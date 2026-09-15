@@ -4,6 +4,7 @@ import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { StatusConnectionGuide } from "./status-connection-guide";
 
 type Seller = {
   id: string;
@@ -417,6 +418,28 @@ export function AdminDashboard({ email }: { email: string }) {
       .update(values)
       .eq("id", id);
     setNotice(error?.message || "Fulfilment updated.");
+    if (!error) await load();
+  }
+  async function updateAdminPackage(id: string, status: string) {
+    const values: Record<string, string> = { status };
+    if (status === "received") values.received_at = new Date().toISOString();
+    const { error } = await supabase
+      .from("inbound_packages")
+      .update(values)
+      .eq("id", id);
+    setNotice(error?.message || "Shared package status updated.");
+    if (!error) await load();
+  }
+  async function updateAdminShipment(id: string, status: string) {
+    const values: Record<string, string> = { status };
+    if (status === "outbound_shipped")
+      values.shipped_at = new Date().toISOString();
+    if (status === "delivered") values.delivered_at = new Date().toISOString();
+    const { error } = await supabase
+      .from("outbound_shipments")
+      .update(values)
+      .eq("id", id);
+    setNotice(error?.message || "Shared shipment status updated.");
     if (!error) await load();
   }
   async function addPartner(e: FormEvent<HTMLFormElement>) {
@@ -987,6 +1010,10 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "orders" && (
           <>
+            <StatusConnectionGuide
+              role="admin-orders"
+              title="ORDER STATUS CONNECTIONS"
+            />
             <form className="admin-form product-form" onSubmit={addOrder}>
               <input name="customer" placeholder="CUSTOMER NAME" required />
               <input name="phone" placeholder="PHONE" />
@@ -1077,6 +1104,10 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "fulfilment" && (
           <>
+            <StatusConnectionGuide
+              role="admin-fulfilment"
+              title="PACKAGE AND SHIPMENT CONNECTIONS"
+            />
             <section className="portal-setup-guide">
               <p className="eyebrow">INTERNAL ACCESS</p>
               <h2>ADD A FULFILMENT TEAM ACCOUNT</h2>
@@ -1153,6 +1184,32 @@ export function AdminDashboard({ email }: { email: string }) {
                       </option>
                     ))}
                   </select>
+                  <select
+                    value={p.status}
+                    aria-label={`Override status for package ${p.package_number}`}
+                    onChange={(e) =>
+                      void updateAdminPackage(p.id, e.target.value)
+                    }
+                  >
+                    {[
+                      "awaiting_seller",
+                      "seller_confirmed",
+                      "inbound_transit",
+                      "received",
+                      "qc_hold",
+                      "qc_passed",
+                      "ready_to_pack",
+                      "packed",
+                      "outbound_shipped",
+                      "delivered",
+                      "cancelled",
+                      "returned",
+                    ].map((status) => (
+                      <option key={status} value={status}>
+                        {status.replaceAll("_", " ").toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
                 </article>
               ))}
             </div>
@@ -1168,6 +1225,26 @@ export function AdminDashboard({ email }: { email: string }) {
                       {shipment.tracking_number || "NO CUSTOMER TRACKING"}
                     </small>
                   </div>
+                  <select
+                    value={shipment.status}
+                    aria-label={`Override status for shipment ${shipment.shipment_number}`}
+                    onChange={(e) =>
+                      void updateAdminShipment(shipment.id, e.target.value)
+                    }
+                  >
+                    {[
+                      "ready_to_pack",
+                      "packed",
+                      "outbound_shipped",
+                      "delivered",
+                      "cancelled",
+                      "returned",
+                    ].map((status) => (
+                      <option key={status} value={status}>
+                        {status.replaceAll("_", " ").toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
                 </article>
               ))}
             </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { StatusConnectionGuide } from "./status-connection-guide";
 type Package = {
   id: string;
   package_number: number;
@@ -96,6 +97,7 @@ export function FulfilmentWorkspace({
           inbound tracking. OVERSTOCK can audit and correct every stage.
         </p>
       </section>
+      <StatusConnectionGuide role="fulfilment" />
       <h2>INCOMING SELLER PACKAGES</h2>
       <div className="package-grid">
         {packages.map((p) => (
@@ -160,6 +162,7 @@ export function FulfilmentWorkspace({
                 "outbound_shipped",
                 "delivered",
                 "returned",
+                "cancelled",
               ].map((x) => (
                 <option key={x}>{x}</option>
               ))}
