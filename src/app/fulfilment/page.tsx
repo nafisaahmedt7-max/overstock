@@ -1,0 +1,5 @@
+import {redirect} from "next/navigation";
+import {createClient} from "@/lib/supabase/server";
+import {FulfilmentWorkspace} from "@/components/fulfilment-workspace";
+export const dynamic="force-dynamic";
+export default async function FulfilmentPortal(){const sb=await createClient();const{data:{user}}=await sb.auth.getUser();if(!user)redirect("/portal/login");const{data:member}=await sb.from("fulfillment_users").select("partner_id").eq("user_id",user.id).maybeSingle();if(!member)redirect("/portal");const[p,o]=await Promise.all([sb.from("inbound_packages").select("id,package_number,status,inbound_courier,inbound_tracking,expected_arrival,received_at,qc_result,expected_item_count,seller_id").order("created_at",{ascending:false}),sb.from("outbound_shipments").select("id,shipment_number,status,recipient_name,recipient_phone,delivery_address,courier,tracking_number,weight_grams").order("created_at",{ascending:false})]);return <FulfilmentWorkspace packages={p.data??[]} shipments={o.data??[]}/>}
