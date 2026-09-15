@@ -66,6 +66,14 @@ type Package = {
   fulfillment_partner_id: string | null;
   inbound_tracking: string | null;
 };
+type Shipment = {
+  id: string;
+  shipment_number: number;
+  status: string;
+  recipient_name: string;
+  courier: string | null;
+  tracking_number: string | null;
+};
 type Tab = "overview" | "sellers" | "products" | "orders" | "fulfilment";
 
 export function AdminDashboard({ email }: { email: string }) {
@@ -76,6 +84,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [fulfillments, setFulfillments] = useState<Fulfillment[]>([]),
     [partners, setPartners] = useState<Partner[]>([]),
     [packages, setPackages] = useState<Package[]>([]),
+    [shipments, setShipments] = useState<Shipment[]>([]),
     [finance, setFinance] = useState<FinanceLine[]>([]),
     [imagePreview, setImagePreview] = useState<string | null>(null),
     [editing, setEditing] = useState<Product | null>(null),
@@ -84,7 +93,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const [supabase] = useState(createClient);
   const router = useRouter();
   const load = useCallback(async () => {
-    const [s, p, o, f, fp, ip, fin] = await Promise.all([
+    const [s, p, o, f, fp, ip, os, fin] = await Promise.all([
       supabase
         .from("sellers")
         .select("id,seller_code,display_name,email,commission_percent,status")
@@ -118,6 +127,12 @@ export function AdminDashboard({ email }: { email: string }) {
         )
         .order("created_at", { ascending: false }),
       supabase
+        .from("outbound_shipments")
+        .select(
+          "id,shipment_number,status,recipient_name,courier,tracking_number",
+        )
+        .order("created_at", { ascending: false }),
+      supabase
         .from("order_items")
         .select("ownership,gross_amount,platform_fee,seller_due,payout_status"),
     ]);
@@ -135,6 +150,7 @@ export function AdminDashboard({ email }: { email: string }) {
     setFulfillments((f.data ?? []) as unknown as Fulfillment[]);
     setPartners(fp.data ?? []);
     setPackages(ip.data ?? []);
+    setShipments(os.data ?? []);
     setFinance(fin.data ?? []);
   }, [supabase]);
   useEffect(() => {
@@ -409,9 +425,7 @@ export function AdminDashboard({ email }: { email: string }) {
       email: String(f.get("email")).toLowerCase(),
       partner_id: partner.id,
     });
-    setNotice(
-      invite.error?.message || "Fulfilment company and login email added.",
-    );
+    setNotice(invite.error?.message || "Internal fulfilment team login added.");
     if (!invite.error) {
       form.reset();
       await load();
@@ -451,7 +465,7 @@ export function AdminDashboard({ email }: { email: string }) {
       <aside className="admin-sidebar">
         <div>
           <strong>OVERSTOCK</strong>
-          <small>COLLECTIVE / OPS</small>
+          <small>INTERNAL OPERATIONS</small>
         </div>
         <nav>
           {(
@@ -546,8 +560,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 <article>
                   <b>WAREHOUSE VERIFICATION</b>
                   <p>
-                    Fulfilment team controls Received, QC, Packed, Shipped and
-                    Delivered.
+                    Your internal fulfilment team controls Received, QC, Packed,
+                    Shipped and Delivered.
                   </p>
                 </article>
                 <article>
@@ -905,7 +919,11 @@ export function AdminDashboard({ email }: { email: string }) {
         {tab === "fulfilment" && (
           <>
             <form className="admin-form" onSubmit={addPartner}>
-              <input name="name" placeholder="FULFILMENT COMPANY" required />
+              <input
+                name="name"
+                placeholder="INTERNAL TEAM OR LOCATION"
+                required
+              />
               <input name="address" placeholder="WAREHOUSE ADDRESS" required />
               <input
                 name="email"
@@ -913,7 +931,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="WORKER LOGIN EMAIL"
                 required
               />
-              <button>ADD COMPANY</button>
+              <button>ADD TEAM</button>
             </form>
             <div className="fulfilment-list">
               {packages.map((p) => (
@@ -939,6 +957,21 @@ export function AdminDashboard({ email }: { email: string }) {
                       </option>
                     ))}
                   </select>
+                </article>
+              ))}
+            </div>
+            <h2>OUTBOUND CUSTOMER TRACKING</h2>
+            <div className="fulfilment-list">
+              {shipments.map((shipment) => (
+                <article key={shipment.id}>
+                  <div>
+                    <b>SHIP-{shipment.shipment_number}</b>
+                    <span>{shipment.recipient_name}</span>
+                    <small>
+                      {shipment.status} / {shipment.courier || "NO COURIER"} /{" "}
+                      {shipment.tracking_number || "NO CUSTOMER TRACKING"}
+                    </small>
+                  </div>
                 </article>
               ))}
             </div>

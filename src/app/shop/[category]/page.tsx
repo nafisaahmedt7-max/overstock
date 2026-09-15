@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ProductGrid } from "@/components/product-grid";
+import { GenderCatalog } from "@/components/gender-catalog";
 import { getProducts } from "@/data/products";
 export const dynamic = "force-dynamic";
 export default async function CategoryPage({
@@ -10,7 +10,7 @@ export default async function CategoryPage({
   const { category } = await params;
   if (category !== "men" && category !== "women") notFound();
   const filtered = (await getProducts()).filter(
-    (product) => product.category === category || product.category === "unisex",
+    (product) => product.category === category,
   );
   return (
     <main>
@@ -18,7 +18,7 @@ export default async function CategoryPage({
         <h1>{category.toUpperCase()}</h1>
         <p>{filtered.length} PRODUCTS</p>
       </section>
-      <ProductGrid products={filtered} />
+      <GenderCatalog products={filtered} />
     </main>
   );
 }

@@ -11,8 +11,7 @@ export const metadata: Metadata = {
     default: "OVERSTOCK — Independent Marketplace",
     template: "%s — OVERSTOCK",
   },
-  description:
-    "OVERSTOCK COLLECTIVE — a direct marketplace for independent products.",
+  description: "OVERSTOCK — a direct marketplace for independent products.",
 };
 export default function RootLayout({
   children,

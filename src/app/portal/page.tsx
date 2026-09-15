@@ -33,7 +33,7 @@ export default async function Portal() {
         <h1>ACCESS PENDING</h1>
         <p>
           Your email has not yet been connected to an OVERSTOCK seller or
-          fulfilment company. Contact OVERSTOCK on WhatsApp.
+          internal fulfilment team. Contact OVERSTOCK on WhatsApp.
         </p>
       </section>
     </main>

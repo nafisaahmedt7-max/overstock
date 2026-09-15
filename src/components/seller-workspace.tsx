@@ -36,16 +36,14 @@ export function SellerWorkspace({
     e.preventDefault();
     const f = new FormData(e.currentTarget),
       action = String(f.get("action"));
-    const { error } = await sb
-      .from("seller_package_updates")
-      .upsert({
-        package_id: p.id,
-        seller_id: sellerId,
-        confirmed_at: new Date().toISOString(),
-        courier: String(f.get("courier") || ""),
-        tracking_number: String(f.get("tracking") || ""),
-        dispatched_at: action === "dispatch" ? new Date().toISOString() : null,
-      });
+    const { error } = await sb.from("seller_package_updates").upsert({
+      package_id: p.id,
+      seller_id: sellerId,
+      confirmed_at: new Date().toISOString(),
+      courier: String(f.get("courier") || ""),
+      tracking_number: String(f.get("tracking") || ""),
+      dispatched_at: action === "dispatch" ? new Date().toISOString() : null,
+    });
     setNotice(
       error?.message ||
         (action === "dispatch"
@@ -75,8 +73,8 @@ export function SellerWorkspace({
         <b>YOUR CONTROL</b>
         <p>
           Confirm supply, then add courier and tracking when dispatched.
-          OVERSTOCK approves products and payouts. The fulfilment company
-          verifies receipt, quality and delivery.
+          OVERSTOCK approves products and payouts. The internal OVERSTOCK
+          fulfilment team verifies receipt, quality and delivery.
         </p>
       </section>
       <div className="seller-package-list">
@@ -94,7 +92,7 @@ export function SellerWorkspace({
             <input
               name="tracking"
               defaultValue={p.inbound_tracking || ""}
-              placeholder="TRACKING NUMBER"
+              placeholder="SELLER → OVERSTOCK TRACKING"
             />
             <div>
               <button name="action" value="confirm">

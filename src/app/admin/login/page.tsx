@@ -30,7 +30,7 @@ export default function AdminLogin() {
   return (
     <main className="admin-login">
       <form onSubmit={submit} className="admin-panel">
-        <p className="eyebrow">OVERSTOCK COLLECTIVE / PRIVATE</p>
+        <p className="eyebrow">OVERSTOCK / PRIVATE</p>
         <h1>ADMIN LOGIN</h1>
         <label>
           Email

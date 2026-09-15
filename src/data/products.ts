@@ -3,7 +3,7 @@ export type Product = {
   slug: string;
   name: string;
   price: number;
-  category: "men" | "women" | "unisex";
+  category: "men" | "women";
   apparelType: string;
   seller: string;
   color: string;
@@ -29,23 +29,15 @@ function map(row: Row): Product {
     slug: row.slug,
     name: row.name,
     price: Number(row.price),
-    category:
-      row.audience === "women"
-        ? "women"
-        : row.audience === "men"
-          ? "men"
-          : "unisex",
+    category: row.audience === "women" ? "women" : "men",
     apparelType: row.category || "other",
-    seller: row.brand || "OVERSTOCK COLLECTIVE",
+    seller: row.brand || "OVERSTOCK",
     color: row.color || "UNSPECIFIED",
-    imageTone: row.color?.toLowerCase().includes("white")
-      ? "#d2d2cf"
-      : "#f1f1ef",
+    imageTone: "#d0d0cc",
     imageUrl: row.image_url,
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
     description:
-      row.description ||
-      "Independent product supplied through OVERSTOCK COLLECTIVE.",
+      row.description || "Independent product supplied through OVERSTOCK.",
   };
 }
 export async function getProducts() {

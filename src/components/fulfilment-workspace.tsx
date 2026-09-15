@@ -46,8 +46,18 @@ export function FulfilmentWorkspace({
     }
     location.reload();
   }
-  async function updateShipment(id: string, status: string) {
-    const values: Record<string, string> = { status };
+  async function updateShipment(
+    event: React.FormEvent<HTMLFormElement>,
+    id: string,
+  ) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const status = String(form.get("status"));
+    const values: Record<string, string> = {
+      status,
+      courier: String(form.get("courier") || ""),
+      tracking_number: String(form.get("tracking") || ""),
+    };
     if (status === "outbound_shipped")
       values.shipped_at = new Date().toISOString();
     if (status === "delivered") values.delivered_at = new Date().toISOString();
@@ -119,13 +129,30 @@ export function FulfilmentWorkspace({
       <h2>OUTBOUND CUSTOMER SHIPMENTS</h2>
       <div className="package-grid">
         {shipments.map((s) => (
-          <article key={s.id}>
+          <form
+            key={s.id}
+            className="shipment-card"
+            onSubmit={(event) => void updateShipment(event, s.id)}
+          >
             <b>SHIP-{s.shipment_number}</b>
             <span>{s.recipient_name}</span>
             <small>{s.delivery_address}</small>
+            <input
+              name="courier"
+              defaultValue={s.courier || ""}
+              placeholder="OUTBOUND COURIER"
+            />
+            <input
+              name="tracking"
+              defaultValue={s.tracking_number || ""}
+              placeholder="CUSTOMER TRACKING NUMBER"
+            />
             <select
+              name="status"
               value={s.status}
-              onChange={(e) => void updateShipment(s.id, e.target.value)}
+              onChange={(event) => {
+                event.currentTarget.form?.requestSubmit();
+              }}
             >
               {[
                 "ready_to_pack",
@@ -137,7 +164,8 @@ export function FulfilmentWorkspace({
                 <option key={x}>{x}</option>
               ))}
             </select>
-          </article>
+            <button>UPDATE SHIPMENT</button>
+          </form>
         ))}
       </div>
     </main>
