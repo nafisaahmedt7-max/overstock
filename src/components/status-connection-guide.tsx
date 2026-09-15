@@ -85,10 +85,10 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Every dashboard receives the same final progress.",
     ],
     [
-      "CANCELLED / RETURNED",
+      "CANCELLED",
       "Admin override",
-      "Order stopped or came back.",
-      "Seller and fulfilment records update for resolution.",
+      "Order was stopped before completion.",
+      "Seller and fulfilment records update automatically.",
     ],
   ],
   "admin-fulfilment": [
@@ -117,13 +117,25 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Main order and seller view become Shipped.",
     ],
     [
-      "DELIVERED / RETURNED",
+      "DELIVERED",
       "Fulfilment or admin",
-      "Shipment finished or returned.",
+      "Shipment finished successfully.",
       "All connected views receive the result.",
     ],
   ],
 };
+
+function tone(status: string) {
+  if (status.includes("CANCEL") || status.includes("HOLD")) return "attention";
+  if (status.includes("DELIVERED") || status.includes("PASSED"))
+    return "complete";
+  if (status.includes("SHIPPED") || status.includes("TRANSIT"))
+    return "transit";
+  if (status.includes("PACK")) return "packing";
+  if (status.includes("RECEIVED")) return "received";
+  if (status.includes("CONFIRMED")) return "confirmed";
+  return "waiting";
+}
 
 export function StatusConnectionGuide({
   role,
@@ -149,7 +161,7 @@ export function StatusConnectionGuide({
           <tbody>
             {guides[role].map(([status, control, meaning, result]) => (
               <tr key={status}>
-                <td>{status}</td>
+                <td data-status={tone(status)}>{status}</td>
                 <td>{control}</td>
                 <td>{meaning}</td>
                 <td>{result}</td>

@@ -221,7 +221,17 @@ export function AdminDashboard({ email }: { email: string }) {
       f = new FormData(form),
       seller = String(f.get("seller")),
       name = String(f.get("name")),
-      sku = String(f.get("sku")).toUpperCase();
+      sku = String(f.get("sku")).toUpperCase(),
+      sizes = String(f.get("sizes") || "")
+        .split(",")
+        .map((x) => x.trim().toUpperCase())
+        .filter(Boolean);
+    if (sizes.includes("X")) {
+      setNotice(
+        "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
+      );
+      return;
+    }
     const image = f.get("image");
     if (image instanceof File && image.size) {
       try {
@@ -248,10 +258,7 @@ export function AdminDashboard({ email }: { email: string }) {
           brand: String(f.get("brand") || ""),
           color: String(f.get("color") || ""),
           condition: String(f.get("condition") || ""),
-          sizes: String(f.get("sizes") || "")
-            .split(",")
-            .map((x) => x.trim())
-            .filter(Boolean),
+          sizes,
           price: Number(f.get("price")),
           stock_quantity: Number(f.get("stock")),
           ownership: seller ? "seller" : "own_stock",
@@ -298,9 +305,19 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!editing) return;
     const f = new FormData(e.currentTarget);
     const seller = String(f.get("seller"));
-    const { error } = await supabase
-      .from("products")
-      .update({
+    const sizes = String(f.get("sizes"))
+      .split(",")
+      .map((x) => x.trim().toUpperCase())
+      .filter(Boolean);
+    if (sizes.includes("X")) {
+      setNotice(
+        "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
+      );
+      return;
+    }
+    const { error } = await supabase.rpc("admin_update_product", {
+      target_product_id: editing.id,
+      payload: {
         name: String(f.get("name")),
         description: String(f.get("description")),
         audience: String(f.get("audience")),
@@ -308,17 +325,14 @@ export function AdminDashboard({ email }: { email: string }) {
         brand: String(f.get("brand")),
         color: String(f.get("color")),
         condition: String(f.get("condition")),
-        sizes: String(f.get("sizes"))
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean),
+        sizes,
         price: Number(f.get("price")),
         stock_quantity: Number(f.get("stock")),
         ownership: seller ? "seller" : "own_stock",
         seller_id: seller || null,
         status: String(f.get("status")),
-      })
-      .eq("id", editing.id);
+      },
+    });
     setNotice(error?.message || "Product updated.");
     if (!error) {
       setEditing(null);
@@ -724,12 +738,12 @@ export function AdminDashboard({ email }: { email: string }) {
                       <td>Fulfilment</td>
                     </tr>
                     <tr>
-                      <td>CANCELLED / RETURNED</td>
-                      <td>The order stopped or came back.</td>
+                      <td>CANCELLED</td>
+                      <td>The order was stopped before completion.</td>
                       <td>Resolve stock and money</td>
                       <td>Outcome visible</td>
-                      <td>Handle returned parcel</td>
-                      <td>Admin + Fulfilment</td>
+                      <td>Stop shipment</td>
+                      <td>Admin</td>
                     </tr>
                     <tr>
                       <td>UNPAID / PAID / REFUNDED</td>
@@ -819,7 +833,11 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="PRODUCT DESCRIPTION"
                 required
               />
-              <input name="sizes" placeholder="SIZES: S, M, L" required />
+              <input
+                name="sizes"
+                placeholder="SIZES: XS, S, M, L, XL"
+                required
+              />
               <input
                 name="price"
                 type="number"
@@ -843,12 +861,16 @@ export function AdminDashboard({ email }: { email: string }) {
                   </option>
                 ))}
               </select>
-              <input
-                name="image"
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/avif"
-                onChange={(e) => void chooseImage(e.target.files?.[0])}
-              />
+              <label className="image-upload-field">
+                <span>PRODUCT IMAGE</span>
+                <input
+                  name="image"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  onChange={(e) => void chooseImage(e.target.files?.[0])}
+                />
+                <b>{imagePreview ? "IMAGE READY" : "CHOOSE FILE"}</b>
+              </label>
               <button>ADD DRAFT</button>
             </form>
             <p className="form-help">
@@ -890,7 +912,13 @@ export function AdminDashboard({ email }: { email: string }) {
                   : "OVERSTOCK",
                 money(p.price),
                 p.stock_quantity,
-                p.status,
+                <span
+                  className="status-badge"
+                  data-status={p.status}
+                  key={p.id}
+                >
+                  {p.status.replaceAll("_", " ").toUpperCase()}
+                </span>,
                 <div className="table-actions" key={p.id}>
                   <button onClick={() => setEditing(p)}>EDIT</button>
                   <button onClick={() => setDeleting(p)}>REMOVE</button>
@@ -982,7 +1010,12 @@ export function AdminDashboard({ email }: { email: string }) {
                       <option value="archived">ARCHIVED</option>
                     </select>
                   </div>
-                  <button className="admin-primary">SAVE CHANGES</button>
+                  <div className="edit-actions">
+                    <button type="button" onClick={() => setEditing(null)}>
+                      CANCEL
+                    </button>
+                    <button className="admin-primary">SAVE CHANGES</button>
+                  </div>
                 </form>
               </div>
             )}
@@ -1065,6 +1098,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 money(o.total),
                 <select
                   className="table-select"
+                  data-status={o.status}
                   key={`${o.id}-status`}
                   value={o.status}
                   onChange={(e) =>
@@ -1078,24 +1112,26 @@ export function AdminDashboard({ email }: { email: string }) {
                     "shipped",
                     "delivered",
                     "cancelled",
-                    "returned",
                   ].map((x) => (
-                    <option key={x}>{x}</option>
+                    <option key={x} value={x}>
+                      {x.toUpperCase()}
+                    </option>
                   ))}
                 </select>,
                 <select
                   className="table-select"
+                  data-status={o.payment_status}
                   key={`${o.id}-payment`}
                   value={o.payment_status}
                   onChange={(e) =>
                     void updateOrder(o.id, "payment_status", e.target.value)
                   }
                 >
-                  {["unpaid", "paid", "refunded", "partially_refunded"].map(
-                    (x) => (
-                      <option key={x}>{x}</option>
-                    ),
-                  )}
+                  {["unpaid", "paid"].map((x) => (
+                    <option key={x} value={x}>
+                      {x.toUpperCase()}
+                    </option>
+                  ))}
                 </select>,
                 new Date(o.placed_at).toLocaleDateString("en-AU"),
               ])}
@@ -1174,6 +1210,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     </small>
                   </div>
                   <select
+                    data-status={p.status}
                     value={p.fulfillment_partner_id || ""}
                     onChange={(e) => void assignPackage(p.id, e.target.value)}
                   >
@@ -1203,7 +1240,6 @@ export function AdminDashboard({ email }: { email: string }) {
                       "outbound_shipped",
                       "delivered",
                       "cancelled",
-                      "returned",
                     ].map((status) => (
                       <option key={status} value={status}>
                         {status.replaceAll("_", " ").toUpperCase()}
@@ -1226,6 +1262,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     </small>
                   </div>
                   <select
+                    data-status={shipment.status}
                     value={shipment.status}
                     aria-label={`Override status for shipment ${shipment.shipment_number}`}
                     onChange={(e) =>
@@ -1238,7 +1275,6 @@ export function AdminDashboard({ email }: { email: string }) {
                       "outbound_shipped",
                       "delivered",
                       "cancelled",
-                      "returned",
                     ].map((status) => (
                       <option key={status} value={status}>
                         {status.replaceAll("_", " ").toUpperCase()}
@@ -1261,6 +1297,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     </small>
                   </div>
                   <select
+                    data-status={f.status}
                     value={f.status}
                     onChange={(e) =>
                       void updateFulfillment(f.id, e.target.value)
@@ -1273,9 +1310,10 @@ export function AdminDashboard({ email }: { email: string }) {
                       "shipped",
                       "delivered",
                       "cancelled",
-                      "returned",
                     ].map((s) => (
-                      <option key={s}>{s}</option>
+                      <option key={s} value={s}>
+                        {s.toUpperCase()}
+                      </option>
                     ))}
                   </select>
                 </article>

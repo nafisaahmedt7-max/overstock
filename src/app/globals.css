@@ -747,6 +747,38 @@ input[type="number"]::-webkit-outer-spin-button {
 .admin-form input[type="file"] {
   padding: 0.6rem;
 }
+.image-upload-field {
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid;
+  background: #e4e4e0;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font:
+    600 0.7rem var(--font-mono),
+    monospace;
+}
+.image-upload-field input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.image-upload-field b {
+  padding: 0.45rem 0.65rem;
+  background: var(--ink);
+  color: var(--paper);
+  white-space: nowrap;
+}
+.image-upload-field:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
 .fulfilment-list {
   margin-top: 2rem;
   border-top: 1px solid;
@@ -1146,6 +1178,29 @@ input[type="number"]::-webkit-outer-spin-button {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
 }
+.edit-actions {
+  position: sticky;
+  bottom: -1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 1.5rem -1.5rem -1.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid;
+  background: var(--paper);
+}
+.edit-actions button {
+  min-width: 10rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid;
+  font:
+    600 0.72rem var(--font-mono),
+    monospace;
+}
+.edit-actions .admin-primary {
+  margin: 0;
+}
 .confirm-panel {
   width: min(32rem, 100%);
 }
@@ -1354,6 +1409,62 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .connection-guide tr:last-child td {
   border-bottom: 0;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  font:
+    700 0.62rem var(--font-mono),
+    monospace;
+  text-transform: uppercase;
+}
+[data-status="new"],
+[data-status="waiting"],
+[data-status="awaiting_seller"],
+[data-status="unpaid"] {
+  background-color: #d6d6d1 !important;
+  color: #171717;
+}
+[data-status="confirmed"],
+[data-status="seller_confirmed"] {
+  background-color: #b8d5f2 !important;
+  color: #10243c;
+}
+[data-status="transit"],
+[data-status="inbound_transit"] {
+  background-color: #efc276 !important;
+  color: #35230a;
+}
+[data-status="received"] {
+  background-color: #9ddbd5 !important;
+  color: #092c29;
+}
+[data-status="complete"],
+[data-status="qc_passed"],
+[data-status="delivered"],
+[data-status="paid"] {
+  background-color: #a9d6a3 !important;
+  color: #102d0d;
+}
+[data-status="packing"],
+[data-status="ready_to_pack"],
+[data-status="packed"] {
+  background-color: #c9b8e8 !important;
+  color: #281941;
+}
+[data-status="outbound_shipped"],
+[data-status="shipped"] {
+  background-color: #8eb7e8 !important;
+  color: #102744;
+}
+[data-status="attention"],
+[data-status="qc_hold"],
+[data-status="cancelled"] {
+  background-color: #e5a09a !important;
+  color: #42120e;
 }
 .seller-package-list form > div {
   grid-column: 1/-1;

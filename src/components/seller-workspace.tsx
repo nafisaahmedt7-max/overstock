@@ -12,6 +12,8 @@ type Feed = {
   package_number: number | null;
   seller_due: number | null;
   payout_status: string;
+  order_status: string;
+  package_status: string | null;
 };
 type Package = {
   id: string;
@@ -85,7 +87,9 @@ export function SellerWorkspace({
           <form key={p.id} onSubmit={(e) => void update(e, p)}>
             <header>
               <b>PKG-{p.package_number}</b>
-              <span>{p.status.replaceAll("_", " ")}</span>
+              <span className="status-badge" data-status={p.status}>
+                {p.status.replaceAll("_", " ")}
+              </span>
             </header>
             <input
               name="courier"
@@ -97,7 +101,12 @@ export function SellerWorkspace({
               defaultValue={p.inbound_tracking || ""}
               placeholder="SELLER → OVERSTOCK TRACKING"
             />
-            <select name="status" defaultValue="" required>
+            <select
+              name="status"
+              defaultValue=""
+              required
+              data-status={p.status}
+            >
               <option value="" disabled>
                 CHOOSE YOUR NEXT STATUS
               </option>
@@ -119,6 +128,8 @@ export function SellerWorkspace({
               <th>SIZE</th>
               <th>QTY</th>
               <th>PACKAGE</th>
+              <th>ORDER STATUS</th>
+              <th>PACKAGE STATUS</th>
               <th>SELLER DUE</th>
               <th>PAYOUT</th>
             </tr>
@@ -135,13 +146,29 @@ export function SellerWorkspace({
                   <td>{r.selected_size || "—"}</td>
                   <td>{r.quantity}</td>
                   <td>{r.package_number ? `PKG-${r.package_number}` : "—"}</td>
+                  <td>
+                    <span className="status-badge" data-status={r.order_status}>
+                      {r.order_status.replaceAll("_", " ")}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className="status-badge"
+                      data-status={r.package_status || "awaiting_seller"}
+                    >
+                      {(r.package_status || "awaiting_seller").replaceAll(
+                        "_",
+                        " ",
+                      )}
+                    </span>
+                  </td>
                   <td>A${Number(r.seller_due || 0).toFixed(2)}</td>
                   <td>{r.payout_status}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={7}>NO SELLER ORDERS YET</td>
+                <td colSpan={9}>NO SELLER ORDERS YET</td>
               </tr>
             )}
           </tbody>

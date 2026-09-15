@@ -109,6 +109,7 @@ export function FulfilmentWorkspace({
               {p.inbound_tracking || "NO TRACKING"}
             </small>
             <select
+              data-status={p.status}
               value={p.status}
               onChange={(e) => void updatePackage(p.id, e.target.value)}
             >
@@ -121,7 +122,9 @@ export function FulfilmentWorkspace({
               )}
               {["received", "qc_hold", "qc_passed", "ready_to_pack"].map(
                 (x) => (
-                  <option key={x}>{x}</option>
+                  <option key={x} value={x}>
+                    {x.replaceAll("_", " ").toUpperCase()}
+                  </option>
                 ),
               )}
             </select>
@@ -151,6 +154,7 @@ export function FulfilmentWorkspace({
             />
             <select
               name="status"
+              data-status={s.status}
               value={s.status}
               onChange={(event) => {
                 event.currentTarget.form?.requestSubmit();
@@ -161,10 +165,11 @@ export function FulfilmentWorkspace({
                 "packed",
                 "outbound_shipped",
                 "delivered",
-                "returned",
                 "cancelled",
               ].map((x) => (
-                <option key={x}>{x}</option>
+                <option key={x} value={x}>
+                  {x.replaceAll("_", " ").toUpperCase()}
+                </option>
               ))}
             </select>
             <button>UPDATE SHIPMENT</button>

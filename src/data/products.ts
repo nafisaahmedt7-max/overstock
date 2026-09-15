@@ -3,7 +3,7 @@ export type Product = {
   slug: string;
   name: string;
   price: number;
-  category: "men" | "women";
+  category: "men" | "women" | "unisex";
   apparelType: string;
   seller: string;
   color: string;
@@ -29,7 +29,12 @@ function map(row: Row): Product {
     slug: row.slug,
     name: row.name,
     price: Number(row.price),
-    category: row.audience === "women" ? "women" : "men",
+    category:
+      row.audience === "women"
+        ? "women"
+        : row.audience === "unisex"
+          ? "unisex"
+          : "men",
     apparelType: row.category || "other",
     seller: row.brand || "OVERSTOCK",
     color: row.color || "UNSPECIFIED",

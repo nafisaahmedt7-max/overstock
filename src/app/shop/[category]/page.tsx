@@ -10,7 +10,7 @@ export default async function CategoryPage({
   const { category } = await params;
   if (category !== "men" && category !== "women") notFound();
   const filtered = (await getProducts()).filter(
-    (product) => product.category === category,
+    (product) => product.category === category || product.category === "unisex",
   );
   return (
     <main>
