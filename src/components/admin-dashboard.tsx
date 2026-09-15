@@ -544,33 +544,165 @@ export function AdminDashboard({ email }: { email: string }) {
               </article>
             </div>
             <section className="status-guide">
-              <h2>CONTROL GUIDE</h2>
-              <div>
-                <article>
-                  <b>PRODUCT APPROVAL</b>
-                  <p>Admin only: Draft → Active → Sold out/Archived.</p>
-                </article>
-                <article>
-                  <b>SELLER SUPPLY</b>
-                  <p>
-                    Seller confirms preparation and inbound tracking. Admin can
-                    correct it.
-                  </p>
-                </article>
-                <article>
-                  <b>WAREHOUSE VERIFICATION</b>
-                  <p>
-                    Your internal fulfilment team controls Received, QC, Packed,
-                    Shipped and Delivered.
-                  </p>
-                </article>
-                <article>
-                  <b>PAYMENTS</b>
-                  <p>
-                    Admin only: Unpaid → Paid/Refunded and seller payout Due →
-                    Paid.
-                  </p>
-                </article>
+              <p className="eyebrow">SHARED WORKFLOW</p>
+              <h2>STATUS DICTIONARY</h2>
+              <p className="guide-intro">
+                Everyone reads the same live status. Each role can only update
+                the stages assigned to them; admin can verify and correct all
+                records.
+              </p>
+              <div className="status-table-wrap">
+                <table className="status-table">
+                  <thead>
+                    <tr>
+                      <th>STATUS</th>
+                      <th>WHAT IT MEANS</th>
+                      <th>ADMIN VIEW</th>
+                      <th>SELLER VIEW</th>
+                      <th>FULFILMENT VIEW</th>
+                      <th>CONTROLLED BY</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>DRAFT</td>
+                      <td>
+                        Product is being prepared and is hidden from customers.
+                      </td>
+                      <td>Review or edit</td>
+                      <td>Not published</td>
+                      <td>Not relevant</td>
+                      <td>Admin</td>
+                    </tr>
+                    <tr>
+                      <td>ACTIVE</td>
+                      <td>Product is approved and visible in the shop.</td>
+                      <td>Live product</td>
+                      <td>Approved product</td>
+                      <td>Not relevant</td>
+                      <td>Admin</td>
+                    </tr>
+                    <tr>
+                      <td>AWAITING SELLER</td>
+                      <td>
+                        An order exists and the seller must confirm the item.
+                      </td>
+                      <td>Waiting for seller</td>
+                      <td>Action required</td>
+                      <td>Waiting; read only</td>
+                      <td>Seller</td>
+                    </tr>
+                    <tr>
+                      <td>SELLER CONFIRMED</td>
+                      <td>The seller confirms the item can be supplied.</td>
+                      <td>Confirmed</td>
+                      <td>Prepare parcel</td>
+                      <td>Expected inbound</td>
+                      <td>Seller</td>
+                    </tr>
+                    <tr>
+                      <td>INBOUND TRANSIT</td>
+                      <td>The seller parcel is travelling to OVERSTOCK.</td>
+                      <td>See inbound tracking</td>
+                      <td>See own tracking</td>
+                      <td>Track incoming parcel</td>
+                      <td>Seller</td>
+                    </tr>
+                    <tr>
+                      <td>RECEIVED</td>
+                      <td>
+                        Your internal team physically received the seller
+                        parcel.
+                      </td>
+                      <td>Verified received</td>
+                      <td>Received by OVERSTOCK</td>
+                      <td>Begin inspection</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>QC HOLD</td>
+                      <td>
+                        The item has a quality issue that needs a decision.
+                      </td>
+                      <td>Review issue</td>
+                      <td>Quality issue visible</td>
+                      <td>Record and hold</td>
+                      <td>Fulfilment + Admin</td>
+                    </tr>
+                    <tr>
+                      <td>QC PASSED</td>
+                      <td>The item passed inspection.</td>
+                      <td>Ready for dispatch flow</td>
+                      <td>Inspection passed</td>
+                      <td>Prepare customer parcel</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>READY TO PACK</td>
+                      <td>The customer shipment can be packed.</td>
+                      <td>Awaiting packing</td>
+                      <td>Order progressing</td>
+                      <td>Action required</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>PACKED</td>
+                      <td>
+                        The customer parcel is sealed and ready for courier
+                        pickup.
+                      </td>
+                      <td>Packed</td>
+                      <td>Order progressing</td>
+                      <td>Add outbound courier</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>SHIPPED</td>
+                      <td>
+                        The parcel is travelling from OVERSTOCK to the customer.
+                      </td>
+                      <td>See customer tracking</td>
+                      <td>Order dispatched</td>
+                      <td>Monitor delivery</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>DELIVERED</td>
+                      <td>The customer received the parcel.</td>
+                      <td>Complete order</td>
+                      <td>Sale delivered</td>
+                      <td>Delivery complete</td>
+                      <td>Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>CANCELLED / RETURNED</td>
+                      <td>The order stopped or came back.</td>
+                      <td>Resolve stock and money</td>
+                      <td>Outcome visible</td>
+                      <td>Handle returned parcel</td>
+                      <td>Admin + Fulfilment</td>
+                    </tr>
+                    <tr>
+                      <td>UNPAID / PAID / REFUNDED</td>
+                      <td>
+                        Customer payment record. Stripe will automate this
+                        later.
+                      </td>
+                      <td>Manage payment</td>
+                      <td>Relevant outcome only</td>
+                      <td>Not editable</td>
+                      <td>Admin</td>
+                    </tr>
+                    <tr>
+                      <td>PAYOUT DUE / PAID</td>
+                      <td>Money owed or already settled with the seller.</td>
+                      <td>Approve settlement</td>
+                      <td>See own balance</td>
+                      <td>Not visible</td>
+                      <td>Admin</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </section>
           </>
@@ -918,6 +1050,43 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "fulfilment" && (
           <>
+            <section className="portal-setup-guide">
+              <p className="eyebrow">INTERNAL ACCESS</p>
+              <h2>ADD A FULFILMENT TEAM ACCOUNT</h2>
+              <ol>
+                <li>
+                  <b>1</b>
+                  <span>
+                    Add the team member or warehouse below using their exact
+                    work email.
+                  </span>
+                </li>
+                <li>
+                  <b>2</b>
+                  <span>
+                    In Supabase open Authentication → Users → Add user → Create
+                    new user.
+                  </span>
+                </li>
+                <li>
+                  <b>3</b>
+                  <span>
+                    Use the same email, choose a temporary password and enable
+                    Auto Confirm User.
+                  </span>
+                </li>
+                <li>
+                  <b>4</b>
+                  <span>
+                    Give the login privately. They use /portal/login and are
+                    routed to the internal Package Desk.
+                  </span>
+                </li>
+              </ol>
+              <p>
+                Use one account per worker. Never share your admin password.
+              </p>
+            </section>
             <form className="admin-form" onSubmit={addPartner}>
               <input
                 name="name"
