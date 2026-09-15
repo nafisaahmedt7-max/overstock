@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 export type CartItem = { slug: string; name: string; price: number; size: string; quantity: number };
 type Value = { items: CartItem[]; count: number; add: (item: Omit<CartItem, "quantity">) => void; remove: (slug: string, size: string) => void; clear: () => void };
 const CartContext = createContext<Value | null>(null);
-const STORAGE_KEY = "form-cart-v1";
+const STORAGE_KEY = "overstock-cart-v1";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const restored = useRef(false);
