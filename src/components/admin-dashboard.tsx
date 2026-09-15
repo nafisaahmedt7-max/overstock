@@ -365,6 +365,16 @@ export function AdminDashboard({ email }: { email: string }) {
   }
   async function addOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser();
+
+console.log("MANUAL ORDER AUTH:", {
+  userId: user?.id,
+  email: user?.email,
+  authError,
+});
     const form = e.currentTarget,
       f = new FormData(form),
       product = products.find((p) => p.id === String(f.get("product"))),
