@@ -12,7 +12,9 @@ export async function proxy(request: NextRequest) {
       setAll(items) {
         items.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        items.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        items.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options),
+        );
       },
     },
   });
@@ -20,4 +22,11 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/admin/:path*", "/portal/:path*", "/seller/:path*", "/fulfilment/:path*"] };
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    "/portal/:path*",
+    "/seller/:path*",
+    "/fulfilment/:path*",
+  ],
+};

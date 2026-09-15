@@ -1,4 +1,43 @@
-import {redirect} from "next/navigation";
-import {createClient} from "@/lib/supabase/server";
-export const dynamic="force-dynamic";
-export default async function SellerPortal(){const sb=await createClient();const{data:{user}}=await sb.auth.getUser();if(!user)redirect("/portal/login");const{data:member}=await sb.from("seller_users").select("seller_id").eq("user_id",user.id).maybeSingle();if(!member)redirect("/portal");const{data:rows}=await sb.from("seller_order_feed").select("*").order("ordered_at",{ascending:false});const due=(rows??[]).filter(x=>x.payout_status==="due").reduce((n,x)=>n+Number(x.seller_due||0),0);return <main className="partner-page"><header><div><p className="eyebrow">OVERSTOCK / SELLER</p><h1>MY ORDERS</h1></div><div><span>AMOUNT DUE</span><b>{new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD"}).format(due)}</b></div></header><div className="admin-table-wrap"><table><thead><tr><th>ORDER</th><th>PRODUCT</th><th>SIZE</th><th>QTY</th><th>PACKAGE</th><th>SUPPLY STATUS</th><th>SELLER DUE</th><th>PAYOUT</th></tr></thead><tbody>{rows?.length?rows.map(r=><tr key={r.order_item_id}><td>#{r.order_number}</td><td>{r.product_name}<small>{r.sku}</small></td><td>{r.selected_size||"—"}</td><td>{r.quantity}</td><td>{r.package_number?`PKG-${r.package_number}`:"—"}</td><td>{r.package_status||r.fulfillment_status}</td><td>A${Number(r.seller_due||0).toFixed(2)}</td><td>{r.payout_status}</td></tr>):<tr><td colSpan={8}>NO SELLER ORDERS YET</td></tr>}</tbody></table></div><p className="portal-help">Use the package number on the outside and inside of every parcel you send to the fulfilment warehouse.</p></main>}
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { SellerWorkspace } from "@/components/seller-workspace";
+export const dynamic = "force-dynamic";
+export default async function SellerPortal() {
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) redirect("/portal/login");
+  const { data: member } = await sb
+    .from("seller_users")
+    .select("seller_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!member) redirect("/portal");
+  const [feed, packs] = await Promise.all([
+    sb
+      .from("seller_order_feed")
+      .select("*")
+      .order("ordered_at", { ascending: false }),
+    sb
+      .from("inbound_packages")
+      .select("id,package_number,status,inbound_courier,inbound_tracking")
+      .order("created_at", { ascending: false }),
+  ]);
+  const rows = feed.data ?? [],
+    due = rows
+      .filter((x) => x.payout_status === "due")
+      .reduce((n, x) => n + Number(x.seller_due || 0), 0),
+    formatted = new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: "AUD",
+    }).format(due);
+  return (
+    <SellerWorkspace
+      sellerId={member.seller_id}
+      rows={rows}
+      packages={packs.data ?? []}
+      due={formatted}
+    />
+  );
+}

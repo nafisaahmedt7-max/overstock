@@ -1,5 +1,145 @@
 "use client";
-import {createClient} from "@/lib/supabase/client";
-type Package={id:string;package_number:number;status:string;inbound_courier:string|null;inbound_tracking:string|null;expected_arrival:string|null;received_at:string|null;qc_result:string;expected_item_count:number;seller_id:string};
-type Shipment={id:string;shipment_number:number;status:string;recipient_name:string;recipient_phone:string|null;delivery_address:string;courier:string|null;tracking_number:string|null;weight_grams:number|null};
-export function FulfilmentWorkspace({packages,shipments}:{packages:Package[];shipments:Shipment[]}){const sb=createClient();async function updatePackage(id:string,status:string){const values:Record<string,string>={status};if(status==="received")values.received_at=new Date().toISOString();await sb.from("inbound_packages").update(values).eq("id",id);location.reload()}async function updateShipment(id:string,status:string){const values:Record<string,string>={status};if(status==="outbound_shipped")values.shipped_at=new Date().toISOString();if(status==="delivered")values.delivered_at=new Date().toISOString();await sb.from("outbound_shipments").update(values).eq("id",id);location.reload()}return <main className="partner-page"><header><div><p className="eyebrow">OVERSTOCK / FULFILMENT</p><h1>PACKAGE DESK</h1></div><div><span>INBOUND</span><b>{packages.length}</b></div></header><h2>INCOMING SELLER PACKAGES</h2><div className="package-grid">{packages.map(p=><article key={p.id}><b>PKG-{p.package_number}</b><span>{p.expected_item_count} ITEM(S)</span><small>{p.inbound_courier||"COURIER PENDING"} / {p.inbound_tracking||"NO TRACKING"}</small><select value={p.status} onChange={e=>void updatePackage(p.id,e.target.value)}>{["awaiting_seller","seller_confirmed","inbound_transit","received","qc_hold","qc_passed","ready_to_pack"].map(x=><option key={x}>{x}</option>)}</select></article>)}</div><h2>OUTBOUND CUSTOMER SHIPMENTS</h2><div className="package-grid">{shipments.map(s=><article key={s.id}><b>SHIP-{s.shipment_number}</b><span>{s.recipient_name}</span><small>{s.delivery_address}</small><select value={s.status} onChange={e=>void updateShipment(s.id,e.target.value)}>{["ready_to_pack","packed","outbound_shipped","delivered","returned"].map(x=><option key={x}>{x}</option>)}</select></article>)}</div></main>}
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+type Package = {
+  id: string;
+  package_number: number;
+  status: string;
+  inbound_courier: string | null;
+  inbound_tracking: string | null;
+  expected_arrival: string | null;
+  received_at: string | null;
+  qc_result: string;
+  expected_item_count: number;
+  seller_id: string;
+};
+type Shipment = {
+  id: string;
+  shipment_number: number;
+  status: string;
+  recipient_name: string;
+  recipient_phone: string | null;
+  delivery_address: string;
+  courier: string | null;
+  tracking_number: string | null;
+  weight_grams: number | null;
+};
+export function FulfilmentWorkspace({
+  packages,
+  shipments,
+}: {
+  packages: Package[];
+  shipments: Shipment[];
+}) {
+  const sb = createClient();
+  const [notice, setNotice] = useState("");
+  async function updatePackage(id: string, status: string) {
+    const values: Record<string, string> = { status };
+    if (status === "received") values.received_at = new Date().toISOString();
+    const { error } = await sb
+      .from("inbound_packages")
+      .update(values)
+      .eq("id", id);
+    if (error) {
+      setNotice(error.message);
+      return;
+    }
+    location.reload();
+  }
+  async function updateShipment(id: string, status: string) {
+    const values: Record<string, string> = { status };
+    if (status === "outbound_shipped")
+      values.shipped_at = new Date().toISOString();
+    if (status === "delivered") values.delivered_at = new Date().toISOString();
+    const { error } = await sb
+      .from("outbound_shipments")
+      .update(values)
+      .eq("id", id);
+    if (error) {
+      setNotice(error.message);
+      return;
+    }
+    location.reload();
+  }
+  return (
+    <main className="partner-page">
+      <header>
+        <div>
+          <p className="eyebrow">OVERSTOCK / FULFILMENT</p>
+          <h1>PACKAGE DESK</h1>
+        </div>
+        <div>
+          <span>INBOUND</span>
+          <b>{packages.length}</b>
+        </div>
+      </header>
+      {notice && (
+        <div className="portal-alert" role="alert">
+          {notice}
+        </div>
+      )}
+      <section className="role-guide">
+        <b>YOUR CONTROL</b>
+        <p>
+          Verify package receipt and quality, then control Ready to pack,
+          Packed, Shipped and Delivered. Sellers control their confirmation and
+          inbound tracking. OVERSTOCK can audit and correct every stage.
+        </p>
+      </section>
+      <h2>INCOMING SELLER PACKAGES</h2>
+      <div className="package-grid">
+        {packages.map((p) => (
+          <article key={p.id}>
+            <b>PKG-{p.package_number}</b>
+            <span>{p.expected_item_count} ITEM(S)</span>
+            <small>
+              {p.inbound_courier || "COURIER PENDING"} /{" "}
+              {p.inbound_tracking || "NO TRACKING"}
+            </small>
+            <select
+              value={p.status}
+              onChange={(e) => void updatePackage(p.id, e.target.value)}
+            >
+              {!["received", "qc_hold", "qc_passed", "ready_to_pack"].includes(
+                p.status,
+              ) && (
+                <option value={p.status} disabled>
+                  {p.status} — WAITING FOR SELLER
+                </option>
+              )}
+              {["received", "qc_hold", "qc_passed", "ready_to_pack"].map(
+                (x) => (
+                  <option key={x}>{x}</option>
+                ),
+              )}
+            </select>
+          </article>
+        ))}
+      </div>
+      <h2>OUTBOUND CUSTOMER SHIPMENTS</h2>
+      <div className="package-grid">
+        {shipments.map((s) => (
+          <article key={s.id}>
+            <b>SHIP-{s.shipment_number}</b>
+            <span>{s.recipient_name}</span>
+            <small>{s.delivery_address}</small>
+            <select
+              value={s.status}
+              onChange={(e) => void updateShipment(s.id, e.target.value)}
+            >
+              {[
+                "ready_to_pack",
+                "packed",
+                "outbound_shipped",
+                "delivered",
+                "returned",
+              ].map((x) => (
+                <option key={x}>{x}</option>
+              ))}
+            </select>
+          </article>
+        ))}
+      </div>
+    </main>
+  );
+}

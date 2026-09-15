@@ -1,53 +1,1020 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Seller = { id:string; seller_code:string; display_name:string; email:string|null; commission_percent:number; status:string };
-type Product = { id:string; sku:string; name:string; ownership:string; seller_id:string|null; price:number; stock_quantity:number; status:string; sizes:string[]; image_url:string|null };
-type Order = { id:string; order_number:number; customer_name:string; total:number; status:string; payment_status:string; placed_at:string };
-type Fulfillment = { id:string; order_id:string; assigned_to:string|null; status:string; courier:string|null; tracking_reference:string|null; due_at:string|null; orders:{order_number:number;customer_name:string}|null };
-type Partner = {id:string;name:string;warehouse_address:string|null};
-type Package = {id:string;package_number:number;status:string;seller_id:string;fulfillment_partner_id:string|null;inbound_tracking:string|null};
-type Tab = "overview"|"sellers"|"products"|"orders"|"fulfilment";
+type Seller = {
+  id: string;
+  seller_code: string;
+  display_name: string;
+  email: string | null;
+  commission_percent: number;
+  status: string;
+};
+type Product = {
+  id: string;
+  sku: string;
+  name: string;
+  ownership: string;
+  seller_id: string | null;
+  price: number;
+  stock_quantity: number;
+  status: string;
+  sizes: string[];
+  image_url: string | null;
+  description: string | null;
+  audience: string | null;
+  category: string | null;
+  brand: string | null;
+  color: string | null;
+  condition: string | null;
+};
+type FinanceLine = {
+  ownership: string;
+  gross_amount: number | null;
+  platform_fee: number | null;
+  seller_due: number | null;
+  payout_status: string;
+};
+type Order = {
+  id: string;
+  order_number: number;
+  customer_name: string;
+  total: number;
+  status: string;
+  payment_status: string;
+  placed_at: string;
+};
+type Fulfillment = {
+  id: string;
+  order_id: string;
+  assigned_to: string | null;
+  status: string;
+  courier: string | null;
+  tracking_reference: string | null;
+  due_at: string | null;
+  orders: { order_number: number; customer_name: string } | null;
+};
+type Partner = { id: string; name: string; warehouse_address: string | null };
+type Package = {
+  id: string;
+  package_number: number;
+  status: string;
+  seller_id: string;
+  fulfillment_partner_id: string | null;
+  inbound_tracking: string | null;
+};
+type Tab = "overview" | "sellers" | "products" | "orders" | "fulfilment";
 
-export function AdminDashboard({ email }: { email:string }) {
-  const [tab,setTab]=useState<Tab>("overview"), [sellers,setSellers]=useState<Seller[]>([]), [products,setProducts]=useState<Product[]>([]), [orders,setOrders]=useState<Order[]>([]), [fulfillments,setFulfillments]=useState<Fulfillment[]>([]), [partners,setPartners]=useState<Partner[]>([]), [packages,setPackages]=useState<Package[]>([]), [notice,setNotice]=useState("");
-  const [supabase]=useState(createClient);
-  const router=useRouter();
-  const load=useCallback(async()=>{
-    const [s,p,o,f,fp,ip]=await Promise.all([
-      supabase.from("sellers").select("id,seller_code,display_name,email,commission_percent,status").order("created_at",{ascending:false}),
-      supabase.from("products").select("id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url").order("created_at",{ascending:false}),
-      supabase.from("orders").select("id,order_number,customer_name,total,status,payment_status,placed_at").order("placed_at",{ascending:false}),
-      supabase.from("fulfillments").select("id,order_id,assigned_to,status,courier,tracking_reference,due_at,orders(order_number,customer_name)").order("created_at",{ascending:false}),
-      supabase.from("fulfillment_partners").select("id,name,warehouse_address").order("created_at",{ascending:false}),
-      supabase.from("inbound_packages").select("id,package_number,status,seller_id,fulfillment_partner_id,inbound_tracking").order("created_at",{ascending:false}),
+export function AdminDashboard({ email }: { email: string }) {
+  const [tab, setTab] = useState<Tab>("overview"),
+    [sellers, setSellers] = useState<Seller[]>([]),
+    [products, setProducts] = useState<Product[]>([]),
+    [orders, setOrders] = useState<Order[]>([]),
+    [fulfillments, setFulfillments] = useState<Fulfillment[]>([]),
+    [partners, setPartners] = useState<Partner[]>([]),
+    [packages, setPackages] = useState<Package[]>([]),
+    [finance, setFinance] = useState<FinanceLine[]>([]),
+    [imagePreview, setImagePreview] = useState<string | null>(null),
+    [editing, setEditing] = useState<Product | null>(null),
+    [deleting, setDeleting] = useState<Product | null>(null),
+    [notice, setNotice] = useState("");
+  const [supabase] = useState(createClient);
+  const router = useRouter();
+  const load = useCallback(async () => {
+    const [s, p, o, f, fp, ip, fin] = await Promise.all([
+      supabase
+        .from("sellers")
+        .select("id,seller_code,display_name,email,commission_percent,status")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("products")
+        .select(
+          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,description,audience,category,brand,color,condition",
+        )
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("orders")
+        .select(
+          "id,order_number,customer_name,total,status,payment_status,placed_at",
+        )
+        .order("placed_at", { ascending: false }),
+      supabase
+        .from("fulfillments")
+        .select(
+          "id,order_id,assigned_to,status,courier,tracking_reference,due_at,orders(order_number,customer_name)",
+        )
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("fulfillment_partners")
+        .select("id,name,warehouse_address")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("inbound_packages")
+        .select(
+          "id,package_number,status,seller_id,fulfillment_partner_id,inbound_tracking",
+        )
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("order_items")
+        .select("ownership,gross_amount,platform_fee,seller_due,payout_status"),
     ]);
-    if(s.error||p.error||o.error||f.error) setNotice(s.error?.message||p.error?.message||o.error?.message||f.error?.message||"Could not load data");
-    setSellers(s.data??[]); setProducts(p.data??[]); setOrders(o.data??[]); setFulfillments((f.data??[]) as unknown as Fulfillment[]);setPartners(fp.data??[]);setPackages(ip.data??[]);
-  },[supabase]);
-  useEffect(()=>{
-    const timer=window.setTimeout(()=>{void load()},0);
-    return ()=>window.clearTimeout(timer);
-  },[load]);
+    if (s.error || p.error || o.error || f.error)
+      setNotice(
+        s.error?.message ||
+          p.error?.message ||
+          o.error?.message ||
+          f.error?.message ||
+          "Could not load data",
+      );
+    setSellers(s.data ?? []);
+    setProducts(p.data ?? []);
+    setOrders(o.data ?? []);
+    setFulfillments((f.data ?? []) as unknown as Fulfillment[]);
+    setPartners(fp.data ?? []);
+    setPackages(ip.data ?? []);
+    setFinance(fin.data ?? []);
+  }, [supabase]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void load();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
-  async function addSeller(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget);const {error}=await supabase.from("sellers").insert({seller_code:String(f.get("code")).toUpperCase(),display_name:String(f.get("name")),email:String(f.get("email")).toLowerCase(),commission_percent:Number(f.get("commission"))});setNotice(error?.message||"Seller added. They can now use the partner login with this email.");if(!error){e.currentTarget.reset();await load()}}
-  async function addProduct(e:FormEvent<HTMLFormElement>){e.preventDefault();const form=e.currentTarget,f=new FormData(form),seller=String(f.get("seller")),name=String(f.get("name")),sku=String(f.get("sku")).toUpperCase();const {data:product,error}=await supabase.from("products").insert({sku,slug:`${name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")}-${Date.now().toString(36)}`,name,brand:String(f.get("brand")||""),color:String(f.get("color")||""),condition:String(f.get("condition")||""),sizes:String(f.get("sizes")||"").split(",").map(x=>x.trim()).filter(Boolean),price:Number(f.get("price")),stock_quantity:Number(f.get("stock")),ownership:seller?"seller":"own_stock",seller_id:seller||null,status:"draft"}).select("id").single();if(error||!product){setNotice(error?.message||"Could not add product.");return}const image=f.get("image");if(image instanceof File&&image.size){const ext=image.name.split(".").pop()?.toLowerCase()||"jpg",path=`${product.id}/${crypto.randomUUID()}.${ext}`;const upload=await supabase.storage.from("product-images").upload(path,image,{upsert:false});if(upload.error){setNotice(`Product saved, image failed: ${upload.error.message}`)}else{const url=supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;await Promise.all([supabase.from("product_images").insert({product_id:product.id,storage_path:path,alt_text:name}),supabase.from("products").update({image_url:url}).eq("id",product.id)]);setNotice("Product and image added as draft.")}}else setNotice("Product added as draft.");form.reset();await load()}
-  async function addOrder(e:FormEvent<HTMLFormElement>){e.preventDefault();const form=e.currentTarget,f=new FormData(form),product=products.find(p=>p.id===String(f.get("product"))),qty=Number(f.get("quantity"));if(!product){setNotice("Choose a product.");return}const subtotal=product.price*qty;const {data:order,error}=await supabase.from("orders").insert({customer_name:String(f.get("customer")),customer_phone:String(f.get("phone")||""),customer_email:String(f.get("email")||""),delivery_address:String(f.get("address")||""),sales_channel:String(f.get("channel")||"manual"),subtotal,delivery_fee:Number(f.get("delivery")||0)}).select("id").single();if(error||!order){setNotice(error?.message||"Could not create order.");return}const item=await supabase.from("order_items").insert({order_id:order.id,product_id:product.id,product_name:product.name,sku:product.sku,ownership:product.ownership,selected_size:String(f.get("size")||""),quantity:qty,unit_price:product.price});setNotice(item.error?.message||"Manual order created, seller package generated, and seller assigned automatically.");if(!item.error){form.reset();await load()}}
-  async function updateFulfillment(id:string,status:string){const values:Record<string,string>={status};if(status==="shipped")values.shipped_at=new Date().toISOString();if(status==="delivered")values.delivered_at=new Date().toISOString();const {error}=await supabase.from("fulfillments").update(values).eq("id",id);setNotice(error?.message||"Fulfilment updated.");if(!error)await load()}
-  async function addPartner(e:FormEvent<HTMLFormElement>){e.preventDefault();const form=e.currentTarget,f=new FormData(form);const{data:partner,error}=await supabase.from("fulfillment_partners").insert({name:String(f.get("name")),warehouse_address:String(f.get("address"))}).select("id").single();if(error||!partner){setNotice(error?.message||"Could not add partner.");return}const invite=await supabase.from("fulfillment_invites").insert({email:String(f.get("email")).toLowerCase(),partner_id:partner.id});setNotice(invite.error?.message||"Fulfilment company and login email added.");if(!invite.error){form.reset();await load()}}
-  async function assignPackage(id:string,partnerId:string){const{error}=await supabase.from("inbound_packages").update({fulfillment_partner_id:partnerId||null}).eq("id",id);setNotice(error?.message||"Package assigned.");if(!error)await load()}
-  async function signOut(){await supabase.auth.signOut();router.push("/admin/login");router.refresh()}
-  const money=(n:number)=>new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD"}).format(n);
-  return <main className="admin-shell"><aside className="admin-sidebar"><div><strong>OVERSTOCK</strong><small>COLLECTIVE / OPS</small></div><nav>{(["overview","sellers","products","orders","fulfilment"] as Tab[]).map(x=><button key={x} className={tab===x?"active":""} onClick={()=>setTab(x)}>{x.toUpperCase()}</button>)}</nav><button onClick={signOut}>SIGN OUT</button></aside>
-    <section className="admin-content"><header><div><p className="eyebrow">PRIVATE OPERATIONS</p><h1>{tab.toUpperCase()}</h1></div><small>{email}</small></header>{notice&&<button className="admin-notice" onClick={()=>setNotice("")}>{notice} ×</button>}
-    {tab==="overview"&&<div className="admin-stats"><article><span>SELLERS</span><b>{sellers.length}</b></article><article><span>PRODUCTS</span><b>{products.length}</b></article><article><span>ORDERS</span><b>{orders.length}</b></article><article><span>SELLER STOCK</span><b>{products.filter(p=>p.ownership==="seller").length}</b></article></div>}
-    {tab==="sellers"&&<><form className="admin-form" onSubmit={addSeller}><input name="code" placeholder="SELLER CODE" pattern="[A-Za-z0-9_-]{3,32}" required/><input name="name" placeholder="SELLER NAME" required/><input name="email" type="email" placeholder="LOGIN EMAIL" required/><input name="commission" type="number" min="0" max="100" defaultValue="20" required/><button>ADD SELLER</button></form><DataTable headings={["CODE","SELLER","EMAIL","COMMISSION","STATUS"]} rows={sellers.map(s=>[s.seller_code,s.display_name,s.email||"—",`${s.commission_percent}%`,s.status])}/></>}
-    {tab==="products"&&<><form className="admin-form product-form" onSubmit={addProduct}><input name="sku" placeholder="SKU" required/><input name="name" placeholder="PRODUCT NAME" required/><input name="brand" placeholder="BRAND"/><input name="color" placeholder="COLOR"/><input name="condition" placeholder="CONDITION"/><input name="sizes" placeholder="SIZES: S, M, L" required/><input name="price" type="number" min="0" step="0.01" placeholder="PRICE" required/><input name="stock" type="number" min="0" placeholder="STOCK" required/><select name="seller"><option value="">OWN STOCK</option>{sellers.map(s=><option key={s.id} value={s.id}>{s.display_name}</option>)}</select><input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif"/><button>ADD DRAFT</button></form><DataTable headings={["IMAGE","SKU","PRODUCT","SIZES","OWNER","PRICE","STOCK","STATUS"]} rows={products.map(p=>[p.image_url?"UPLOADED":"—",p.sku,p.name,p.sizes.join(", "),p.ownership==="seller"?(sellers.find(s=>s.id===p.seller_id)?.display_name||"Seller"):"OVERSTOCK",money(p.price),p.stock_quantity,p.status])}/></>}
-    {tab==="orders"&&<><form className="admin-form product-form" onSubmit={addOrder}><input name="customer" placeholder="CUSTOMER NAME" required/><input name="phone" placeholder="PHONE"/><input name="email" type="email" placeholder="EMAIL"/><input name="address" placeholder="DELIVERY ADDRESS"/><select name="product" required><option value="">CHOOSE PRODUCT</option>{products.map(p=><option key={p.id} value={p.id}>{p.name} / {p.sku}</option>)}</select><input name="size" placeholder="SELECTED SIZE" required/><input name="quantity" type="number" min="1" defaultValue="1" required/><input name="delivery" type="number" min="0" step="0.01" placeholder="DELIVERY FEE"/><input name="channel" placeholder="CHANNEL" defaultValue="manual"/><button>CREATE ORDER</button></form><DataTable headings={["ORDER","CUSTOMER","TOTAL","ORDER STATUS","PAYMENT","PLACED"]} rows={orders.map(o=>[`#${o.order_number}`,o.customer_name,money(o.total),o.status,o.payment_status,new Date(o.placed_at).toLocaleDateString("en-AU")])}/></>}
-    {tab==="fulfilment"&&<><form className="admin-form" onSubmit={addPartner}><input name="name" placeholder="FULFILMENT COMPANY" required/><input name="address" placeholder="WAREHOUSE ADDRESS" required/><input name="email" type="email" placeholder="WORKER LOGIN EMAIL" required/><button>ADD COMPANY</button></form><div className="fulfilment-list">{packages.map(p=><article key={p.id}><div><b>PKG-{p.package_number}</b><span>{sellers.find(s=>s.id===p.seller_id)?.display_name||"SELLER"}</span><small>{p.status} / {p.inbound_tracking||"NO TRACKING"}</small></div><select value={p.fulfillment_partner_id||""} onChange={e=>void assignPackage(p.id,e.target.value)}><option value="">UNASSIGNED</option>{partners.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></article>)}</div><h2>LEGACY ORDER QUEUE</h2><div className="fulfilment-list">{fulfillments.map(f=><article key={f.id}><div><b>#{f.orders?.order_number}</b><span>{f.orders?.customer_name}</span><small>{f.courier||"COURIER NOT SET"} / {f.tracking_reference||"NO TRACKING"}</small></div><select value={f.status} onChange={e=>void updateFulfillment(f.id,e.target.value)}>{["unassigned","assigned","packing","shipped","delivered","cancelled","returned"].map(s=><option key={s}>{s}</option>)}</select></article>)}</div></>} </section></main>;
+  async function validateImage(file: File) {
+    if (file.size > 10 * 1024 * 1024)
+      throw new Error("Image must be under 10 MB.");
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+        file.type,
+      )
+    )
+      throw new Error("Use JPG, PNG, WebP or AVIF.");
+    const dimensions = await new Promise<{ width: number; height: number }>(
+      (resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve({ width: img.width, height: img.height });
+        img.onerror = () => reject(new Error("Image could not be read."));
+        img.src = URL.createObjectURL(file);
+      },
+    );
+    const ratio = dimensions.width / dimensions.height;
+    if (Math.abs(ratio - 0.8) > 0.08)
+      throw new Error("Use a 4:5 image. Recommended size: 1600 × 2000 px.");
+  }
+  async function chooseImage(file?: File) {
+    if (!file) {
+      setImagePreview(null);
+      return;
+    }
+    try {
+      await validateImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      setNotice("Image approved: 4:5 ratio and under 10 MB.");
+    } catch (error) {
+      setImagePreview(null);
+      setNotice(error instanceof Error ? error.message : "Invalid image.");
+    }
+  }
+
+  async function addSeller(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const { error } = await supabase.from("sellers").insert({
+      seller_code: String(f.get("code")).toUpperCase(),
+      display_name: String(f.get("name")),
+      email: String(f.get("email")).toLowerCase(),
+      commission_percent: Number(f.get("commission")),
+    });
+    setNotice(
+      error?.message ||
+        "Seller added. They can now use the partner login with this email.",
+    );
+    if (!error) {
+      e.currentTarget.reset();
+      await load();
+    }
+  }
+  async function addProduct(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget,
+      f = new FormData(form),
+      seller = String(f.get("seller")),
+      name = String(f.get("name")),
+      sku = String(f.get("sku")).toUpperCase();
+    const { data: product, error } = await supabase
+      .from("products")
+      .insert({
+        sku,
+        slug: `${name
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")}-${Date.now().toString(36)}`,
+        name,
+        description: String(f.get("description") || ""),
+        audience: String(f.get("audience")),
+        category: String(f.get("category")),
+        brand: String(f.get("brand") || ""),
+        color: String(f.get("color") || ""),
+        condition: String(f.get("condition") || ""),
+        sizes: String(f.get("sizes") || "")
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        price: Number(f.get("price")),
+        stock_quantity: Number(f.get("stock")),
+        ownership: seller ? "seller" : "own_stock",
+        seller_id: seller || null,
+        status: "draft",
+      })
+      .select("id")
+      .single();
+    if (error || !product) {
+      setNotice(error?.message || "Could not add product.");
+      return;
+    }
+    const image = f.get("image");
+    if (image instanceof File && image.size) {
+      try {
+        await validateImage(image);
+      } catch (error) {
+        await supabase.from("products").delete().eq("id", product.id);
+        setNotice(error instanceof Error ? error.message : "Invalid image.");
+        return;
+      }
+      const ext = image.name.split(".").pop()?.toLowerCase() || "jpg",
+        path = `${product.id}/${crypto.randomUUID()}.${ext}`;
+      const upload = await supabase.storage
+        .from("product-images")
+        .upload(path, image, { upsert: false });
+      if (upload.error) {
+        setNotice(`Product saved, image failed: ${upload.error.message}`);
+      } else {
+        const url = supabase.storage.from("product-images").getPublicUrl(path)
+          .data.publicUrl;
+        await Promise.all([
+          supabase.from("product_images").insert({
+            product_id: product.id,
+            storage_path: path,
+            alt_text: name,
+          }),
+          supabase
+            .from("products")
+            .update({ image_url: url })
+            .eq("id", product.id),
+        ]);
+        setNotice("Product and image added as draft.");
+      }
+    } else setNotice("Product added as draft.");
+    form.reset();
+    setImagePreview(null);
+    await load();
+  }
+
+  async function saveProduct(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editing) return;
+    const f = new FormData(e.currentTarget);
+    const seller = String(f.get("seller"));
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name: String(f.get("name")),
+        description: String(f.get("description")),
+        audience: String(f.get("audience")),
+        category: String(f.get("category")),
+        brand: String(f.get("brand")),
+        color: String(f.get("color")),
+        condition: String(f.get("condition")),
+        sizes: String(f.get("sizes"))
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        price: Number(f.get("price")),
+        stock_quantity: Number(f.get("stock")),
+        ownership: seller ? "seller" : "own_stock",
+        seller_id: seller || null,
+        status: String(f.get("status")),
+      })
+      .eq("id", editing.id);
+    setNotice(error?.message || "Product updated.");
+    if (!error) {
+      setEditing(null);
+      await load();
+    }
+  }
+  async function removeProduct() {
+    if (!deleting) return;
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", deleting.id);
+    setNotice(error?.message || "Product removed.");
+    if (!error) {
+      setDeleting(null);
+      await load();
+    }
+  }
+  async function updateOrder(
+    id: string,
+    field: "status" | "payment_status",
+    value: string,
+  ) {
+    const { error } = await supabase
+      .from("orders")
+      .update({ [field]: value })
+      .eq("id", id);
+    setNotice(error?.message || "Order updated.");
+    if (!error) await load();
+  }
+  async function addOrder(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget,
+      f = new FormData(form),
+      product = products.find((p) => p.id === String(f.get("product"))),
+      qty = Number(f.get("quantity"));
+    if (!product) {
+      setNotice("Choose a product.");
+      return;
+    }
+    const subtotal = product.price * qty;
+    const { data: order, error } = await supabase
+      .from("orders")
+      .insert({
+        customer_name: String(f.get("customer")),
+        customer_phone: String(f.get("phone") || ""),
+        customer_email: String(f.get("email") || ""),
+        delivery_address: String(f.get("address") || ""),
+        sales_channel: String(f.get("channel") || "manual"),
+        subtotal,
+        delivery_fee: Number(f.get("delivery") || 0),
+      })
+      .select("id")
+      .single();
+    if (error || !order) {
+      setNotice(error?.message || "Could not create order.");
+      return;
+    }
+    const item = await supabase.from("order_items").insert({
+      order_id: order.id,
+      product_id: product.id,
+      product_name: product.name,
+      sku: product.sku,
+      ownership: product.ownership,
+      selected_size: String(f.get("size") || ""),
+      quantity: qty,
+      unit_price: product.price,
+    });
+    setNotice(
+      item.error?.message ||
+        "Manual order created, seller package generated, and seller assigned automatically.",
+    );
+    if (!item.error) {
+      form.reset();
+      await load();
+    }
+  }
+  async function updateFulfillment(id: string, status: string) {
+    const values: Record<string, string> = { status };
+    if (status === "shipped") values.shipped_at = new Date().toISOString();
+    if (status === "delivered") values.delivered_at = new Date().toISOString();
+    const { error } = await supabase
+      .from("fulfillments")
+      .update(values)
+      .eq("id", id);
+    setNotice(error?.message || "Fulfilment updated.");
+    if (!error) await load();
+  }
+  async function addPartner(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget,
+      f = new FormData(form);
+    const { data: partner, error } = await supabase
+      .from("fulfillment_partners")
+      .insert({
+        name: String(f.get("name")),
+        warehouse_address: String(f.get("address")),
+      })
+      .select("id")
+      .single();
+    if (error || !partner) {
+      setNotice(error?.message || "Could not add partner.");
+      return;
+    }
+    const invite = await supabase.from("fulfillment_invites").insert({
+      email: String(f.get("email")).toLowerCase(),
+      partner_id: partner.id,
+    });
+    setNotice(
+      invite.error?.message || "Fulfilment company and login email added.",
+    );
+    if (!invite.error) {
+      form.reset();
+      await load();
+    }
+  }
+  async function assignPackage(id: string, partnerId: string) {
+    const { error } = await supabase
+      .from("inbound_packages")
+      .update({ fulfillment_partner_id: partnerId || null })
+      .eq("id", id);
+    setNotice(error?.message || "Package assigned.");
+    if (!error) await load();
+  }
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.push("/admin/login");
+    router.refresh();
+  }
+  const money = (n: number) =>
+    new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: "AUD",
+    }).format(n);
+  const gross = finance.reduce((n, x) => n + Number(x.gross_amount || 0), 0);
+  const sellerDue = finance.reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const platformFees = finance.reduce(
+    (n, x) => n + Number(x.platform_fee || 0),
+    0,
+  );
+  const ownSales = finance
+    .filter((x) => x.ownership === "own_stock")
+    .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
+  const overstockBalance = ownSales + platformFees;
+  const sellerPercent = gross ? Math.round((sellerDue / gross) * 100) : 0;
+  return (
+    <main className="admin-shell">
+      <aside className="admin-sidebar">
+        <div>
+          <strong>OVERSTOCK</strong>
+          <small>COLLECTIVE / OPS</small>
+        </div>
+        <nav>
+          {(
+            ["overview", "sellers", "products", "orders", "fulfilment"] as Tab[]
+          ).map((x) => (
+            <button
+              key={x}
+              className={tab === x ? "active" : ""}
+              onClick={() => setTab(x)}
+            >
+              {x.toUpperCase()}
+            </button>
+          ))}
+        </nav>
+        <button onClick={signOut}>SIGN OUT</button>
+      </aside>
+      <section className="admin-content">
+        <header>
+          <div>
+            <p className="eyebrow">PRIVATE OPERATIONS</p>
+            <h1>{tab.toUpperCase()}</h1>
+          </div>
+          <small>{email}</small>
+        </header>
+        {notice && (
+          <button className="admin-notice" onClick={() => setNotice("")}>
+            {notice} ×
+          </button>
+        )}
+        {tab === "overview" && (
+          <>
+            <div className="finance-overview">
+              <div
+                className="balance-chart"
+                style={{
+                  background: `conic-gradient(#050505 0 ${sellerPercent}%, #777 ${sellerPercent}% 100%)`,
+                }}
+                aria-label={`${sellerPercent}% seller balance`}
+              >
+                <span>
+                  {money(gross)}
+                  <small>RECORDED SALES</small>
+                </span>
+              </div>
+              <div className="balance-list">
+                <article>
+                  <span>SELLER BALANCE</span>
+                  <b>{money(sellerDue)}</b>
+                </article>
+                <article>
+                  <span>OVERSTOCK BALANCE</span>
+                  <b>{money(overstockBalance)}</b>
+                </article>
+                <article>
+                  <span>PLATFORM COMMISSION</span>
+                  <b>{money(platformFees)}</b>
+                </article>
+              </div>
+            </div>
+            <div className="admin-stats">
+              <article>
+                <span>SELLERS</span>
+                <b>{sellers.length}</b>
+              </article>
+              <article>
+                <span>PRODUCTS</span>
+                <b>{products.length}</b>
+              </article>
+              <article>
+                <span>ORDERS</span>
+                <b>{orders.length}</b>
+              </article>
+              <article>
+                <span>SELLER STOCK</span>
+                <b>{products.filter((p) => p.ownership === "seller").length}</b>
+              </article>
+            </div>
+            <section className="status-guide">
+              <h2>CONTROL GUIDE</h2>
+              <div>
+                <article>
+                  <b>PRODUCT APPROVAL</b>
+                  <p>Admin only: Draft → Active → Sold out/Archived.</p>
+                </article>
+                <article>
+                  <b>SELLER SUPPLY</b>
+                  <p>
+                    Seller confirms preparation and inbound tracking. Admin can
+                    correct it.
+                  </p>
+                </article>
+                <article>
+                  <b>WAREHOUSE VERIFICATION</b>
+                  <p>
+                    Fulfilment team controls Received, QC, Packed, Shipped and
+                    Delivered.
+                  </p>
+                </article>
+                <article>
+                  <b>PAYMENTS</b>
+                  <p>
+                    Admin only: Unpaid → Paid/Refunded and seller payout Due →
+                    Paid.
+                  </p>
+                </article>
+              </div>
+            </section>
+          </>
+        )}
+        {tab === "sellers" && (
+          <>
+            <form className="admin-form" onSubmit={addSeller}>
+              <input
+                name="code"
+                placeholder="SELLER CODE"
+                pattern="[A-Za-z0-9_-]{3,32}"
+                required
+              />
+              <input name="name" placeholder="SELLER NAME" required />
+              <input
+                name="email"
+                type="email"
+                placeholder="LOGIN EMAIL"
+                required
+              />
+              <input
+                name="commission"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="20"
+                required
+              />
+              <button>ADD SELLER</button>
+            </form>
+            <DataTable
+              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "STATUS"]}
+              rows={sellers.map((s) => [
+                s.seller_code,
+                s.display_name,
+                s.email || "—",
+                `${s.commission_percent}%`,
+                s.status,
+              ])}
+            />
+          </>
+        )}
+        {tab === "products" && (
+          <>
+            <form className="admin-form product-form" onSubmit={addProduct}>
+              <input name="sku" placeholder="SKU" required />
+              <input name="name" placeholder="PRODUCT NAME" required />
+              <input name="brand" placeholder="BRAND" />
+              <input name="color" placeholder="COLOR" />
+              <input name="condition" placeholder="CONDITION" />
+              <select name="audience" required>
+                <option value="">MEN / WOMEN</option>
+                <option value="men">MEN</option>
+                <option value="women">WOMEN</option>
+                <option value="unisex">UNISEX</option>
+              </select>
+              <select name="category" required>
+                <option value="">APPAREL TYPE</option>
+                <option value="tops">TOPS</option>
+                <option value="bottoms">BOTTOMS</option>
+                <option value="accessories">ACCESSORIES</option>
+              </select>
+              <textarea
+                name="description"
+                placeholder="PRODUCT DESCRIPTION"
+                required
+              />
+              <input name="sizes" placeholder="SIZES: S, M, L" required />
+              <input
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="PRICE"
+                required
+              />
+              <input
+                name="stock"
+                type="number"
+                min="0"
+                placeholder="STOCK"
+                required
+              />
+              <select name="seller">
+                <option value="">OWN STOCK</option>
+                {sellers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.display_name}
+                  </option>
+                ))}
+              </select>
+              <input
+                name="image"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/avif"
+                onChange={(e) => void chooseImage(e.target.files?.[0])}
+              />
+              <button>ADD DRAFT</button>
+            </form>
+            <p className="form-help">
+              Images must be 4:5, JPG/PNG/WebP/AVIF, and no larger than 10 MB.
+              Recommended: 1600 × 2000 px.
+            </p>
+            {imagePreview && (
+              <div className="image-preview">
+                <Image
+                  src={imagePreview}
+                  alt="Product upload preview"
+                  fill
+                  unoptimized
+                />
+              </div>
+            )}
+            <DataTable
+              headings={[
+                "IMAGE",
+                "SKU",
+                "PRODUCT",
+                "SIZES",
+                "TAG",
+                "OWNER",
+                "PRICE",
+                "STOCK",
+                "STATUS",
+                "ACTIONS",
+              ]}
+              rows={products.map((p) => [
+                p.image_url ? "UPLOADED" : "—",
+                p.sku,
+                p.name,
+                p.sizes.join(", "),
+                `${(p.audience || "—").toUpperCase()} / ${(p.category || "—").toUpperCase()}`,
+                p.ownership === "seller"
+                  ? sellers.find((s) => s.id === p.seller_id)?.display_name ||
+                    "Seller"
+                  : "OVERSTOCK",
+                money(p.price),
+                p.stock_quantity,
+                p.status,
+                <div className="table-actions" key={p.id}>
+                  <button onClick={() => setEditing(p)}>EDIT</button>
+                  <button onClick={() => setDeleting(p)}>REMOVE</button>
+                </div>,
+              ])}
+            />
+            {editing && (
+              <div className="modal-backdrop">
+                <form className="edit-panel" onSubmit={saveProduct}>
+                  <header>
+                    <h2>EDIT PRODUCT</h2>
+                    <button type="button" onClick={() => setEditing(null)}>
+                      CLOSE
+                    </button>
+                  </header>
+                  <input name="name" defaultValue={editing.name} required />
+                  <textarea
+                    name="description"
+                    defaultValue={editing.description || ""}
+                    required
+                  />
+                  <div className="edit-grid">
+                    <input
+                      name="brand"
+                      defaultValue={editing.brand || ""}
+                      placeholder="BRAND"
+                    />
+                    <input
+                      name="color"
+                      defaultValue={editing.color || ""}
+                      placeholder="COLOR"
+                    />
+                    <input
+                      name="condition"
+                      defaultValue={editing.condition || ""}
+                      placeholder="CONDITION"
+                    />
+                    <select
+                      name="audience"
+                      defaultValue={editing.audience || "unisex"}
+                    >
+                      <option value="men">MEN</option>
+                      <option value="women">WOMEN</option>
+                      <option value="unisex">UNISEX</option>
+                    </select>
+                    <select
+                      name="category"
+                      defaultValue={editing.category || "tops"}
+                    >
+                      <option value="tops">TOPS</option>
+                      <option value="bottoms">BOTTOMS</option>
+                      <option value="accessories">ACCESSORIES</option>
+                    </select>
+                    <input
+                      name="sizes"
+                      defaultValue={editing.sizes.join(", ")}
+                      required
+                    />
+                    <input
+                      name="price"
+                      type="number"
+                      step=".01"
+                      min="0"
+                      defaultValue={editing.price}
+                      required
+                    />
+                    <input
+                      name="stock"
+                      type="number"
+                      min="0"
+                      defaultValue={editing.stock_quantity}
+                      required
+                    />
+                    <select
+                      name="seller"
+                      defaultValue={editing.seller_id || ""}
+                    >
+                      <option value="">OWN STOCK</option>
+                      {sellers.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.display_name}
+                        </option>
+                      ))}
+                    </select>
+                    <select name="status" defaultValue={editing.status}>
+                      <option value="draft">DRAFT</option>
+                      <option value="active">ACTIVE / APPROVED</option>
+                      <option value="sold_out">SOLD OUT</option>
+                      <option value="archived">ARCHIVED</option>
+                    </select>
+                  </div>
+                  <button className="admin-primary">SAVE CHANGES</button>
+                </form>
+              </div>
+            )}
+            {deleting && (
+              <div className="modal-backdrop">
+                <section className="confirm-panel">
+                  <h2>REMOVE {deleting.name}?</h2>
+                  <p>
+                    This is only allowed when the product has no protected order
+                    history.
+                  </p>
+                  <div>
+                    <button onClick={() => setDeleting(null)}>CANCEL</button>
+                    <button
+                      className="danger-button"
+                      onClick={() => void removeProduct()}
+                    >
+                      REMOVE PRODUCT
+                    </button>
+                  </div>
+                </section>
+              </div>
+            )}
+          </>
+        )}
+        {tab === "orders" && (
+          <>
+            <form className="admin-form product-form" onSubmit={addOrder}>
+              <input name="customer" placeholder="CUSTOMER NAME" required />
+              <input name="phone" placeholder="PHONE" />
+              <input name="email" type="email" placeholder="EMAIL" />
+              <input name="address" placeholder="DELIVERY ADDRESS" />
+              <select name="product" required>
+                <option value="">CHOOSE PRODUCT</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} / {p.sku}
+                  </option>
+                ))}
+              </select>
+              <input name="size" placeholder="SELECTED SIZE" required />
+              <input
+                name="quantity"
+                type="number"
+                min="1"
+                defaultValue="1"
+                required
+              />
+              <input
+                name="delivery"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="DELIVERY FEE"
+              />
+              <input
+                name="channel"
+                placeholder="CHANNEL"
+                defaultValue="manual"
+              />
+              <button>CREATE ORDER</button>
+            </form>
+            <DataTable
+              headings={[
+                "ORDER",
+                "CUSTOMER",
+                "TOTAL",
+                "ORDER STATUS",
+                "PAYMENT",
+                "PLACED",
+              ]}
+              rows={orders.map((o) => [
+                `#${o.order_number}`,
+                o.customer_name,
+                money(o.total),
+                <select
+                  className="table-select"
+                  key={`${o.id}-status`}
+                  value={o.status}
+                  onChange={(e) =>
+                    void updateOrder(o.id, "status", e.target.value)
+                  }
+                >
+                  {[
+                    "new",
+                    "confirmed",
+                    "packing",
+                    "shipped",
+                    "delivered",
+                    "cancelled",
+                    "returned",
+                  ].map((x) => (
+                    <option key={x}>{x}</option>
+                  ))}
+                </select>,
+                <select
+                  className="table-select"
+                  key={`${o.id}-payment`}
+                  value={o.payment_status}
+                  onChange={(e) =>
+                    void updateOrder(o.id, "payment_status", e.target.value)
+                  }
+                >
+                  {["unpaid", "paid", "refunded", "partially_refunded"].map(
+                    (x) => (
+                      <option key={x}>{x}</option>
+                    ),
+                  )}
+                </select>,
+                new Date(o.placed_at).toLocaleDateString("en-AU"),
+              ])}
+            />
+          </>
+        )}
+        {tab === "fulfilment" && (
+          <>
+            <form className="admin-form" onSubmit={addPartner}>
+              <input name="name" placeholder="FULFILMENT COMPANY" required />
+              <input name="address" placeholder="WAREHOUSE ADDRESS" required />
+              <input
+                name="email"
+                type="email"
+                placeholder="WORKER LOGIN EMAIL"
+                required
+              />
+              <button>ADD COMPANY</button>
+            </form>
+            <div className="fulfilment-list">
+              {packages.map((p) => (
+                <article key={p.id}>
+                  <div>
+                    <b>PKG-{p.package_number}</b>
+                    <span>
+                      {sellers.find((s) => s.id === p.seller_id)
+                        ?.display_name || "SELLER"}
+                    </span>
+                    <small>
+                      {p.status} / {p.inbound_tracking || "NO TRACKING"}
+                    </small>
+                  </div>
+                  <select
+                    value={p.fulfillment_partner_id || ""}
+                    onChange={(e) => void assignPackage(p.id, e.target.value)}
+                  >
+                    <option value="">UNASSIGNED</option>
+                    {partners.map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {x.name}
+                      </option>
+                    ))}
+                  </select>
+                </article>
+              ))}
+            </div>
+            <h2>LEGACY ORDER QUEUE</h2>
+            <div className="fulfilment-list">
+              {fulfillments.map((f) => (
+                <article key={f.id}>
+                  <div>
+                    <b>#{f.orders?.order_number}</b>
+                    <span>{f.orders?.customer_name}</span>
+                    <small>
+                      {f.courier || "COURIER NOT SET"} /{" "}
+                      {f.tracking_reference || "NO TRACKING"}
+                    </small>
+                  </div>
+                  <select
+                    value={f.status}
+                    onChange={(e) =>
+                      void updateFulfillment(f.id, e.target.value)
+                    }
+                  >
+                    {[
+                      "unassigned",
+                      "assigned",
+                      "packing",
+                      "shipped",
+                      "delivered",
+                      "cancelled",
+                      "returned",
+                    ].map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </select>
+                </article>
+              ))}
+            </div>
+          </>
+        )}{" "}
+      </section>
+    </main>
+  );
 }
 
-function DataTable({headings,rows}:{headings:string[];rows:(string|number)[][]}){return <div className="admin-table-wrap"><table><thead><tr>{headings.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.length?rows.map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j}>{v}</td>)}</tr>):<tr><td colSpan={headings.length}>NO RECORDS YET</td></tr>}</tbody></table></div>}
+function DataTable({
+  headings,
+  rows,
+}: {
+  headings: string[];
+  rows: ReactNode[][];
+}) {
+  return (
+    <div className="admin-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {headings.map((h) => (
+              <th key={h}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length ? (
+            rows.map((r, i) => (
+              <tr key={i}>
+                {r.map((v, j) => (
+                  <td key={j}>{v}</td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={headings.length}>NO RECORDS YET</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
