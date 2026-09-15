@@ -12,7 +12,7 @@ export default function AdminLogin() {
     const data = new FormData(event.currentTarget);
     const { error } = await createClient().auth.signInWithOtp({
       email: String(data.get("email")),
-      options: { emailRedirectTo: `${window.location.origin}/admin`, shouldCreateUser: true },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/admin`, shouldCreateUser: true },
     });
     if (error) { setMessage(error.message); setBusy(false); return; }
     setMessage("CHECK YOUR EMAIL FOR THE SECURE LOGIN LINK."); setBusy(false);
