@@ -1,0 +1,8 @@
+"use client";
+import { useState } from "react";
+import type { Product } from "@/data/products";
+import { useCart } from "./cart-provider";
+export function AddToCart({ product }: { product: Product }) {
+  const [size, setSize] = useState(product.sizes[0]); const [added, setAdded] = useState(false); const { add } = useCart();
+  return <div className="purchase-panel"><fieldset><legend>SELECT SIZE</legend><div className="size-grid">{product.sizes.map((option) => <button className={size === option ? "selected" : ""} key={option} type="button" onClick={() => setSize(option)} aria-pressed={size === option}>{option}</button>)}</div></fieldset><button className="add-button" type="button" onClick={() => { add({ slug: product.slug, name: product.name, price: product.price, size }); setAdded(true); }}>{added ? "ADDED TO CART" : "ADD TO CART"}</button></div>;
+}
