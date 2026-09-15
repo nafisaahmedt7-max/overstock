@@ -6,7 +6,7 @@ import "./globals.css";
 
 const sans = Geist({ variable: "--font-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
-export const metadata: Metadata = { title: { default: "FORM — Independent Marketplace", template: "%s — FORM" }, description: "A direct marketplace for independent products." };
+export const metadata: Metadata = { title: { default: "OVERSTOCK — Independent Marketplace", template: "%s — OVERSTOCK" }, description: "OVERSTOCK COLLECTIVE — a direct marketplace for independent products." };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en" className={`${sans.variable} ${mono.variable}`}><body><CartProvider><SiteHeader />{children}</CartProvider></body></html>;
 }
