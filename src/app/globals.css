@@ -538,6 +538,16 @@ button {
   color: #575753;
   opacity: 1;
 }
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
 .admin-primary,
 .admin-form button {
   min-height: 3rem;

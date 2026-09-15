@@ -221,49 +221,50 @@ export function AdminDashboard({ email }: { email: string }) {
       seller = String(f.get("seller")),
       name = String(f.get("name")),
       sku = String(f.get("sku")).toUpperCase();
-    const { data: product, error } = await supabase
-      .from("products")
-      .insert({
-        sku,
-        slug: `${name
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "")}-${Date.now().toString(36)}`,
-        name,
-        description: String(f.get("description") || ""),
-        audience: String(f.get("audience")),
-        category: String(f.get("category")),
-        brand: String(f.get("brand") || ""),
-        color: String(f.get("color") || ""),
-        condition: String(f.get("condition") || ""),
-        sizes: String(f.get("sizes") || "")
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean),
-        price: Number(f.get("price")),
-        stock_quantity: Number(f.get("stock")),
-        ownership: seller ? "seller" : "own_stock",
-        seller_id: seller || null,
-        status: "draft",
-      })
-      .select("id")
-      .single();
-    if (error || !product) {
-      setNotice(error?.message || "Could not add product.");
-      return;
-    }
     const image = f.get("image");
     if (image instanceof File && image.size) {
       try {
         await validateImage(image);
       } catch (error) {
-        await supabase.from("products").delete().eq("id", product.id);
         setNotice(error instanceof Error ? error.message : "Invalid image.");
         return;
       }
+    }
+    const { data: productId, error } = await supabase.rpc(
+      "admin_create_product",
+      {
+        payload: {
+          sku,
+          slug: `${name
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "")}-${Date.now().toString(36)}`,
+          name,
+          description: String(f.get("description") || ""),
+          audience: String(f.get("audience")),
+          category: String(f.get("category")),
+          brand: String(f.get("brand") || ""),
+          color: String(f.get("color") || ""),
+          condition: String(f.get("condition") || ""),
+          sizes: String(f.get("sizes") || "")
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean),
+          price: Number(f.get("price")),
+          stock_quantity: Number(f.get("stock")),
+          ownership: seller ? "seller" : "own_stock",
+          seller_id: seller || null,
+        },
+      },
+    );
+    if (error || !productId) {
+      setNotice(error?.message || "Could not add product.");
+      return;
+    }
+    if (image instanceof File && image.size) {
       const ext = image.name.split(".").pop()?.toLowerCase() || "jpg",
-        path = `${product.id}/${crypto.randomUUID()}.${ext}`;
+        path = `${productId}/${crypto.randomUUID()}.${ext}`;
       const upload = await supabase.storage
         .from("product-images")
         .upload(path, image, { upsert: false });
@@ -274,14 +275,14 @@ export function AdminDashboard({ email }: { email: string }) {
           .data.publicUrl;
         await Promise.all([
           supabase.from("product_images").insert({
-            product_id: product.id,
+            product_id: productId,
             storage_path: path,
             alt_text: name,
           }),
-          supabase
-            .from("products")
-            .update({ image_url: url })
-            .eq("id", product.id),
+          supabase.rpc("admin_update_product_image", {
+            target_product_id: productId,
+            target_image_url: url,
+          }),
         ]);
         setNotice("Product and image added as draft.");
       }
@@ -352,9 +353,22 @@ export function AdminDashboard({ email }: { email: string }) {
     const form = e.currentTarget,
       f = new FormData(form),
       product = products.find((p) => p.id === String(f.get("product"))),
-      qty = Number(f.get("quantity"));
+      qty = Number(f.get("quantity")),
+      deliveryFee = Number(
+        String(f.get("delivery") || "0")
+          .trim()
+          .replace(",", "."),
+      );
     if (!product) {
       setNotice("Choose a product.");
+      return;
+    }
+    if (!Number.isInteger(qty) || qty < 1) {
+      setNotice("Quantity must be a whole number of 1 or more.");
+      return;
+    }
+    if (!Number.isFinite(deliveryFee) || deliveryFee < 0) {
+      setNotice("Enter a valid delivery fee, such as 12.50.");
       return;
     }
     const subtotal = product.price * qty;
@@ -367,7 +381,7 @@ export function AdminDashboard({ email }: { email: string }) {
         delivery_address: String(f.get("address") || ""),
         sales_channel: String(f.get("channel") || "manual"),
         subtotal,
-        delivery_fee: Number(f.get("delivery") || 0),
+        delivery_fee: deliveryFee,
       })
       .select("id")
       .single();
@@ -425,6 +439,18 @@ export function AdminDashboard({ email }: { email: string }) {
       email: String(f.get("email")).toLowerCase(),
       partner_id: partner.id,
     });
+    if (!invite.error) {
+      await Promise.all([
+        supabase
+          .from("inbound_packages")
+          .update({ fulfillment_partner_id: partner.id })
+          .is("fulfillment_partner_id", null),
+        supabase
+          .from("outbound_shipments")
+          .update({ fulfillment_partner_id: partner.id })
+          .is("fulfillment_partner_id", null),
+      ]);
+    }
     setNotice(invite.error?.message || "Internal fulfilment team login added.");
     if (!invite.error) {
       form.reset();
@@ -984,10 +1010,11 @@ export function AdminDashboard({ email }: { email: string }) {
               />
               <input
                 name="delivery"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="DELIVERY FEE"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]+([.,][0-9]{1,2})?"
+                placeholder="DELIVERY FEE (AUD)"
+                aria-label="Delivery fee in Australian dollars"
               />
               <input
                 name="channel"
