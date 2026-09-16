@@ -145,9 +145,8 @@ export function StatusConnectionGuide({
   title?: string;
 }) {
   return (
-    <section className="connection-guide">
-      <p className="eyebrow">LIVE SHARED STATUS</p>
-      <h2>{title}</h2>
+    <details className="connection-guide collapsible-guide">
+      <summary>{title}</summary>
       <div>
         <table>
           <thead>
@@ -170,6 +169,6 @@ export function StatusConnectionGuide({
           </tbody>
         </table>
       </div>
-    </section>
+    </details>
   );
 }

@@ -611,7 +611,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 <b>{products.filter((p) => p.ownership === "seller").length}</b>
               </article>
             </div>
-            <section className="status-guide">
+            <details className="status-guide collapsible-guide">
+              <summary>ALL STATUS EXPLANATIONS</summary>
               <p className="eyebrow">SHARED WORKFLOW</p>
               <h2>STATUS DICTIONARY</h2>
               <p className="guide-intro">
@@ -772,11 +773,21 @@ export function AdminDashboard({ email }: { email: string }) {
                   </tbody>
                 </table>
               </div>
-            </section>
+            </details>
           </>
         )}
         {tab === "sellers" && (
           <>
+            <details className="admin-help-dropdown">
+              <summary>SELLER STATUS EXPLANATIONS</summary>
+              <div>
+                <p><b>ACTIVE</b> — Seller can sign in and view their assigned orders.</p>
+                <p><b>INACTIVE</b> — Seller access is paused but their records remain saved.</p>
+                <p><b>ARCHIVED</b> — Seller is retained for order history and no longer used for new products.</p>
+                <p><b>PAYOUT DUE</b> — An amount is waiting to be settled with the seller.</p>
+                <p><b>PAID</b> — The seller payment has been completed.</p>
+              </div>
+            </details>
             <form className="admin-form" onSubmit={addSeller}>
               <input
                 name="code"
@@ -791,14 +802,22 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="LOGIN EMAIL"
                 required
               />
-              <input
-                name="commission"
-                type="number"
-                min="0"
-                max="100"
-                defaultValue="20"
-                required
-              />
+              <label className="percent-field">
+                <span>COMMISSION</span>
+                <span className="percent-input">
+                  <input
+                    name="commission"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    defaultValue="20"
+                    aria-label="Seller commission percentage"
+                    required
+                  />
+                  <b>%</b>
+                </span>
+              </label>
               <button>ADD SELLER</button>
             </form>
             <DataTable
@@ -815,6 +834,15 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "products" && (
           <>
+            <details className="admin-help-dropdown">
+              <summary>PRODUCT STATUS EXPLANATIONS</summary>
+              <div>
+                <p><b>DRAFT</b> — Product is saved but hidden from the shop.</p>
+                <p><b>ACTIVE</b> — Product is approved and visible to customers.</p>
+                <p><b>SOLD OUT</b> — Product remains recorded but cannot be purchased.</p>
+                <p><b>ARCHIVED</b> — Product is removed from the catalogue without deleting its history.</p>
+              </div>
+            </details>
             <form className="admin-form product-form" onSubmit={addProduct}>
               <input name="sku" placeholder="SKU" required />
               <input name="name" placeholder="PRODUCT NAME" required />
