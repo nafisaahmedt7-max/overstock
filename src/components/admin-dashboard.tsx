@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { StatusConnectionGuide } from "./status-connection-guide";
+import { JOURNEY, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
 
 type Seller = {
   id: string;
@@ -47,6 +48,8 @@ type Order = {
   status: string;
   payment_status: string;
   placed_at: string;
+  journey_status: JourneyStatus;
+  journey_timestamps: Record<string, string>;
 };
 type Fulfillment = {
   id: string;
@@ -88,6 +91,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [shipments, setShipments] = useState<Shipment[]>([]),
     [finance, setFinance] = useState<FinanceLine[]>([]),
     [imagePreview, setImagePreview] = useState<string | null>(null),
+    [imageFileName, setImageFileName] = useState(""),
     [editing, setEditing] = useState<Product | null>(null),
     [deleting, setDeleting] = useState<Product | null>(null),
     [notice, setNotice] = useState("");
@@ -108,7 +112,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,total,status,payment_status,placed_at",
+          "id,order_number,customer_name,total,status,payment_status,placed_at,journey_status,journey_timestamps",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -185,14 +189,17 @@ export function AdminDashboard({ email }: { email: string }) {
   async function chooseImage(file?: File) {
     if (!file) {
       setImagePreview(null);
+      setImageFileName("");
       return;
     }
     try {
       await validateImage(file);
       setImagePreview(URL.createObjectURL(file));
+      setImageFileName(file.name);
       setNotice("Image approved: 4:5 ratio and under 10 MB.");
     } catch (error) {
       setImagePreview(null);
+      setImageFileName("");
       setNotice(error instanceof Error ? error.message : "Invalid image.");
     }
   }
@@ -260,7 +267,7 @@ export function AdminDashboard({ email }: { email: string }) {
           condition: String(f.get("condition") || ""),
           sizes,
           price: Number(f.get("price")),
-          stock_quantity: Number(f.get("stock")),
+          stock_quantity: 1,
           ownership: seller ? "seller" : "own_stock",
           seller_id: seller || null,
         },
@@ -297,6 +304,7 @@ export function AdminDashboard({ email }: { email: string }) {
     } else setNotice("Product added as draft.");
     form.reset();
     setImagePreview(null);
+    setImageFileName("");
     await load();
   }
 
@@ -315,6 +323,11 @@ export function AdminDashboard({ email }: { email: string }) {
       );
       return;
     }
+    const replacementImage = f.get("image");
+    if (replacementImage instanceof File && replacementImage.size) {
+      try { await validateImage(replacementImage); }
+      catch (error) { setNotice(error instanceof Error ? error.message : "Invalid image."); return; }
+    }
     const { error } = await supabase.rpc("admin_update_product", {
       target_product_id: editing.id,
       payload: {
@@ -327,7 +340,7 @@ export function AdminDashboard({ email }: { email: string }) {
         condition: String(f.get("condition")),
         sizes,
         price: Number(f.get("price")),
-        stock_quantity: Number(f.get("stock")),
+        stock_quantity: 1,
         ownership: seller ? "seller" : "own_stock",
         seller_id: seller || null,
         status: String(f.get("status")),
@@ -335,6 +348,14 @@ export function AdminDashboard({ email }: { email: string }) {
     });
     setNotice(error?.message || "Product updated.");
     if (!error) {
+      if (replacementImage instanceof File && replacementImage.size) {
+        const ext = replacementImage.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${editing.id}/${crypto.randomUUID()}.${ext}`;
+        const upload = await supabase.storage.from("product-images").upload(path, replacementImage);
+        if (upload.error) { setNotice(`Product updated, image failed: ${upload.error.message}`); return; }
+        const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
+        await supabase.rpc("admin_update_product_image", { target_product_id: editing.id, target_image_url: url });
+      }
       setEditing(null);
       await load();
     }
@@ -365,16 +386,6 @@ export function AdminDashboard({ email }: { email: string }) {
   }
   async function addOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const {
-  data: { user },
-  error: authError,
-} = await supabase.auth.getUser();
-
-console.log("MANUAL ORDER AUTH:", {
-  userId: user?.id,
-  email: user?.email,
-  authError,
-});
     const form = e.currentTarget,
       f = new FormData(form),
       product = products.find((p) => p.id === String(f.get("product"))),
@@ -396,42 +407,26 @@ console.log("MANUAL ORDER AUTH:", {
       setNotice("Enter a valid delivery fee, such as 12.50.");
       return;
     }
-    const subtotal = product.price * qty;
-    const { data: order, error } = await supabase
-      .from("orders")
-      .insert({
-        customer_name: String(f.get("customer")),
-        customer_phone: String(f.get("phone") || ""),
-        customer_email: String(f.get("email") || ""),
-        delivery_address: String(f.get("address") || ""),
-        sales_channel: String(f.get("channel") || "manual"),
-        subtotal,
-        delivery_fee: deliveryFee,
-      })
-      .select("id")
-      .single();
-    if (error || !order) {
+    const { error } = await supabase.rpc("admin_create_manual_order", { payload: {
+      customer_name: String(f.get("customer")), customer_phone: String(f.get("phone") || ""),
+      customer_email: String(f.get("email") || ""), delivery_address: String(f.get("address") || ""),
+      product_id: product.id, selected_size: String(f.get("size") || ""), quantity: qty,
+      unit_price: product.price, delivery_fee: deliveryFee, internal_notes: ""
+    }});
+    if (error) {
       setNotice(error?.message || "Could not create order.");
       return;
     }
-    const item = await supabase.from("order_items").insert({
-      order_id: order.id,
-      product_id: product.id,
-      product_name: product.name,
-      sku: product.sku,
-      ownership: product.ownership,
-      selected_size: String(f.get("size") || ""),
-      quantity: qty,
-      unit_price: product.price,
+    setNotice("Manual order created atomically and assigned automatically.");
+    form.reset();
+    await load();
+  }
+  async function advanceOrder(id: string, status: JourneyStatus) {
+    const { error } = await supabase.rpc("advance_order_journey", {
+      target_order_id: id, target_status: status, note: "Admin update",
     });
-    setNotice(
-      item.error?.message ||
-        "Manual order created, seller package generated, and seller assigned automatically.",
-    );
-    if (!item.error) {
-      form.reset();
-      await load();
-    }
+    setNotice(error?.message || "Shared journey updated for every role.");
+    if (!error) await load();
   }
   async function updateFulfillment(id: string, status: string) {
     const values: Record<string, string> = { status };
@@ -856,13 +851,6 @@ console.log("MANUAL ORDER AUTH:", {
                 placeholder="PRICE"
                 required
               />
-              <input
-                name="stock"
-                type="number"
-                min="0"
-                placeholder="STOCK"
-                required
-              />
               <select name="seller">
                 <option value="">OWN STOCK</option>
                 {sellers.map((s) => (
@@ -871,15 +859,19 @@ console.log("MANUAL ORDER AUTH:", {
                   </option>
                 ))}
               </select>
-              <label className="image-upload-field">
+              <label className="image-upload-field" htmlFor="product-image">
                 <span>PRODUCT IMAGE</span>
                 <input
+                  id="product-image"
                   name="image"
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/avif"
                   onChange={(e) => void chooseImage(e.target.files?.[0])}
                 />
-                <b>{imagePreview ? "IMAGE READY" : "CHOOSE FILE"}</b>
+                <span className="image-file-name">
+                  {imageFileName || "NO IMAGE SELECTED"}
+                </span>
+                <b>CHOOSE FILE</b>
               </label>
               <button>ADD DRAFT</button>
             </form>
@@ -906,7 +898,6 @@ console.log("MANUAL ORDER AUTH:", {
                 "TAG",
                 "OWNER",
                 "PRICE",
-                "STOCK",
                 "STATUS",
                 "ACTIONS",
               ]}
@@ -921,7 +912,6 @@ console.log("MANUAL ORDER AUTH:", {
                     "Seller"
                   : "OVERSTOCK",
                 money(p.price),
-                p.stock_quantity,
                 <span
                   className="status-badge"
                   data-status={p.status}
@@ -944,81 +934,103 @@ console.log("MANUAL ORDER AUTH:", {
                       CLOSE
                     </button>
                   </header>
-                  <input name="name" defaultValue={editing.name} required />
-                  <textarea
-                    name="description"
-                    defaultValue={editing.description || ""}
-                    required
-                  />
+                  <label className="edit-field edit-field-wide">
+                    <span>PRODUCT NAME</span>
+                    <input name="name" defaultValue={editing.name} required />
+                  </label>
+                  <label className="edit-field edit-field-wide">
+                    <span>PRODUCT DESCRIPTION</span>
+                    <textarea
+                      name="description"
+                      defaultValue={editing.description || ""}
+                      required
+                    />
+                  </label>
+                  <label className="image-upload-field edit-field-wide">
+                    <span>REPLACE PRODUCT IMAGE (OPTIONAL)</span>
+                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" />
+                    <b>CHOOSE IMAGE</b>
+                  </label>
                   <div className="edit-grid">
-                    <input
-                      name="brand"
-                      defaultValue={editing.brand || ""}
-                      placeholder="BRAND"
-                    />
-                    <input
-                      name="color"
-                      defaultValue={editing.color || ""}
-                      placeholder="COLOR"
-                    />
-                    <input
-                      name="condition"
-                      defaultValue={editing.condition || ""}
-                      placeholder="CONDITION"
-                    />
-                    <select
-                      name="audience"
-                      defaultValue={editing.audience || "unisex"}
-                    >
-                      <option value="men">MEN</option>
-                      <option value="women">WOMEN</option>
-                      <option value="unisex">UNISEX</option>
-                    </select>
-                    <select
-                      name="category"
-                      defaultValue={editing.category || "tops"}
-                    >
-                      <option value="tops">TOPS</option>
-                      <option value="bottoms">BOTTOMS</option>
-                      <option value="accessories">ACCESSORIES</option>
-                    </select>
-                    <input
-                      name="sizes"
-                      defaultValue={editing.sizes.join(", ")}
-                      required
-                    />
-                    <input
-                      name="price"
-                      type="number"
-                      step=".01"
-                      min="0"
-                      defaultValue={editing.price}
-                      required
-                    />
-                    <input
-                      name="stock"
-                      type="number"
-                      min="0"
-                      defaultValue={editing.stock_quantity}
-                      required
-                    />
-                    <select
-                      name="seller"
-                      defaultValue={editing.seller_id || ""}
-                    >
-                      <option value="">OWN STOCK</option>
-                      {sellers.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.display_name}
-                        </option>
-                      ))}
-                    </select>
-                    <select name="status" defaultValue={editing.status}>
-                      <option value="draft">DRAFT</option>
-                      <option value="active">ACTIVE / APPROVED</option>
-                      <option value="sold_out">SOLD OUT</option>
-                      <option value="archived">ARCHIVED</option>
-                    </select>
+                    <label className="edit-field">
+                      <span>BRAND</span>
+                      <input name="brand" defaultValue={editing.brand || ""} />
+                    </label>
+                    <label className="edit-field">
+                      <span>COLOUR</span>
+                      <input name="color" defaultValue={editing.color || ""} />
+                    </label>
+                    <label className="edit-field">
+                      <span>CONDITION</span>
+                      <input
+                        name="condition"
+                        defaultValue={editing.condition || ""}
+                      />
+                    </label>
+                    <label className="edit-field">
+                      <span>AUDIENCE</span>
+                      <select
+                        name="audience"
+                        defaultValue={editing.audience || "unisex"}
+                      >
+                        <option value="men">MEN</option>
+                        <option value="women">WOMEN</option>
+                        <option value="unisex">UNISEX</option>
+                      </select>
+                    </label>
+                    <label className="edit-field">
+                      <span>APPAREL TYPE</span>
+                      <select
+                        name="category"
+                        defaultValue={editing.category || "tops"}
+                      >
+                        <option value="tops">TOPS</option>
+                        <option value="bottoms">BOTTOMS</option>
+                        <option value="accessories">ACCESSORIES</option>
+                      </select>
+                    </label>
+                    <label className="edit-field">
+                      <span>SIZES</span>
+                      <input
+                        name="sizes"
+                        defaultValue={editing.sizes.join(", ")}
+                        required
+                      />
+                    </label>
+                    <label className="edit-field">
+                      <span>PRICE (AUD)</span>
+                      <input
+                        name="price"
+                        type="number"
+                        step=".01"
+                        min="0"
+                        defaultValue={editing.price}
+                        required
+                      />
+                    </label>
+                    <label className="edit-field">
+                      <span>PRODUCT OWNER</span>
+                      <select
+                        name="seller"
+                        defaultValue={editing.seller_id || ""}
+                      >
+                        <option value="">OWN STOCK</option>
+                        {sellers.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.display_name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="edit-field">
+                      <span>PUBLICATION STATUS</span>
+                      <select name="status" defaultValue={editing.status}>
+                        <option value="draft">DRAFT</option>
+                        <option value="active">ACTIVE / APPROVED</option>
+                        <option value="sold_out">SOLD OUT</option>
+                        <option value="archived">ARCHIVED</option>
+                      </select>
+                    </label>
                   </div>
                   <div className="edit-actions">
                     <button type="button" onClick={() => setEditing(null)}>
@@ -1053,10 +1065,7 @@ console.log("MANUAL ORDER AUTH:", {
         )}
         {tab === "orders" && (
           <>
-            <StatusConnectionGuide
-              role="admin-orders"
-              title="ORDER STATUS CONNECTIONS"
-            />
+            <TrackingGuide role="admin" />
             <form className="admin-form product-form" onSubmit={addOrder}>
               <input name="customer" placeholder="CUSTOMER NAME" required />
               <input name="phone" placeholder="PHONE" />
@@ -1093,59 +1102,25 @@ console.log("MANUAL ORDER AUTH:", {
               />
               <button>CREATE ORDER</button>
             </form>
-            <DataTable
-              headings={[
-                "ORDER",
-                "CUSTOMER",
-                "TOTAL",
-                "ORDER STATUS",
-                "PAYMENT",
-                "PLACED",
-              ]}
-              rows={orders.map((o) => [
-                `#${o.order_number}`,
-                o.customer_name,
-                money(o.total),
-                <select
-                  className="table-select"
-                  data-status={o.status}
-                  key={`${o.id}-status`}
-                  value={o.status}
-                  onChange={(e) =>
-                    void updateOrder(o.id, "status", e.target.value)
-                  }
-                >
-                  {[
-                    "new",
-                    "confirmed",
-                    "packing",
-                    "shipped",
-                    "delivered",
-                    "cancelled",
-                  ].map((x) => (
-                    <option key={x} value={x}>
-                      {x.toUpperCase()}
-                    </option>
-                  ))}
-                </select>,
-                <select
-                  className="table-select"
-                  data-status={o.payment_status}
-                  key={`${o.id}-payment`}
-                  value={o.payment_status}
-                  onChange={(e) =>
-                    void updateOrder(o.id, "payment_status", e.target.value)
-                  }
-                >
-                  {["unpaid", "paid"].map((x) => (
-                    <option key={x} value={x}>
-                      {x.toUpperCase()}
-                    </option>
-                  ))}
-                </select>,
-                new Date(o.placed_at).toLocaleDateString("en-AU"),
-              ])}
-            />
+            <div className="order-card-list admin-orders">
+              {orders.map((o) => (
+                <article className="order-card" key={o.id}>
+                  <header>
+                    <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{money(o.total)} / {new Date(o.placed_at).toLocaleDateString("en-AU")}</small></div>
+                    <select className="table-select" data-status={o.payment_status} value={o.payment_status} onChange={(e) => void updateOrder(o.id, "payment_status", e.target.value)}>
+                      <option value="unpaid">UNPAID</option><option value="paid">PAID</option>
+                    </select>
+                  </header>
+                  <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
+                  <label className="journey-override">ADMIN JOURNEY CONTROL
+                    <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => void advanceOrder(o.id, e.target.value as JourneyStatus)}>
+                      {JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}
+                      <option value="cancelled">CANCELLED</option>
+                    </select>
+                  </label>
+                </article>
+              ))}
+            </div>
           </>
         )}
         {tab === "fulfilment" && (

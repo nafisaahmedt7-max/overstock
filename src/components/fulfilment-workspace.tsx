@@ -1,181 +1,53 @@
 "use client";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { StatusConnectionGuide } from "./status-connection-guide";
-type Package = {
-  id: string;
-  package_number: number;
-  status: string;
-  inbound_courier: string | null;
-  inbound_tracking: string | null;
-  expected_arrival: string | null;
-  received_at: string | null;
-  qc_result: string;
-  expected_item_count: number;
-  seller_id: string;
+import { JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+
+type WorkOrder = {
+  id: string; order_number: number; customer_name: string; delivery_address: string | null;
+  journey_status: JourneyStatus; journey_timestamps: Record<string, string>;
+  shipment_id: string; courier: string | null; tracking_number: string | null;
 };
-type Shipment = {
-  id: string;
-  shipment_number: number;
-  status: string;
-  recipient_name: string;
-  recipient_phone: string | null;
-  delivery_address: string;
-  courier: string | null;
-  tracking_number: string | null;
-  weight_grams: number | null;
+const next: Partial<Record<JourneyStatus, { status: JourneyStatus; label: string }>> = {
+  sent_to_fulfillment: { status: "received_by_fulfillment", label: "MARK RECEIVED" },
+  received_by_fulfillment: { status: "preparing_for_customer", label: "START CUSTOMER PACKING" },
+  preparing_for_customer: { status: "sent_to_customer", label: "MARK SENT TO CUSTOMER" },
+  sent_to_customer: { status: "delivered", label: "MARK DELIVERED" },
 };
-export function FulfilmentWorkspace({
-  packages,
-  shipments,
-}: {
-  packages: Package[];
-  shipments: Shipment[];
-}) {
+
+export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
   const sb = createClient();
   const [notice, setNotice] = useState("");
-  async function updatePackage(id: string, status: string) {
-    const values: Record<string, string> = { status };
-    if (status === "received") values.received_at = new Date().toISOString();
-    const { error } = await sb
-      .from("inbound_packages")
-      .update(values)
-      .eq("id", id);
-    if (error) {
-      setNotice(error.message);
-      return;
-    }
-    location.reload();
-  }
-  async function updateShipment(
-    event: React.FormEvent<HTMLFormElement>,
-    id: string,
-  ) {
+  async function advance(event: FormEvent<HTMLFormElement>, order: WorkOrder, target: JourneyStatus) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const status = String(form.get("status"));
-    const values: Record<string, string> = {
-      status,
-      courier: String(form.get("courier") || ""),
-      tracking_number: String(form.get("tracking") || ""),
-    };
-    if (status === "outbound_shipped")
-      values.shipped_at = new Date().toISOString();
-    if (status === "delivered") values.delivered_at = new Date().toISOString();
-    const { error } = await sb
-      .from("outbound_shipments")
-      .update(values)
-      .eq("id", id);
-    if (error) {
-      setNotice(error.message);
-      return;
+    const data = new FormData(event.currentTarget);
+    if (target === "sent_to_customer") {
+      const { error } = await sb.from("outbound_shipments").update({
+        courier: String(data.get("courier") || ""), tracking_number: String(data.get("tracking") || ""),
+      }).eq("id", order.shipment_id);
+      if (error) { setNotice(error.message); return; }
     }
-    location.reload();
+    const { error } = await sb.rpc("advance_order_journey", { target_order_id: order.id, target_status: target, note: null });
+    setNotice(error?.message || "Shared order journey updated.");
+    if (!error) window.setTimeout(() => location.reload(), 500);
   }
-  return (
-    <main className="partner-page">
-      <header>
-        <div>
-          <p className="eyebrow">OVERSTOCK / FULFILMENT</p>
-          <h1>PACKAGE DESK</h1>
-        </div>
-        <div>
-          <span>INBOUND</span>
-          <b>{packages.length}</b>
-        </div>
-      </header>
-      {notice && (
-        <div className="portal-alert" role="alert">
-          {notice}
-        </div>
-      )}
-      <section className="role-guide">
-        <b>YOUR CONTROL</b>
-        <p>
-          Verify package receipt and quality, then control Ready to pack,
-          Packed, Shipped and Delivered. Sellers control their confirmation and
-          inbound tracking. OVERSTOCK can audit and correct every stage.
-        </p>
-      </section>
-      <StatusConnectionGuide role="fulfilment" />
-      <h2>INCOMING SELLER PACKAGES</h2>
-      <div className="package-grid">
-        {packages.map((p) => (
-          <article key={p.id}>
-            <b>PKG-{p.package_number}</b>
-            <span>{p.expected_item_count} ITEM(S)</span>
-            <small>
-              {p.inbound_courier || "COURIER PENDING"} /{" "}
-              {p.inbound_tracking || "NO TRACKING"}
-            </small>
-            <select
-              data-status={p.status}
-              value={p.status}
-              onChange={(e) => void updatePackage(p.id, e.target.value)}
-            >
-              {!["received", "qc_hold", "qc_passed", "ready_to_pack"].includes(
-                p.status,
-              ) && (
-                <option value={p.status} disabled>
-                  {p.status} — WAITING FOR SELLER
-                </option>
-              )}
-              {["received", "qc_hold", "qc_passed", "ready_to_pack"].map(
-                (x) => (
-                  <option key={x} value={x}>
-                    {x.replaceAll("_", " ").toUpperCase()}
-                  </option>
-                ),
-              )}
-            </select>
-          </article>
-        ))}
-      </div>
-      <h2>OUTBOUND CUSTOMER SHIPMENTS</h2>
-      <div className="package-grid">
-        {shipments.map((s) => (
-          <form
-            key={s.id}
-            className="shipment-card"
-            onSubmit={(event) => void updateShipment(event, s.id)}
-          >
-            <b>SHIP-{s.shipment_number}</b>
-            <span>{s.recipient_name}</span>
-            <small>{s.delivery_address}</small>
-            <input
-              name="courier"
-              defaultValue={s.courier || ""}
-              placeholder="OUTBOUND COURIER"
-            />
-            <input
-              name="tracking"
-              defaultValue={s.tracking_number || ""}
-              placeholder="CUSTOMER TRACKING NUMBER"
-            />
-            <select
-              name="status"
-              data-status={s.status}
-              value={s.status}
-              onChange={(event) => {
-                event.currentTarget.form?.requestSubmit();
-              }}
-            >
-              {[
-                "ready_to_pack",
-                "packed",
-                "outbound_shipped",
-                "delivered",
-                "cancelled",
-              ].map((x) => (
-                <option key={x} value={x}>
-                  {x.replaceAll("_", " ").toUpperCase()}
-                </option>
-              ))}
-            </select>
-            <button>UPDATE SHIPMENT</button>
-          </form>
-        ))}
-      </div>
-    </main>
-  );
+  return <main className="partner-page">
+    <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div></header>
+    {notice && <div className="portal-alert" role="alert">{notice}</div>}
+    <div className="portal-summary"><article><span>INBOUND</span><b>{orders.filter(o => o.journey_status === "sent_to_fulfillment").length}</b></article><article><span>PREPARING</span><b>{orders.filter(o => ["received_by_fulfillment","preparing_for_customer"].includes(o.journey_status)).length}</b></article><article><span>OUT FOR DELIVERY</span><b>{orders.filter(o => o.journey_status === "sent_to_customer").length}</b></article></div>
+    <TrackingGuide role="fulfillment" />
+    <div className="order-card-list">
+      {orders.map(order => {
+        const action = next[order.journey_status];
+        return <article className="order-card" key={order.id}>
+          <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.customer_name}</h2><small>{order.delivery_address || "ADDRESS PENDING"}</small></div><span className="status-badge" data-status={order.journey_status}>{order.journey_status.replaceAll("_"," ")}</span></header>
+          <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
+          {action && <form className="order-action-form" onSubmit={e => void advance(e, order, action.status)}>
+            {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER<input name="courier" defaultValue={order.courier || ""} required /></label><label>CUSTOMER TRACKING<input name="tracking" defaultValue={order.tracking_number || ""} required /></label></>}
+            <button className="admin-primary">{action.label}</button>
+          </form>}
+        </article>;
+      })}
+    </div>
+  </main>;
 }

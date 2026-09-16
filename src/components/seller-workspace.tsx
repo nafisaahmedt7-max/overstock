@@ -1,179 +1,47 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { StatusConnectionGuide } from "./status-connection-guide";
-type Feed = {
-  order_item_id: string;
-  order_number: number;
-  product_name: string;
-  sku: string;
-  selected_size: string | null;
-  quantity: number;
-  package_number: number | null;
-  seller_due: number | null;
-  payout_status: string;
-  order_status: string;
-  package_status: string | null;
+import { JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+
+export type SellerOrder = {
+  id: string; order_number: number; journey_status: JourneyStatus;
+  journey_timestamps: Record<string, string>; product_name: string;
+  selected_size: string | null; quantity: number; seller_due: number; payout_status: string;
+  package_id: string | null; seller_id: string; inbound_courier: string | null; inbound_tracking: string | null;
 };
-type Package = {
-  id: string;
-  package_number: number;
-  status: string;
-  inbound_courier: string | null;
-  inbound_tracking: string | null;
-};
-export function SellerWorkspace({
-  sellerId,
-  rows,
-  packages,
-  due,
-}: {
-  sellerId: string;
-  rows: Feed[];
-  packages: Package[];
-  due: string;
-}) {
+
+export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: string }) {
   const [notice, setNotice] = useState("");
   const sb = createClient();
-  async function update(e: FormEvent<HTMLFormElement>, p: Package) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget),
-      status = String(f.get("status"));
-    const { error } = await sb.from("seller_package_updates").upsert({
-      package_id: p.id,
-      seller_id: sellerId,
-      confirmed_at: new Date().toISOString(),
-      courier: String(f.get("courier") || ""),
-      tracking_number: String(f.get("tracking") || ""),
-      dispatched_at:
-        status === "inbound_transit" ? new Date().toISOString() : null,
-    });
-    setNotice(
-      error?.message ||
-        (status === "inbound_transit"
-          ? "Dispatch recorded. OVERSTOCK and the warehouse can now track it."
-          : "Order confirmed."),
-    );
-    if (!error) window.setTimeout(() => location.reload(), 700);
+  async function advance(event: FormEvent<HTMLFormElement>, order: SellerOrder, target: JourneyStatus) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    if (order.package_id && target === "sent_to_fulfillment") {
+      const { error } = await sb.from("seller_package_updates").upsert({
+        package_id: order.package_id, seller_id: order.seller_id,
+        courier: String(form.get("courier") || ""), tracking_number: String(form.get("tracking") || ""),
+        confirmed_at: new Date().toISOString(), dispatched_at: new Date().toISOString(),
+      });
+      if (error) { setNotice(error.message); return; }
+    }
+    const { error } = await sb.rpc("advance_order_journey", { target_order_id: order.id, target_status: target, note: null });
+    setNotice(error?.message || "Order progress updated for OVERSTOCK and fulfillment.");
+    if (!error) window.setTimeout(() => location.reload(), 500);
   }
-  return (
-    <main className="partner-page">
-      <header>
-        <div>
-          <p className="eyebrow">OVERSTOCK / SELLER PORTAL</p>
-          <h1>MY ORDERS</h1>
-        </div>
-        <div>
-          <span>AMOUNT DUE</span>
-          <b>{due}</b>
-        </div>
-      </header>
-      {notice && (
-        <div className="portal-alert" role="status">
-          {notice}
-        </div>
-      )}
-      <section className="role-guide">
-        <b>YOUR CONTROL</b>
-        <p>
-          Confirm supply, then add courier and tracking when dispatched.
-          OVERSTOCK approves products and payouts. The internal OVERSTOCK
-          fulfilment team verifies receipt, quality and delivery.
-        </p>
-      </section>
-      <StatusConnectionGuide role="seller" />
-      <div className="seller-package-list">
-        {packages.map((p) => (
-          <form key={p.id} onSubmit={(e) => void update(e, p)}>
-            <header>
-              <b>PKG-{p.package_number}</b>
-              <span className="status-badge" data-status={p.status}>
-                {p.status.replaceAll("_", " ")}
-              </span>
-            </header>
-            <input
-              name="courier"
-              defaultValue={p.inbound_courier || ""}
-              placeholder="COURIER"
-            />
-            <input
-              name="tracking"
-              defaultValue={p.inbound_tracking || ""}
-              placeholder="SELLER → OVERSTOCK TRACKING"
-            />
-            <select
-              name="status"
-              defaultValue=""
-              required
-              data-status={p.status}
-            >
-              <option value="" disabled>
-                CHOOSE YOUR NEXT STATUS
-              </option>
-              <option value="seller_confirmed">SELLER CONFIRMED</option>
-              <option value="inbound_transit">INBOUND TRANSIT</option>
-            </select>
-            <div>
-              <button className="admin-primary">UPDATE SHARED STATUS</button>
-            </div>
-          </form>
-        ))}
-      </div>
-      <div className="admin-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ORDER</th>
-              <th>PRODUCT</th>
-              <th>SIZE</th>
-              <th>QTY</th>
-              <th>PACKAGE</th>
-              <th>ORDER STATUS</th>
-              <th>PACKAGE STATUS</th>
-              <th>SELLER DUE</th>
-              <th>PAYOUT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length ? (
-              rows.map((r) => (
-                <tr key={r.order_item_id}>
-                  <td>#{r.order_number}</td>
-                  <td>
-                    {r.product_name}
-                    <small>{r.sku}</small>
-                  </td>
-                  <td>{r.selected_size || "—"}</td>
-                  <td>{r.quantity}</td>
-                  <td>{r.package_number ? `PKG-${r.package_number}` : "—"}</td>
-                  <td>
-                    <span className="status-badge" data-status={r.order_status}>
-                      {r.order_status.replaceAll("_", " ")}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className="status-badge"
-                      data-status={r.package_status || "awaiting_seller"}
-                    >
-                      {(r.package_status || "awaiting_seller").replaceAll(
-                        "_",
-                        " ",
-                      )}
-                    </span>
-                  </td>
-                  <td>A${Number(r.seller_due || 0).toFixed(2)}</td>
-                  <td>{r.payout_status}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={9}>NO SELLER ORDERS YET</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  );
+  const actionCount = orders.filter(o => ["admin_confirmed", "seller_preparing"].includes(o.journey_status)).length;
+  return <main className="partner-page">
+    <header><div><p className="eyebrow">OVERSTOCK / SELLER PORTAL</p><h1>MY ORDERS</h1></div><div><span>AMOUNT DUE</span><b>{due}</b></div></header>
+    {notice && <div className="portal-alert" role="status">{notice}</div>}
+    <div className="portal-summary"><article><span>ACTION REQUIRED</span><b>{actionCount}</b></article><article><span>TOTAL ORDERS</span><b>{orders.length}</b></article><article><span>SELLER BALANCE</span><b>{due}</b></article></div>
+    <TrackingGuide role="seller" />
+    <div className="order-card-list">
+      {orders.length ? orders.map(order => <article className="order-card" key={order.id}>
+        <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div><span className="status-badge" data-status={order.journey_status}>{order.journey_status.replaceAll("_", " ")}</span></header>
+        <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
+        {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>Confirm that you have the item and begin packing it.</p><button className="admin-primary">START PREPARING</button></form>}
+        {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER<input name="courier" defaultValue={order.inbound_courier || ""} required /></label><label>TRACKING NUMBER<input name="tracking" defaultValue={order.inbound_tracking || ""} required /></label><button className="admin-primary">MARK SENT TO FULFILLMENT</button></form>}
+        <footer><span>YOUR EARNINGS</span><b>A\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status.replaceAll("_", " ")}</span></footer>
+      </article>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
+    </div>
+  </main>;
 }

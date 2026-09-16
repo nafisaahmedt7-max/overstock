@@ -2,6 +2,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 export default function PortalLogin() {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -49,6 +50,7 @@ export default function PortalLogin() {
             {message}
           </p>
         )}
+        <Link className="portal-register-link" href="/portal/register">FIRST LOGIN? CREATE YOUR PASSWORD</Link>
       </form>
     </main>
   );

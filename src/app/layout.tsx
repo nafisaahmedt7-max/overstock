@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CartProvider } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const sans = Geist({ variable: "--font-sans", subsets: ["latin"] });
@@ -22,6 +23,7 @@ export default function RootLayout({
         <CartProvider>
           <SiteHeader />
           {children}
+          <SiteFooter />
         </CartProvider>
       </body>
     </html>
