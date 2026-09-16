@@ -509,7 +509,7 @@ export function AdminDashboard({ email }: { email: string }) {
   }
   async function signOut() {
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/portal/login");
     router.refresh();
   }
   const money = (n: number) =>

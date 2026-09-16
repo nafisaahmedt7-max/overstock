@@ -26,8 +26,9 @@ export default function PortalLogin() {
   return (
     <main className="admin-login">
       <form className="admin-panel" onSubmit={submit}>
-        <p className="eyebrow">OVERSTOCK / TEAM PORTAL</p>
+        <p className="eyebrow">OVERSTOCK / SECURE PORTAL</p>
         <h1>PORTAL LOGIN</h1>
+        <p>One login for administrators, sellers and fulfillment team members.</p>
         <label>
           Approved email
           <input type="email" name="email" required autoComplete="email" />
