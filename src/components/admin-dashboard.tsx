@@ -1093,7 +1093,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 inputMode="decimal"
                 pattern="[0-9]+([.,][0-9]{1,2})?"
                 placeholder="DELIVERY FEE (AUD)"
-                aria-label="Delivery fee in Australian dollars"
+                aria-label="Delivery fee"
               />
               <input
                 name="channel"

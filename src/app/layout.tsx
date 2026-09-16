@@ -9,7 +9,7 @@ const sans = Geist({ variable: "--font-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: {
-    default: "OVERSTOCK — Independent Marketplace",
+    default: "OVERSTOCK",
     template: "%s — OVERSTOCK",
   },
   description: "OVERSTOCK — a direct marketplace for independent products.",

@@ -50,7 +50,7 @@ export default function PortalLogin() {
             {message}
           </p>
         )}
-        <Link className="portal-register-link" href="/portal/register">FIRST LOGIN? CREATE YOUR PASSWORD</Link>
+        <Link className="portal-register-link" href="/portal/register">REGISTER</Link>
       </form>
     </main>
   );
