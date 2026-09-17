@@ -9,10 +9,12 @@ type WorkOrder = {
   shipment_id: string; courier: string | null; tracking_number: string | null;
 };
 const next: Partial<Record<JourneyStatus, { status: JourneyStatus; label: string }>> = {
-  sent_to_fulfillment: { status: "received_by_fulfillment", label: "PACKAGE RECEIVED" },
-  received_by_fulfillment: { status: "preparing_for_customer", label: "QC PASSED" },
-  preparing_for_customer: { status: "sent_to_customer", label: "SHIPPED TO COURIER" },
-  sent_to_customer: { status: "delivered", label: "DELIVERED" },
+  awaiting_package: { status: "received_by_fulfillment", label: "PACKAGE RECEIVED" },
+  received_by_fulfillment: { status: "qc_ongoing", label: "START QC" },
+  qc_ongoing: { status: "package_prepared", label: "PACKAGE PREPARED" },
+  package_prepared: { status: "sent_to_customer", label: "PACKAGE SENT TO COURIER" },
+  sent_to_customer: { status: "package_in_transit", label: "PACKAGE IN TRANSIT (GPO)" },
+  package_in_transit: { status: "delivered", label: "PACKAGE DELIVERED" },
 };
 
 export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
@@ -34,7 +36,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
   return <main className="partner-page">
     <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div></header>
     {notice && <div className="portal-alert" role="alert">{notice}</div>}
-    <div className="portal-summary"><article><span>INBOUND</span><b>{orders.filter(o => o.journey_status === "sent_to_fulfillment").length}</b></article><article><span>PREPARING</span><b>{orders.filter(o => ["received_by_fulfillment","preparing_for_customer"].includes(o.journey_status)).length}</b></article><article><span>OUT FOR DELIVERY</span><b>{orders.filter(o => o.journey_status === "sent_to_customer").length}</b></article></div>
+    <div className="portal-summary"><article><span>AWAITING PACKAGE</span><b>{orders.filter(o => o.journey_status === "awaiting_package").length}</b></article><article><span>IN WAREHOUSE</span><b>{orders.filter(o => ["received_by_fulfillment","qc_ongoing","package_prepared"].includes(o.journey_status)).length}</b></article><article><span>WITH COURIER</span><b>{orders.filter(o => ["sent_to_customer","package_in_transit"].includes(o.journey_status)).length}</b></article></div>
     <TrackingGuide role="fulfillment" />
     <div className="order-card-list">
       {orders.map(order => {
@@ -44,7 +46,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
           <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
           {action && <form className="order-action-form" onSubmit={e => void advance(e, order, action.status)}>
             {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER (OPTIONAL FOR NOW)<input name="courier" placeholder="EXAMPLE: DHL" defaultValue={order.courier || ""} /></label><label>CUSTOMER TRACKING (OPTIONAL FOR NOW)<input name="tracking" placeholder="EXAMPLE: DHL-10245" defaultValue={order.tracking_number || ""} /></label></>}
-            <button className="admin-primary">{action.label}</button>
+            <button className="fulfilment-action">{action.label}</button>
           </form>}
         </article>;
       })}
