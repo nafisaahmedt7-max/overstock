@@ -99,6 +99,8 @@ export function AdminDashboard({ email }: { email: string }) {
     [imagePreview, setImagePreview] = useState<string | null>(null),
     [imageFileName, setImageFileName] = useState(""),
     [orderProductId, setOrderProductId] = useState(""),
+    [editingSeller, setEditingSeller] = useState<Seller | null>(null),
+    [deletingSeller, setDeletingSeller] = useState<Seller | null>(null),
     [editing, setEditing] = useState<Product | null>(null),
     [deleting, setDeleting] = useState<Product | null>(null),
     [notice, setNotice] = useState("");
@@ -226,6 +228,42 @@ export function AdminDashboard({ email }: { email: string }) {
     );
     if (!error) {
       e.currentTarget.reset();
+      await load();
+    }
+  }
+  async function saveSeller(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editingSeller) return;
+    const f = new FormData(e.currentTarget);
+    const { error } = await supabase
+      .from("sellers")
+      .update({
+        seller_code: String(f.get("code")).toUpperCase(),
+        display_name: String(f.get("name")),
+        email: String(f.get("email")).toLowerCase(),
+        commission_percent: Number(f.get("commission")),
+        status: String(f.get("status")),
+      })
+      .eq("id", editingSeller.id);
+    setNotice(error?.message || "Seller updated.");
+    if (!error) {
+      setEditingSeller(null);
+      await load();
+    }
+  }
+  async function removeSeller() {
+    if (!deletingSeller) return;
+    const { error } = await supabase
+      .from("sellers")
+      .delete()
+      .eq("id", deletingSeller.id);
+    setNotice(
+      error
+        ? "This seller has connected products or orders. Edit the seller and set them to ARCHIVED instead."
+        : "Seller deleted.",
+    );
+    if (!error) {
+      setDeletingSeller(null);
       await load();
     }
   }
@@ -397,8 +435,8 @@ export function AdminDashboard({ email }: { email: string }) {
       f = new FormData(form),
       product = products.find((p) => p.id === String(f.get("product"))),
       qty = Number(f.get("quantity")),
-      deliveryFee = Number(
-        String(f.get("delivery") || "0")
+      totalPaid = Number(
+        String(f.get("total_paid") || "0")
           .trim()
           .replace(",", "."),
       );
@@ -410,15 +448,15 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice("Quantity must be a whole number of 1 or more.");
       return;
     }
-    if (!Number.isFinite(deliveryFee) || deliveryFee < 0) {
-      setNotice("Enter a valid customer shipping charge, such as 12.50.");
+    if (!Number.isFinite(totalPaid) || totalPaid <= 0) {
+      setNotice("Enter the total amount paid by the customer, such as 120.00.");
       return;
     }
     const { error } = await supabase.rpc("admin_create_manual_order", { payload: {
       customer_name: String(f.get("customer")), customer_phone: String(f.get("phone") || ""),
       customer_email: String(f.get("email") || ""), delivery_address: String(f.get("address") || ""),
       product_id: product.id, selected_size: String(f.get("size") || ""), quantity: qty,
-      unit_price: product.price, delivery_fee: deliveryFee, internal_notes: ""
+      unit_price: totalPaid / qty, delivery_fee: 0, internal_notes: ""
     }});
     if (error) {
       setNotice(error?.message || "Could not create order.");
@@ -820,15 +858,43 @@ export function AdminDashboard({ email }: { email: string }) {
               <button>ADD SELLER</button>
             </form>
             <DataTable
-              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "STATUS"]}
+              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "STATUS", "ACTIONS"]}
               rows={sellers.map((s) => [
                 s.seller_code,
                 s.display_name,
                 s.email || "—",
                 `${s.commission_percent}%`,
                 s.status,
+                <span className="table-actions" key={`${s.id}-actions`}>
+                  <button onClick={() => setEditingSeller(s)}>EDIT</button>
+                  <button className="danger-text" onClick={() => setDeletingSeller(s)}>DELETE</button>
+                </span>,
               ])}
             />
+            {editingSeller && (
+              <div className="edit-overlay" role="dialog" aria-modal="true" aria-label="Edit seller">
+                <form className="edit-panel seller-edit-panel" onSubmit={saveSeller}>
+                  <header><div><p className="eyebrow">SELLER</p><h2>EDIT {editingSeller.display_name}</h2></div><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
+                  <div className="edit-grid">
+                    <label className="edit-field"><span>SELLER CODE</span><input name="code" defaultValue={editingSeller.seller_code} required /></label>
+                    <label className="edit-field"><span>SELLER NAME</span><input name="name" defaultValue={editingSeller.display_name} required /></label>
+                    <label className="edit-field"><span>LOGIN EMAIL</span><input name="email" type="email" defaultValue={editingSeller.email || ""} required /></label>
+                    <label className="edit-field"><span>COMMISSION (%)</span><input name="commission" type="number" min="0" max="100" step="0.01" defaultValue={editingSeller.commission_percent} required /></label>
+                    <label className="edit-field"><span>STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE</option><option value="inactive">INACTIVE</option><option value="archived">ARCHIVED</option></select></label>
+                  </div>
+                  <button className="admin-primary">SAVE SELLER</button>
+                </form>
+              </div>
+            )}
+            {deletingSeller && (
+              <div className="edit-overlay" role="dialog" aria-modal="true" aria-label="Delete seller">
+                <section className="confirm-panel">
+                  <p className="eyebrow">CONFIRM DELETE</p><h2>{deletingSeller.display_name}</h2>
+                  <p>This permanently deletes a seller only when they have no connected products or orders. Otherwise, set their status to archived.</p>
+                  <div><button onClick={() => setDeletingSeller(null)}>CANCEL</button><button className="danger-button" onClick={() => void removeSeller()}>DELETE SELLER</button></div>
+                </section>
+              </div>
+            )}
           </>
         )}
         {tab === "products" && (
@@ -1097,10 +1163,6 @@ export function AdminDashboard({ email }: { email: string }) {
               <header>
                 <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
               </header>
-              <aside className="order-notes" aria-label="Order entry information">
-                <p><b>CURRENCY</b><span>Record product prices and customer orders in USD. Stripe settlement conversion can be configured later.</span></p>
-                <p id="customer-shipping-note"><b>CUSTOMER SHIPPING</b><span>This is only the shipping amount charged to the customer. Enter 0.00 when shipping is included or has not been decided.</span></p>
-              </aside>
               <form className="order-entry-form" onSubmit={addOrder}>
                 <label><span>CUSTOMER NAME</span><input name="customer" placeholder="EXAMPLE: JANE SMITH" required /></label>
                 <label><span>EMAIL</span><input name="email" type="email" placeholder="jane@example.com" /></label>
@@ -1118,21 +1180,24 @@ export function AdminDashboard({ email }: { email: string }) {
                   <option value="" disabled>CHOOSE</option>
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
                 </select></label>
-                <label><span>CUSTOMER SHIPPING (USD)</span><input name="delivery" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="EXAMPLE: 12.50" aria-describedby="customer-shipping-note" /></label>
+                <label><span>TOTAL PAID (USD)</span><input name="total_paid" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="EXAMPLE: 120.00" required /></label>
                 <button>CREATE ORDER</button>
               </form>
             </section>
-            <section className="settlement-flow" aria-labelledby="settlement-flow-title">
-              <header><p className="eyebrow">MONEY AND FULFILMENT</p><h2 id="settlement-flow-title">HOW ONE ORDER WORKS</h2></header>
-              <ol>
-                <li><b>1</b><span>The customer pays OVERSTOCK.</span></li>
-                <li><b>2</b><span>The seller buys the product from the market.</span></li>
-                <li><b>3</b><span>The seller pays for the product and sends it to the fulfilment team.</span></li>
-                <li><b>4</b><span>OVERSTOCK pays the fulfilment team to check, pack, and send the package.</span></li>
-                <li><b>5</b><span>OVERSTOCK keeps the agreed platform cut and approved operating costs.</span></li>
-                <li><b>6</b><span>The remaining seller share is paid to the seller. The order is complete.</span></li>
-              </ol>
-            </section>
+            <details className="order-process-guide">
+              <summary>HOW MONEY AND FULFILMENT WORK</summary>
+              <div>
+                <p>The customer payment is collected by OVERSTOCK first. The seller is not paid immediately because the product still needs to be purchased, received, checked, and delivered.</p>
+                <ol>
+                  <li><b>1</b><span><strong>CUSTOMER PAYS OVERSTOCK</strong>The full customer payment is recorded against the order.</span></li>
+                  <li><b>2</b><span><strong>OVERSTOCK KEEPS AGREED FEES</strong>Platform fees and fulfilment fees are reserved so OVERSTOCK can pay for operating and delivery services.</span></li>
+                  <li><b>3</b><span><strong>OVERSTOCK SENDS THE REST TO THE SELLER</strong>The seller receives their calculated share according to the agreed commission and costs.</span></li>
+                  <li><b>4</b><span><strong>SELLER BUYS THE PRODUCT</strong>The seller purchases the item from the market and keeps the profit remaining from their share.</span></li>
+                  <li><b>5</b><span><strong>SELLER SENDS IT TO FULFILMENT</strong>The seller prepares the correct item and sends it to the OVERSTOCK fulfilment team with inbound tracking.</span></li>
+                  <li><b>6</b><span><strong>FULFILMENT COMPLETES THE ORDER</strong>The team receives, checks, packs, ships, and marks the customer order delivered.</span></li>
+                </ol>
+              </div>
+            </details>
             <div className="order-card-list admin-orders">
               {orders.map((o) => (
                 <article className="order-card" key={o.id}>
@@ -1144,8 +1209,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   </header>
                   <div className="order-summary-grid">
                     <div><span>ITEMS</span><b>{money(o.subtotal)}</b></div>
-                    <div><span>CUSTOMER SHIPPING</span><b>{money(o.delivery_fee)}</b></div>
-                    <div><span>ORDER TOTAL</span><b>{money(o.total)}</b></div>
+                    <div><span>TOTAL PAID</span><b>{money(o.total)}</b></div>
                     <div><span>CONTACT</span><b>{o.customer_email || o.customer_phone || "NOT ADDED"}</b></div>
                     <div className="order-summary-wide"><span>DELIVERY ADDRESS</span><b>{o.delivery_address || "NOT ADDED"}</b></div>
                   </div>
