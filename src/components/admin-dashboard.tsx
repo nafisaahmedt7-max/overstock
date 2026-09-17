@@ -797,9 +797,9 @@ export function AdminDashboard({ email }: { email: string }) {
               </div>
             </details>
             <form className="admin-form seller-entry-form" onSubmit={addSeller}>
-              <label><span>SELLER CODE</span><input name="code" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
-              <label><span>SELLER NAME</span><input name="name" required /></label>
-              <label><span>LOGIN EMAIL</span><input name="email" type="email" required /></label>
+              <label><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
+              <label><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" required /></label>
+              <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" required /></label>
               <label className="percent-field">
                 <span>COMMISSION</span>
                 <span className="percent-input">
@@ -810,6 +810,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     max="100"
                     step="0.01"
                     defaultValue="20"
+                    placeholder="EXAMPLE: 20"
                     aria-label="Seller commission percentage"
                     required
                   />
@@ -1095,13 +1096,16 @@ export function AdminDashboard({ email }: { email: string }) {
             <section className="order-entry-panel">
               <header>
                 <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
-                <p>Storefront amounts are recorded in USD. Customer shipping is optional until your final shipping policy is set.</p>
               </header>
+              <aside className="order-notes" aria-label="Order entry information">
+                <p><b>CURRENCY</b><span>Record product prices and customer orders in USD. Stripe settlement conversion can be configured later.</span></p>
+                <p id="customer-shipping-note"><b>CUSTOMER SHIPPING</b><span>This is only the shipping amount charged to the customer. Enter 0.00 when shipping is included or has not been decided.</span></p>
+              </aside>
               <form className="order-entry-form" onSubmit={addOrder}>
-                <label><span>CUSTOMER NAME</span><input name="customer" required /></label>
-                <label><span>EMAIL</span><input name="email" type="email" /></label>
-                <label><span>PHONE</span><input name="phone" /></label>
-                <label className="order-field-wide"><span>DELIVERY ADDRESS</span><input name="address" /></label>
+                <label><span>CUSTOMER NAME</span><input name="customer" placeholder="EXAMPLE: JANE SMITH" required /></label>
+                <label><span>EMAIL</span><input name="email" type="email" placeholder="jane@example.com" /></label>
+                <label><span>PHONE</span><input name="phone" placeholder="EXAMPLE: +1 415 555 0123" /></label>
+                <label className="order-field-wide"><span>DELIVERY ADDRESS</span><input name="address" placeholder="EXAMPLE: 100 MARKET ST, SAN FRANCISCO, CA 94105" /></label>
                 <label className="order-field-wide"><span>PRODUCT</span><select name="product" value={orderProductId} onChange={(e) => setOrderProductId(e.target.value)} required>
                   <option value="">CHOOSE PRODUCT</option>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name} / {p.sku} / {money(p.price)}</option>)}
@@ -1114,13 +1118,20 @@ export function AdminDashboard({ email }: { email: string }) {
                   <option value="" disabled>CHOOSE</option>
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
                 </select></label>
-                <label><span>CUSTOMER SHIPPING (USD)</span><input name="delivery" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="0.00" aria-describedby="shipping-help" /></label>
-                <p className="order-field-help" id="shipping-help">Only enter an amount if the customer is charged separately for shipping. Your actual courier, fulfilment, and quality-check costs are deducted later before the seller payout.</p>
+                <label><span>CUSTOMER SHIPPING (USD)</span><input name="delivery" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="EXAMPLE: 12.50" aria-describedby="customer-shipping-note" /></label>
                 <button>CREATE ORDER</button>
               </form>
             </section>
-            <section className="settlement-guide" aria-label="Order settlement formula">
-              <span>CUSTOMER PAYMENT</span><b>− DELIVERY COST</b><b>− FULFILMENT & QC</b><b>− PLATFORM FEE</b><strong>= SELLER PAYOUT</strong>
+            <section className="settlement-flow" aria-labelledby="settlement-flow-title">
+              <header><p className="eyebrow">MONEY AND FULFILMENT</p><h2 id="settlement-flow-title">HOW ONE ORDER WORKS</h2></header>
+              <ol>
+                <li><b>1</b><span>The customer pays OVERSTOCK.</span></li>
+                <li><b>2</b><span>The seller buys the product from the market.</span></li>
+                <li><b>3</b><span>The seller pays for the product and sends it to the fulfilment team.</span></li>
+                <li><b>4</b><span>OVERSTOCK pays the fulfilment team to check, pack, and send the package.</span></li>
+                <li><b>5</b><span>OVERSTOCK keeps the agreed platform cut and approved operating costs.</span></li>
+                <li><b>6</b><span>The remaining seller share is paid to the seller. The order is complete.</span></li>
+              </ol>
             </section>
             <div className="order-card-list admin-orders">
               {orders.map((o) => (
