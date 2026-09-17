@@ -80,8 +80,10 @@ type Package = {
 };
 type Shipment = {
   id: string;
+  order_id: string;
   shipment_number: number;
   status: string;
+  fulfillment_partner_id: string | null;
   recipient_name: string;
   courier: string | null;
   tracking_number: string | null;
@@ -146,7 +148,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("outbound_shipments")
         .select(
-          "id,shipment_number,status,recipient_name,courier,tracking_number",
+          "id,order_id,shipment_number,status,fulfillment_partner_id,recipient_name,courier,tracking_number",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -520,30 +522,19 @@ export function AdminDashboard({ email }: { email: string }) {
       email: String(f.get("email")).toLowerCase(),
       partner_id: partner.id,
     });
-    if (!invite.error) {
-      await Promise.all([
-        supabase
-          .from("inbound_packages")
-          .update({ fulfillment_partner_id: partner.id })
-          .is("fulfillment_partner_id", null),
-        supabase
-          .from("outbound_shipments")
-          .update({ fulfillment_partner_id: partner.id })
-          .is("fulfillment_partner_id", null),
-      ]);
-    }
     setNotice(invite.error?.message || "Internal fulfilment team login added.");
     if (!invite.error) {
       form.reset();
       await load();
     }
   }
-  async function assignPackage(id: string, partnerId: string) {
-    const { error } = await supabase
-      .from("inbound_packages")
-      .update({ fulfillment_partner_id: partnerId || null })
-      .eq("id", id);
-    setNotice(error?.message || (partnerId ? "Team assigned. Status changed to Awaiting Package." : "Team assignment removed."));
+  async function assignOrder(orderId: string, partnerId: string) {
+    if (!partnerId) return;
+    const { error } = await supabase.rpc("assign_fulfillment_team", {
+      target_order_id: orderId,
+      target_partner_id: partnerId,
+    });
+    setNotice(error?.message || "Team assigned. Status changed to Awaiting Package.");
     if (!error) await load();
   }
   async function signOut() {
@@ -1276,6 +1267,32 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>WORKER LOGIN EMAIL</span><input name="email" type="email" placeholder="worker@example.com" required /></label>
               <button>ADD TEAM</button>
             </form>
+            <section className="assignment-queue">
+              <header>
+                <p className="eyebrow">ADMIN ACTION</p>
+                <h2>ASSIGN ORDERS TO FULFILMENT</h2>
+                <p>Orders appear here after the seller marks Package Sent to Fulfilment.</p>
+              </header>
+              {orders.filter((order) => ["sent_to_fulfillment", "awaiting_package"].includes(order.journey_status)).length === 0 ? (
+                <div className="empty-state">NO ORDERS ARE READY TO ASSIGN</div>
+              ) : orders.filter((order) => ["sent_to_fulfillment", "awaiting_package"].includes(order.journey_status)).map((order) => {
+                const shipment = shipments.find((item) => item.order_id === order.id);
+                return <article key={order.id}>
+                  <div>
+                    <span>ORDER #{order.order_number}</span>
+                    <b>{order.customer_name}</b>
+                    <small className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</small>
+                  </div>
+                  <label className="package-assignment-control">
+                    <span>{shipment?.fulfillment_partner_id ? "ASSIGNED TEAM MEMBER" : "SELECT ONE TEAM MEMBER"}</span>
+                    <select value={shipment?.fulfillment_partner_id || ""} onChange={(e) => void assignOrder(order.id, e.target.value)}>
+                      <option value="">SELECT TEAM MEMBER</option>
+                      {partners.map((partner) => <option key={partner.id} value={partner.id}>{partner.name}</option>)}
+                    </select>
+                  </label>
+                </article>;
+              })}
+            </section>
             <div className="fulfilment-list">
               {packages.map((p) => (
                 <article key={p.id} className="package-assignment-row">
@@ -1289,19 +1306,6 @@ export function AdminDashboard({ email }: { email: string }) {
                       {p.status} / {p.inbound_tracking || "NO TRACKING"}
                     </small>
                   </div>
-                  <label className="package-assignment-control"><span>{p.fulfillment_partner_id ? "ASSIGNED TEAM MEMBER" : "ADMIN ACTION — ASSIGN TEAM"}</span><select
-                    data-status={p.status}
-                    value={p.fulfillment_partner_id || ""}
-                    disabled={!["sent_to_fulfillment", "awaiting_package"].includes(orders.find((o) => o.id === p.order_id)?.journey_status || "")}
-                    onChange={(e) => void assignPackage(p.id, e.target.value)}
-                  >
-                    <option value="">{orders.find((o) => o.id === p.order_id)?.journey_status === "sent_to_fulfillment" ? "SELECT TEAM MEMBER" : "NOT READY TO ASSIGN"}</option>
-                    {partners.map((x) => (
-                      <option key={x.id} value={x.id}>
-                        {x.name}
-                      </option>
-                    ))}
-                  </select></label>
                   <span className="status-badge" data-status={orders.find((o) => o.id === p.order_id)?.journey_status}>{journeyLabel(orders.find((o) => o.id === p.order_id)?.journey_status || "order_placed")}</span>
                 </article>
               ))}
