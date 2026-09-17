@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
 
 type WorkOrder = {
   id: string; order_number: number; customer_name: string; delivery_address: string | null;
@@ -9,10 +9,10 @@ type WorkOrder = {
   shipment_id: string; courier: string | null; tracking_number: string | null;
 };
 const next: Partial<Record<JourneyStatus, { status: JourneyStatus; label: string }>> = {
-  sent_to_fulfillment: { status: "received_by_fulfillment", label: "MARK RECEIVED" },
-  received_by_fulfillment: { status: "preparing_for_customer", label: "START CUSTOMER PACKING" },
-  preparing_for_customer: { status: "sent_to_customer", label: "MARK SENT TO CUSTOMER" },
-  sent_to_customer: { status: "delivered", label: "MARK DELIVERED" },
+  sent_to_fulfillment: { status: "received_by_fulfillment", label: "PACKAGE RECEIVED" },
+  received_by_fulfillment: { status: "preparing_for_customer", label: "QC PASSED" },
+  preparing_for_customer: { status: "sent_to_customer", label: "SHIPPED TO COURIER" },
+  sent_to_customer: { status: "delivered", label: "DELIVERED" },
 };
 
 export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
@@ -40,10 +40,10 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
       {orders.map(order => {
         const action = next[order.journey_status];
         return <article className="order-card" key={order.id}>
-          <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.customer_name}</h2><small>{order.delivery_address || "ADDRESS PENDING"}</small></div><span className="status-badge" data-status={order.journey_status}>{order.journey_status.replaceAll("_"," ")}</span></header>
+          <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.customer_name}</h2><small>{order.delivery_address || "ADDRESS PENDING"}</small></div><span className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</span></header>
           <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
           {action && <form className="order-action-form" onSubmit={e => void advance(e, order, action.status)}>
-            {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER<input name="courier" defaultValue={order.courier || ""} required /></label><label>CUSTOMER TRACKING<input name="tracking" defaultValue={order.tracking_number || ""} required /></label></>}
+            {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER (OPTIONAL FOR NOW)<input name="courier" placeholder="EXAMPLE: DHL" defaultValue={order.courier || ""} /></label><label>CUSTOMER TRACKING (OPTIONAL FOR NOW)<input name="tracking" placeholder="EXAMPLE: DHL-10245" defaultValue={order.tracking_number || ""} /></label></>}
             <button className="admin-primary">{action.label}</button>
           </form>}
         </article>;

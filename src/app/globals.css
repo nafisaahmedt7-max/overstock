@@ -1908,3 +1908,44 @@ input[type="number"]::-webkit-outer-spin-button {
     right: 1rem;
   }
 }
+.legacy-status-guide {
+  display: none;
+}
+
+.order-confirmation-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--ink);
+  background: #dededb;
+}
+
+.order-confirmation-control > div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.order-confirmation-control span {
+  font: 700 0.68rem/1 var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.order-confirmation-control button,
+.order-confirmation-control .status-badge {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .order-confirmation-control {
+    grid-template-columns: 1fr;
+  }
+
+  .order-confirmation-control button,
+  .order-confirmation-control .status-badge {
+    width: 100%;
+    justify-content: center;
+  }
+}

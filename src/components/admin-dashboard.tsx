@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { StatusConnectionGuide } from "./status-connection-guide";
-import { JOURNEY, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { JOURNEY, journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
 
 type Seller = {
   id: string;
@@ -660,7 +660,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 <b>{products.filter((p) => p.ownership === "seller").length}</b>
               </article>
             </div>
-            <details className="status-guide collapsible-guide">
+            <StatusConnectionGuide role="admin-orders" title="ORDER STATUS DICTIONARY" />
+            <details className="status-guide collapsible-guide legacy-status-guide">
               <summary>ALL STATUS EXPLANATIONS</summary>
               <p className="eyebrow">SHARED WORKFLOW</p>
               <h2>STATUS DICTIONARY</h2>
@@ -1216,8 +1217,12 @@ export function AdminDashboard({ email }: { email: string }) {
                     <div><span>PHONE</span><b>{o.customer_phone || "NOT ADDED"}</b></div>
                     <div className="order-summary-wide"><span>DELIVERY ADDRESS</span><b>{o.delivery_address || "NOT ADDED"}</b></div>
                   </div>
+                  <section className="order-confirmation-control">
+                    <div><span>ADMIN CONFIRMATION</span><b>{o.journey_status === "order_placed" ? "NEW ORDER — REVIEW REQUIRED" : journeyLabel(o.journey_status)}</b></div>
+                    {o.journey_status === "order_placed" ? <button className="admin-primary" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}
+                  </section>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
-                  <label className="journey-override">ADMIN JOURNEY CONTROL
+                  <label className="journey-override">ADMIN CORRECTION / OVERRIDE
                     <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => void advanceOrder(o.id, e.target.value as JourneyStatus)}>
                       {JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}
                       <option value="cancelled">CANCELLED</option>
@@ -1295,7 +1300,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     value={p.fulfillment_partner_id || ""}
                     onChange={(e) => void assignPackage(p.id, e.target.value)}
                   >
-                    <option value="">UNASSIGNED</option>
+                    <option value="">READY TO ASSIGN</option>
                     {partners.map((x) => (
                       <option key={x.id} value={x.id}>
                         {x.name}
@@ -1322,9 +1327,19 @@ export function AdminDashboard({ email }: { email: string }) {
                       "delivered",
                       "cancelled",
                     ].map((status) => (
-                      <option key={status} value={status}>
-                        {status.replaceAll("_", " ").toUpperCase()}
-                      </option>
+                      <option key={status} value={status}>{({
+                        awaiting_seller: "WAITING FOR ORDER CONFIRMATION",
+                        seller_confirmed: "ORDER STARTED",
+                        inbound_transit: "PRODUCT SENT / READY TO ASSIGN",
+                        received: "PACKAGE RECEIVED",
+                        qc_hold: "QC ISSUE",
+                        qc_passed: "QC PASSED",
+                        ready_to_pack: "QC PASSED / READY TO SHIP",
+                        packed: "READY FOR COURIER",
+                        outbound_shipped: "SHIPPED TO COURIER",
+                        delivered: "DELIVERED",
+                        cancelled: "CANCELLED",
+                      } as Record<string, string>)[status]}</option>
                     ))}
                   </select>
                 </article>
