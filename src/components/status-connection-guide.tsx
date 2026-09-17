@@ -6,16 +6,16 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "ORDER CONFIRMED",
       "Read only",
       "OVERSTOCK has checked and confirmed the customer order.",
-      "The Start Order button becomes available to the seller.",
+      "The Seller Preparing Order button becomes available.",
     ],
     [
-      "ORDER STARTED",
+      "SELLER PREPARING ORDER",
       "Seller button",
       "The seller is buying, sourcing, or preparing the product.",
       "Admin sees the same live progress immediately.",
     ],
     [
-      "PRODUCT SENT",
+      "PACKAGE SENT TO FULFILMENT",
       "Seller button",
       "The seller has sent the package to the fulfilment warehouse.",
       "The order becomes ready for admin to assign to a team member.",
@@ -29,10 +29,10 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
   ],
   fulfilment: [
     [
-      "PRODUCT SENT",
+      "AWAITING PACKAGE",
       "Read only",
-      "The seller sent the package; it is waiting for admin assignment.",
-      "The order appears in a team member's workspace only after assignment.",
+      "Admin assigned this order to the signed-in team member.",
+      "The order now appears in only that team member's workspace.",
     ],
     [
       "PACKAGE RECEIVED",
@@ -41,19 +41,31 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Seller and admin see receipt confirmation immediately.",
     ],
     [
-      "QC PASSED",
+      "QC ONGOING",
       "Fulfilment button",
-      "The product passed the warehouse quality check.",
-      "Seller and admin see that it is cleared for dispatch.",
+      "The assigned team member started the quality check.",
+      "Seller and admin see that inspection is in progress.",
     ],
     [
-      "SHIPPED TO COURIER",
+      "PACKAGE PREPARED",
+      "Fulfilment button",
+      "Quality checks are complete and the parcel is prepared.",
+      "The package is ready to be handed to the courier.",
+    ],
+    [
+      "PACKAGE SENT TO COURIER",
       "Fulfilment button",
       "The completed parcel was handed to the customer courier.",
       "All roles see it as shipped; customer tracking can be connected later.",
     ],
     [
-      "DELIVERED",
+      "PACKAGE IN TRANSIT (GPO)",
+      "Fulfilment button",
+      "The courier has the package and it is moving to the customer.",
+      "Admin and seller see the live delivery stage.",
+    ],
+    [
+      "PACKAGE DELIVERED",
       "Fulfilment button",
       "The courier delivered the customer order.",
       "The shared order journey is complete for every role.",
@@ -70,19 +82,25 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "ORDER CONFIRMED",
       "Admin",
       "OVERSTOCK has accepted and checked the order.",
-      "Seller sees the order and receives the Start Order action.",
+      "Seller sees the order and receives the Seller Preparing Order action.",
     ],
     [
-      "ORDER STARTED",
+      "SELLER PREPARING ORDER",
       "Seller",
       "The seller is sourcing or preparing the product.",
       "The update appears for admin immediately.",
     ],
     [
-      "PRODUCT SENT",
+      "PACKAGE SENT TO FULFILMENT",
       "Seller",
       "The seller sent the package to the warehouse.",
-      "It becomes Ready to Assign; admin assigns one fulfilment team member.",
+      "Admin receives an assignment action; fulfilment cannot see it yet.",
+    ],
+    [
+      "AWAITING PACKAGE",
+      "Admin assignment",
+      "Admin assigned one fulfilment team member.",
+      "The assigned member receives the order automatically.",
     ],
     [
       "PACKAGE RECEIVED",
@@ -91,19 +109,19 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Admin and seller see warehouse receipt immediately.",
     ],
     [
-      "QC PASSED",
+      "QC ONGOING → PACKAGE PREPARED",
       "Fulfilment",
-      "The warehouse quality check is complete.",
-      "The order is cleared for customer dispatch.",
+      "The warehouse checks and prepares the parcel.",
+      "Both changes are shared with admin and seller.",
     ],
     [
-      "SHIPPED TO COURIER",
+      "SENT TO COURIER → IN TRANSIT",
       "Fulfilment",
       "The parcel was handed to the customer courier.",
-      "Every dashboard shows shipped; customer tracking comes later.",
+      "Every dashboard receives both courier stages.",
     ],
     [
-      "DELIVERED",
+      "PACKAGE DELIVERED",
       "Fulfilment",
       "The customer order was delivered.",
       "The shared operational journey is complete.",
@@ -111,16 +129,16 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
   ],
   "admin-fulfilment": [
     [
-      "PRODUCT SENT",
+      "PACKAGE SENT TO FULFILMENT",
       "Seller button",
       "The seller has sent the package to the warehouse.",
-      "This is the admin's Ready to Assign queue.",
+      "This creates the admin's team-assignment action.",
     ],
     [
       "TEAM ASSIGNED",
       "Admin assignment",
       "Admin selects the responsible fulfilment team member.",
-      "The order appears in that member's workspace; this is not a journey status.",
+      "Status automatically becomes Awaiting Package and appears for that member.",
     ],
     [
       "PACKAGE RECEIVED",
@@ -129,13 +147,13 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Admin and seller see receipt immediately.",
     ],
     [
-      "QC PASSED",
-      "Fulfilment button",
-      "The product passed the warehouse quality check.",
-      "The order is cleared for dispatch.",
+      "QC ONGOING → PACKAGE PREPARED",
+      "Fulfilment buttons",
+      "The team inspects and prepares the parcel.",
+      "Both stages update for admin and seller.",
     ],
     [
-      "SHIPPED TO COURIER → DELIVERED",
+      "SENT TO COURIER → IN TRANSIT → DELIVERED",
       "Fulfilment buttons",
       "The team hands off the parcel, then records final delivery.",
       "Both updates are shared with admin and seller automatically.",
@@ -145,14 +163,9 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
 
 function tone(status: string) {
   if (status.includes("CANCEL") || status.includes("HOLD")) return "attention";
-  if (status.includes("DELIVERED") || status.includes("PASSED"))
-    return "complete";
-  if (status.includes("SHIPPED") || status.includes("TRANSIT"))
-    return "transit";
-  if (status.includes("PACK")) return "packing";
-  if (status.includes("RECEIVED")) return "received";
-  if (status.includes("CONFIRMED")) return "confirmed";
-  return "waiting";
+  if (status.includes("SELLER PREPARING") || status.includes("SENT TO FULFILMENT")) return "seller_preparing";
+  if (status.includes("NEW ORDER") || status.includes("ORDER CONFIRMED") || status.includes("TEAM ASSIGNED") || status.includes("AWAITING PACKAGE")) return "admin_confirmed";
+  return "received_by_fulfillment";
 }
 
 export function StatusConnectionGuide({

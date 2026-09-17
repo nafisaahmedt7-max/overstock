@@ -71,6 +71,7 @@ type Fulfillment = {
 type Partner = { id: string; name: string; warehouse_address: string | null };
 type Package = {
   id: string;
+  order_id: string;
   package_number: number;
   status: string;
   seller_id: string;
@@ -139,7 +140,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("inbound_packages")
         .select(
-          "id,package_number,status,seller_id,fulfillment_partner_id,inbound_tracking",
+          "id,order_id,package_number,status,seller_id,fulfillment_partner_id,inbound_tracking",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -487,16 +488,6 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "Fulfilment updated.");
     if (!error) await load();
   }
-  async function updateAdminPackage(id: string, status: string) {
-    const values: Record<string, string> = { status };
-    if (status === "received") values.received_at = new Date().toISOString();
-    const { error } = await supabase
-      .from("inbound_packages")
-      .update(values)
-      .eq("id", id);
-    setNotice(error?.message || "Shared package status updated.");
-    if (!error) await load();
-  }
   async function updateAdminShipment(id: string, status: string) {
     const values: Record<string, string> = { status };
     if (status === "outbound_shipped")
@@ -552,7 +543,7 @@ export function AdminDashboard({ email }: { email: string }) {
       .from("inbound_packages")
       .update({ fulfillment_partner_id: partnerId || null })
       .eq("id", id);
-    setNotice(error?.message || "Package assigned.");
+    setNotice(error?.message || (partnerId ? "Team assigned. Status changed to Awaiting Package." : "Team assignment removed."));
     if (!error) await load();
   }
   async function signOut() {
@@ -1219,11 +1210,14 @@ export function AdminDashboard({ email }: { email: string }) {
                   </div>
                   <section className="order-confirmation-control">
                     <div><span>ADMIN CONFIRMATION</span><b>{o.journey_status === "order_placed" ? "NEW ORDER — REVIEW REQUIRED" : journeyLabel(o.journey_status)}</b></div>
-                    {o.journey_status === "order_placed" ? <button className="admin-primary" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}
+                    {o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}
                   </section>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
                   <label className="journey-override">ADMIN CORRECTION / OVERRIDE
-                    <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => void advanceOrder(o.id, e.target.value as JourneyStatus)}>
+                    <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => {
+                      const next = e.target.value as JourneyStatus;
+                      if (next !== "cancelled" || window.confirm("Cancel this order? Only admin can perform this action.")) void advanceOrder(o.id, next);
+                    }}>
                       {JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}
                       <option value="cancelled">CANCELLED</option>
                     </select>
@@ -1284,7 +1278,7 @@ export function AdminDashboard({ email }: { email: string }) {
             </form>
             <div className="fulfilment-list">
               {packages.map((p) => (
-                <article key={p.id}>
+                <article key={p.id} className="package-assignment-row">
                   <div>
                     <b>PKG-{p.package_number}</b>
                     <span>
@@ -1295,53 +1289,20 @@ export function AdminDashboard({ email }: { email: string }) {
                       {p.status} / {p.inbound_tracking || "NO TRACKING"}
                     </small>
                   </div>
-                  <select
+                  <label className="package-assignment-control"><span>{p.fulfillment_partner_id ? "ASSIGNED TEAM MEMBER" : "ADMIN ACTION — ASSIGN TEAM"}</span><select
                     data-status={p.status}
                     value={p.fulfillment_partner_id || ""}
+                    disabled={!["sent_to_fulfillment", "awaiting_package"].includes(orders.find((o) => o.id === p.order_id)?.journey_status || "")}
                     onChange={(e) => void assignPackage(p.id, e.target.value)}
                   >
-                    <option value="">READY TO ASSIGN</option>
+                    <option value="">{orders.find((o) => o.id === p.order_id)?.journey_status === "sent_to_fulfillment" ? "SELECT TEAM MEMBER" : "NOT READY TO ASSIGN"}</option>
                     {partners.map((x) => (
                       <option key={x.id} value={x.id}>
                         {x.name}
                       </option>
                     ))}
-                  </select>
-                  <select
-                    value={p.status}
-                    aria-label={`Override status for package ${p.package_number}`}
-                    onChange={(e) =>
-                      void updateAdminPackage(p.id, e.target.value)
-                    }
-                  >
-                    {[
-                      "awaiting_seller",
-                      "seller_confirmed",
-                      "inbound_transit",
-                      "received",
-                      "qc_hold",
-                      "qc_passed",
-                      "ready_to_pack",
-                      "packed",
-                      "outbound_shipped",
-                      "delivered",
-                      "cancelled",
-                    ].map((status) => (
-                      <option key={status} value={status}>{({
-                        awaiting_seller: "WAITING FOR ORDER CONFIRMATION",
-                        seller_confirmed: "ORDER STARTED",
-                        inbound_transit: "PRODUCT SENT / READY TO ASSIGN",
-                        received: "PACKAGE RECEIVED",
-                        qc_hold: "QC ISSUE",
-                        qc_passed: "QC PASSED",
-                        ready_to_pack: "QC PASSED / READY TO SHIP",
-                        packed: "READY FOR COURIER",
-                        outbound_shipped: "SHIPPED TO COURIER",
-                        delivered: "DELIVERED",
-                        cancelled: "CANCELLED",
-                      } as Record<string, string>)[status]}</option>
-                    ))}
-                  </select>
+                  </select></label>
+                  <span className="status-badge" data-status={orders.find((o) => o.id === p.order_id)?.journey_status}>{journeyLabel(orders.find((o) => o.id === p.order_id)?.journey_status || "order_placed")}</span>
                 </article>
               ))}
             </div>
