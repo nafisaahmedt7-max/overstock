@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
 
 export type SellerOrder = {
   id: string; order_number: number; journey_status: JourneyStatus;
@@ -36,10 +36,10 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
     <TrackingGuide role="seller" />
     <div className="order-card-list">
       {orders.length ? orders.map(order => <article className="order-card" key={order.id}>
-        <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div><span className="status-badge" data-status={order.journey_status}>{order.journey_status.replaceAll("_", " ")}</span></header>
+        <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div><span className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</span></header>
         <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
-        {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>Confirm that you have the item and begin packing it.</p><button className="admin-primary">START PREPARING</button></form>}
-        {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER<input name="courier" defaultValue={order.inbound_courier || ""} required /></label><label>TRACKING NUMBER<input name="tracking" defaultValue={order.inbound_tracking || ""} required /></label><button className="admin-primary">MARK SENT TO FULFILLMENT</button></form>}
+        {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press the button when you begin sourcing and preparing the product.</p><button className="admin-primary">START ORDER</button></form>}
+        {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>INBOUND COURIER<input name="courier" placeholder="EXAMPLE: PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>INBOUND TRACKING<input name="tracking" placeholder="EXAMPLE: PKG-10245" defaultValue={order.inbound_tracking || ""} required /></label><button className="admin-primary">PRODUCT SENT</button></form>}
         <footer><span>YOUR EARNINGS</span><b>A\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status.replaceAll("_", " ")}</span></footer>
       </article>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
     </div>
