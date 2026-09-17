@@ -38,9 +38,9 @@ export default async function SellerPortal() {
   const due = orders
       .filter((x) => x.payout_status === "due")
       .reduce((n, x) => n + Number(x.seller_due || 0), 0),
-    formatted = new Intl.NumberFormat("en-AU", {
+    formatted = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "AUD",
+      currency: "USD",
     }).format(due);
   return (
     <SellerWorkspace
