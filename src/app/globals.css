@@ -727,6 +727,13 @@ input[type="number"]::-webkit-outer-spin-button {
   gap: 0.4rem;
   font: 600 0.68rem var(--font-mono), monospace;
 }
+.fulfilment-account-form { align-items: end; }
+.fulfilment-account-form > button {
+  height: 3.5rem;
+  min-height: 3.5rem;
+  align-self: end;
+  padding-block: 0;
+}
 .admin-form.product-form {
   grid-template-columns: repeat(5, minmax(7rem, 1fr)) auto;
   padding: 1rem;
@@ -863,6 +870,11 @@ input[type="number"]::-webkit-outer-spin-button {
     margin-top: 0.75rem;
     border: 1px solid;
     padding-inline: 0.75rem;
+    min-height: 3.25rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    font-weight: 700;
   }
   .admin-content {
     padding: 1rem;
@@ -1565,6 +1577,16 @@ input[type="number"]::-webkit-outer-spin-button {
   font-size: 0.62rem;
   margin-top: 0.3rem;
 }
+.balance-list span[data-balance]::before {
+  content: "";
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-right: 0.5rem;
+  background: #4f6fa8;
+}
+.balance-list span[data-balance="platform"]::before { background: #c28a3d; }
+.balance-list span[data-balance="own"]::before { background: #7d9b76; }
 .balance-list {
   display: grid;
   border-top: 1px solid;
@@ -1830,6 +1852,9 @@ input[type="number"]::-webkit-outer-spin-button {
 @media (max-width: 800px) {
   .finance-overview {
     grid-template-columns: 1fr;
+  }
+  .balance-chart {
+    justify-self: center;
   }
   .status-guide > div {
     grid-template-columns: 1fr 1fr;

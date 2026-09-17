@@ -574,8 +574,9 @@ export function AdminDashboard({ email }: { email: string }) {
   const ownSales = finance
     .filter((x) => x.ownership === "own_stock")
     .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const overstockBalance = ownSales + platformFees;
   const sellerPercent = gross ? Math.round((sellerDue / gross) * 100) : 0;
+  const platformPercent = gross ? Math.round((platformFees / gross) * 100) : 0;
+  const platformEnd = Math.min(100, sellerPercent + platformPercent);
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -617,9 +618,9 @@ export function AdminDashboard({ email }: { email: string }) {
               <div
                 className="balance-chart"
                 style={{
-                  background: `conic-gradient(#050505 0 ${sellerPercent}%, #777 ${sellerPercent}% 100%)`,
+                  background: `conic-gradient(#4f6fa8 0 ${sellerPercent}%, #c28a3d ${sellerPercent}% ${platformEnd}%, #7d9b76 ${platformEnd}% 100%)`,
                 }}
-                aria-label={`${sellerPercent}% seller balance`}
+                aria-label={`Sales split: ${sellerPercent}% seller balance, ${platformPercent}% platform commission, and the remainder own-stock sales`}
               >
                 <span>
                   {money(gross)}
@@ -628,15 +629,15 @@ export function AdminDashboard({ email }: { email: string }) {
               </div>
               <div className="balance-list">
                 <article>
-                  <span>SELLER BALANCE</span>
+                  <span data-balance="seller">SELLER BALANCE</span>
                   <b>{money(sellerDue)}</b>
                 </article>
                 <article>
-                  <span>OVERSTOCK BALANCE</span>
-                  <b>{money(overstockBalance)}</b>
+                  <span data-balance="own">OWN-STOCK SALES</span>
+                  <b>{money(ownSales)}</b>
                 </article>
                 <article>
-                  <span>PLATFORM COMMISSION</span>
+                  <span data-balance="platform">PLATFORM COMMISSION</span>
                   <b>{money(platformFees)}</b>
                 </article>
               </div>
@@ -878,12 +879,12 @@ export function AdminDashboard({ email }: { email: string }) {
               <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Edit seller">
                 <form className="edit-panel seller-edit-panel" onSubmit={saveSeller}>
                   <header><h2>EDIT SELLER</h2><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
+                  <label className="edit-field edit-field-wide"><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" defaultValue={editingSeller.display_name} required /></label>
+                  <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
                   <div className="edit-grid">
                     <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" defaultValue={editingSeller.display_name} required /></label>
-                    <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
                     <label className="edit-field"><span>COMMISSION</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="20%" defaultValue={editingSeller.commission_percent} required /></span></label>
-                    <label className="edit-field"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
+                    <label className="edit-field edit-field-wide"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
                   <button className="admin-primary">SAVE SELLER</button>
                 </form>
@@ -1271,8 +1272,8 @@ export function AdminDashboard({ email }: { email: string }) {
               </p>
             </section>
             <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
-              <label><span>TEAM OR LOCATION</span><input name="name" placeholder="EXAMPLE: DHAKA PACKAGE DESK" required /></label>
-              <label><span>WAREHOUSE ADDRESS</span><input name="address" placeholder="EXAMPLE: 12 ROAD 4, DHAKA" required /></label>
+              <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM AHMED" required /></label>
+              <label><span>ASSIGNED LOCATION / ADDRESS</span><input name="address" placeholder="EXAMPLE: DHAKA DESK — 12 ROAD 4" required /></label>
               <label><span>WORKER LOGIN EMAIL</span><input name="email" type="email" placeholder="worker@example.com" required /></label>
               <button>ADD TEAM</button>
             </form>
