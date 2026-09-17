@@ -34,6 +34,7 @@ type Product = {
   condition: string | null;
 };
 type FinanceLine = {
+  seller_id: string | null;
   ownership: string;
   gross_amount: number | null;
   platform_fee: number | null;
@@ -148,7 +149,7 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("ownership,gross_amount,platform_fee,seller_due,payout_status"),
+        .select("seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status"),
     ]);
     if (s.error || p.error || o.error || f.error)
       setNotice(
@@ -830,8 +831,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>ACTIVE</b> — Seller can sign in and view their assigned orders.</p>
                 <p><b>INACTIVE</b> — Seller access is paused but their records remain saved.</p>
                 <p><b>ARCHIVED</b> — Seller is retained for order history and no longer used for new products.</p>
-                <p><b>PAYOUT DUE</b> — An amount is waiting to be settled with the seller.</p>
-                <p><b>PAID</b> — The seller payment has been completed.</p>
+                <p><b>BALANCE DUE</b> — The unpaid seller share from their connected order items.</p>
+                <p><b>PAID OUT</b> — Seller shares already marked as paid. This is separate from the customer payment status on an order.</p>
               </div>
             </details>
             <form className="admin-form seller-entry-form" onSubmit={addSeller}>
@@ -858,13 +859,15 @@ export function AdminDashboard({ email }: { email: string }) {
               <button>ADD SELLER</button>
             </form>
             <DataTable
-              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "STATUS", "ACTIONS"]}
+              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "BALANCE DUE", "PAID OUT", "STATUS", "ACTIONS"]}
               rows={sellers.map((s) => [
                 s.seller_code,
                 s.display_name,
                 s.email || "—",
                 `${s.commission_percent}%`,
-                s.status,
+                money(finance.filter((line) => line.seller_id === s.id && line.payout_status !== "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
+                money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
+                <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button className="danger-text" onClick={() => setDeletingSeller(s)}>DELETE</button>
@@ -872,22 +875,23 @@ export function AdminDashboard({ email }: { email: string }) {
               ])}
             />
             {editingSeller && (
-              <div className="edit-overlay" role="dialog" aria-modal="true" aria-label="Edit seller">
+              <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Edit seller">
                 <form className="edit-panel seller-edit-panel" onSubmit={saveSeller}>
-                  <header><div><p className="eyebrow">SELLER</p><h2>EDIT {editingSeller.display_name}</h2></div><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
+                  <header><div><p className="eyebrow">SELLER PROFILE</p><h2>EDIT SELLER</h2></div><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
+                  <p className="edit-panel-intro">Update the seller’s identity, commercial agreement, and portal availability. Financial balances are calculated from connected order items.</p>
                   <div className="edit-grid">
-                    <label className="edit-field"><span>SELLER CODE</span><input name="code" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>SELLER NAME</span><input name="name" defaultValue={editingSeller.display_name} required /></label>
-                    <label className="edit-field"><span>LOGIN EMAIL</span><input name="email" type="email" defaultValue={editingSeller.email || ""} required /></label>
-                    <label className="edit-field"><span>COMMISSION (%)</span><input name="commission" type="number" min="0" max="100" step="0.01" defaultValue={editingSeller.commission_percent} required /></label>
-                    <label className="edit-field"><span>STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE</option><option value="inactive">INACTIVE</option><option value="archived">ARCHIVED</option></select></label>
+                    <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
+                    <label className="edit-field"><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" defaultValue={editingSeller.display_name} required /></label>
+                    <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
+                    <label className="edit-field"><span>COMMISSION</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" defaultValue={editingSeller.commission_percent} required /><b>%</b></span></label>
+                    <label className="edit-field"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
-                  <button className="admin-primary">SAVE SELLER</button>
+                  <footer className="edit-panel-actions"><button type="button" onClick={() => setEditingSeller(null)}>CANCEL</button><button className="admin-primary">SAVE CHANGES</button></footer>
                 </form>
               </div>
             )}
             {deletingSeller && (
-              <div className="edit-overlay" role="dialog" aria-modal="true" aria-label="Delete seller">
+              <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Delete seller">
                 <section className="confirm-panel">
                   <p className="eyebrow">CONFIRM DELETE</p><h2>{deletingSeller.display_name}</h2>
                   <p>This permanently deletes a seller only when they have no connected products or orders. Otherwise, set their status to archived.</p>
@@ -1203,13 +1207,11 @@ export function AdminDashboard({ email }: { email: string }) {
                 <article className="order-card" key={o.id}>
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
-                    <select className="table-select" data-status={o.payment_status} value={o.payment_status} onChange={(e) => void updateOrder(o.id, "payment_status", e.target.value)}>
-                      <option value="unpaid">UNPAID</option><option value="paid">PAID</option>
-                    </select>
+                    <label className="payment-control"><span>CUSTOMER PAYMENT</span><select data-status={o.payment_status} value={o.payment_status} onChange={(e) => void updateOrder(o.id, "payment_status", e.target.value)}><option value="unpaid">PAYMENT PENDING</option><option value="paid">PAYMENT RECEIVED</option></select></label>
                   </header>
-                  <div className="order-summary-grid">
-                    <div><span>ITEMS</span><b>{money(o.subtotal)}</b></div>
-                    <div><span>TOTAL PAID</span><b>{money(o.total)}</b></div>
+                  <div className="order-summary-grid order-receipt">
+                    <div><span>ORDER VALUE</span><b>{money(o.subtotal)}</b></div>
+                    <div><span>CUSTOMER TOTAL</span><b>{money(o.total)}</b></div>
                     <div><span>CONTACT</span><b>{o.customer_email || o.customer_phone || "NOT ADDED"}</b></div>
                     <div className="order-summary-wide"><span>DELIVERY ADDRESS</span><b>{o.delivery_address || "NOT ADDED"}</b></div>
                   </div>
