@@ -3,7 +3,7 @@ import type { Product } from "@/data/products";
 import { ProductPlaceholder } from "./product-placeholder";
 export function ProductGrid({ products }: { products: Product[] }) {
   return (
-    <section className="product-grid" aria-label="Product catalog">
+    <section className="product-grid" aria-label="Product catalog" tabIndex={0}>
       {products.map((product, index) => (
         <article className="product-card" key={product.slug}>
           <Link

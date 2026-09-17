@@ -45,6 +45,12 @@ type Order = {
   order_number: number;
   customer_name: string;
   total: number;
+  subtotal: number;
+  delivery_fee: number;
+  customer_email: string | null;
+  customer_phone: string | null;
+  delivery_address: string | null;
+  sales_channel: string;
   status: string;
   payment_status: string;
   placed_at: string;
@@ -92,6 +98,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [finance, setFinance] = useState<FinanceLine[]>([]),
     [imagePreview, setImagePreview] = useState<string | null>(null),
     [imageFileName, setImageFileName] = useState(""),
+    [orderProductId, setOrderProductId] = useState(""),
     [editing, setEditing] = useState<Product | null>(null),
     [deleting, setDeleting] = useState<Product | null>(null),
     [notice, setNotice] = useState("");
@@ -112,7 +119,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,total,status,payment_status,placed_at,journey_status,journey_timestamps",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,payment_status,placed_at,journey_status,journey_timestamps",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -404,7 +411,7 @@ export function AdminDashboard({ email }: { email: string }) {
       return;
     }
     if (!Number.isFinite(deliveryFee) || deliveryFee < 0) {
-      setNotice("Enter a valid delivery fee, such as 12.50.");
+      setNotice("Enter a valid customer shipping charge, such as 12.50.");
       return;
     }
     const { error } = await supabase.rpc("admin_create_manual_order", { payload: {
@@ -417,8 +424,9 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice(error?.message || "Could not create order.");
       return;
     }
-    setNotice("Manual order created atomically and assigned automatically.");
+    setNotice("Order created and assigned to the correct seller automatically.");
     form.reset();
+    setOrderProductId("");
     await load();
   }
   async function advanceOrder(id: string, status: JourneyStatus) {
@@ -513,9 +521,9 @@ export function AdminDashboard({ email }: { email: string }) {
     router.refresh();
   }
   const money = (n: number) =>
-    new Intl.NumberFormat("en-AU", {
+    new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "AUD",
+      currency: "USD",
     }).format(n);
   const gross = finance.reduce((n, x) => n + Number(x.gross_amount || 0), 0);
   const sellerDue = finance.reduce((n, x) => n + Number(x.seller_due || 0), 0);
@@ -788,20 +796,10 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>PAID</b> — The seller payment has been completed.</p>
               </div>
             </details>
-            <form className="admin-form" onSubmit={addSeller}>
-              <input
-                name="code"
-                placeholder="SELLER CODE"
-                pattern="[A-Za-z0-9_-]{3,32}"
-                required
-              />
-              <input name="name" placeholder="SELLER NAME" required />
-              <input
-                name="email"
-                type="email"
-                placeholder="LOGIN EMAIL"
-                required
-              />
+            <form className="admin-form seller-entry-form" onSubmit={addSeller}>
+              <label><span>SELLER CODE</span><input name="code" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
+              <label><span>SELLER NAME</span><input name="name" required /></label>
+              <label><span>LOGIN EMAIL</span><input name="email" type="email" required /></label>
               <label className="percent-field">
                 <span>COMMISSION</span>
                 <span className="percent-input">
@@ -876,7 +874,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="PRICE"
+                placeholder="PRICE (USD)"
                 required
               />
               <select name="seller">
@@ -1026,7 +1024,7 @@ export function AdminDashboard({ email }: { email: string }) {
                       />
                     </label>
                     <label className="edit-field">
-                      <span>PRICE (AUD)</span>
+                      <span>PRICE (USD)</span>
                       <input
                         name="price"
                         type="number"
@@ -1094,51 +1092,52 @@ export function AdminDashboard({ email }: { email: string }) {
         {tab === "orders" && (
           <>
             <TrackingGuide role="admin" />
-            <form className="admin-form product-form" onSubmit={addOrder}>
-              <input name="customer" placeholder="CUSTOMER NAME" required />
-              <input name="phone" placeholder="PHONE" />
-              <input name="email" type="email" placeholder="EMAIL" />
-              <input name="address" placeholder="DELIVERY ADDRESS" />
-              <select name="product" required>
-                <option value="">CHOOSE PRODUCT</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} / {p.sku}
-                  </option>
-                ))}
-              </select>
-              <input name="size" placeholder="SELECTED SIZE" required />
-              <input
-                name="quantity"
-                type="number"
-                min="1"
-                defaultValue="1"
-                required
-              />
-              <input
-                name="delivery"
-                type="text"
-                inputMode="decimal"
-                pattern="[0-9]+([.,][0-9]{1,2})?"
-                placeholder="DELIVERY FEE (AUD)"
-                aria-label="Delivery fee"
-              />
-              <input
-                name="channel"
-                placeholder="CHANNEL"
-                defaultValue="manual"
-              />
-              <button>CREATE ORDER</button>
-            </form>
+            <section className="order-entry-panel">
+              <header>
+                <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
+                <p>Storefront amounts are recorded in USD. Customer shipping is optional until your final shipping policy is set.</p>
+              </header>
+              <form className="order-entry-form" onSubmit={addOrder}>
+                <label><span>CUSTOMER NAME</span><input name="customer" required /></label>
+                <label><span>EMAIL</span><input name="email" type="email" /></label>
+                <label><span>PHONE</span><input name="phone" /></label>
+                <label className="order-field-wide"><span>DELIVERY ADDRESS</span><input name="address" /></label>
+                <label className="order-field-wide"><span>PRODUCT</span><select name="product" value={orderProductId} onChange={(e) => setOrderProductId(e.target.value)} required>
+                  <option value="">CHOOSE PRODUCT</option>
+                  {products.map((p) => <option key={p.id} value={p.id}>{p.name} / {p.sku} / {money(p.price)}</option>)}
+                </select></label>
+                <label><span>SIZE</span><select name="size" required disabled={!orderProductId}>
+                  <option value="">CHOOSE SIZE</option>
+                  {(products.find((p) => p.id === orderProductId)?.sizes || []).map((size) => <option key={size} value={size}>{size}</option>)}
+                </select></label>
+                <label><span>QUANTITY</span><select name="quantity" required defaultValue="">
+                  <option value="" disabled>CHOOSE</option>
+                  {Array.from({ length: 10 }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
+                </select></label>
+                <label><span>CUSTOMER SHIPPING (USD)</span><input name="delivery" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="0.00" aria-describedby="shipping-help" /></label>
+                <p className="order-field-help" id="shipping-help">Only enter an amount if the customer is charged separately for shipping. Your actual courier, fulfilment, and quality-check costs are deducted later before the seller payout.</p>
+                <button>CREATE ORDER</button>
+              </form>
+            </section>
+            <section className="settlement-guide" aria-label="Order settlement formula">
+              <span>CUSTOMER PAYMENT</span><b>− DELIVERY COST</b><b>− FULFILMENT & QC</b><b>− PLATFORM FEE</b><strong>= SELLER PAYOUT</strong>
+            </section>
             <div className="order-card-list admin-orders">
               {orders.map((o) => (
                 <article className="order-card" key={o.id}>
                   <header>
-                    <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{money(o.total)} / {new Date(o.placed_at).toLocaleDateString("en-AU")}</small></div>
+                    <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
                     <select className="table-select" data-status={o.payment_status} value={o.payment_status} onChange={(e) => void updateOrder(o.id, "payment_status", e.target.value)}>
                       <option value="unpaid">UNPAID</option><option value="paid">PAID</option>
                     </select>
                   </header>
+                  <div className="order-summary-grid">
+                    <div><span>ITEMS</span><b>{money(o.subtotal)}</b></div>
+                    <div><span>CUSTOMER SHIPPING</span><b>{money(o.delivery_fee)}</b></div>
+                    <div><span>ORDER TOTAL</span><b>{money(o.total)}</b></div>
+                    <div><span>CONTACT</span><b>{o.customer_email || o.customer_phone || "NOT ADDED"}</b></div>
+                    <div className="order-summary-wide"><span>DELIVERY ADDRESS</span><b>{o.delivery_address || "NOT ADDED"}</b></div>
+                  </div>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
                   <label className="journey-override">ADMIN JOURNEY CONTROL
                     <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => void advanceOrder(o.id, e.target.value as JourneyStatus)}>
@@ -1297,7 +1296,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 </article>
               ))}
             </div>
-            <h2>LEGACY ORDER QUEUE</h2>
+            {fulfillments.length > 0 && <><h2>PREVIOUS ORDER RECORDS</h2>
             <div className="fulfilment-list">
               {fulfillments.map((f) => (
                 <article key={f.id}>
@@ -1331,7 +1330,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   </select>
                 </article>
               ))}
-            </div>
+            </div></>}
           </>
         )}{" "}
       </section>
