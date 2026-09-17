@@ -849,11 +849,10 @@ export function AdminDashboard({ email }: { email: string }) {
                     max="100"
                     step="0.01"
                     defaultValue="20"
-                    placeholder="EXAMPLE: 20"
+                    placeholder="20%"
                     aria-label="Seller commission percentage"
                     required
                   />
-                  <b>%</b>
                 </span>
               </label>
               <button>ADD SELLER</button>
@@ -870,32 +869,31 @@ export function AdminDashboard({ email }: { email: string }) {
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
-                  <button className="danger-text" onClick={() => setDeletingSeller(s)}>DELETE</button>
+                  <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
               ])}
             />
             {editingSeller && (
               <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Edit seller">
                 <form className="edit-panel seller-edit-panel" onSubmit={saveSeller}>
-                  <header><div><p className="eyebrow">SELLER PROFILE</p><h2>EDIT SELLER</h2></div><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
-                  <p className="edit-panel-intro">Update the seller’s identity, commercial agreement, and portal availability. Financial balances are calculated from connected order items.</p>
+                  <header><h2>EDIT SELLER</h2><button type="button" onClick={() => setEditingSeller(null)}>CLOSE</button></header>
                   <div className="edit-grid">
                     <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
                     <label className="edit-field"><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" defaultValue={editingSeller.display_name} required /></label>
                     <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
-                    <label className="edit-field"><span>COMMISSION</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" defaultValue={editingSeller.commission_percent} required /><b>%</b></span></label>
+                    <label className="edit-field"><span>COMMISSION</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="20%" defaultValue={editingSeller.commission_percent} required /></span></label>
                     <label className="edit-field"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
-                  <footer className="edit-panel-actions"><button type="button" onClick={() => setEditingSeller(null)}>CANCEL</button><button className="admin-primary">SAVE CHANGES</button></footer>
+                  <button className="admin-primary">SAVE SELLER</button>
                 </form>
               </div>
             )}
             {deletingSeller && (
               <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Delete seller">
                 <section className="confirm-panel">
-                  <p className="eyebrow">CONFIRM DELETE</p><h2>{deletingSeller.display_name}</h2>
-                  <p>This permanently deletes a seller only when they have no connected products or orders. Otherwise, set their status to archived.</p>
-                  <div><button onClick={() => setDeletingSeller(null)}>CANCEL</button><button className="danger-button" onClick={() => void removeSeller()}>DELETE SELLER</button></div>
+                  <p className="eyebrow">CONFIRM REMOVAL</p><h2>REMOVE {deletingSeller.display_name}</h2>
+                  <p>This permanently removes a seller only when they have no connected products or orders. Otherwise, edit the seller and set their status to archived.</p>
+                  <div><button onClick={() => setDeletingSeller(null)}>CANCEL</button><button className="danger-button" onClick={() => void removeSeller()}>REMOVE SELLER</button></div>
                 </section>
               </div>
             )}
@@ -1212,7 +1210,8 @@ export function AdminDashboard({ email }: { email: string }) {
                   <div className="order-summary-grid order-receipt">
                     <div><span>ORDER VALUE</span><b>{money(o.subtotal)}</b></div>
                     <div><span>CUSTOMER TOTAL</span><b>{money(o.total)}</b></div>
-                    <div><span>CONTACT</span><b>{o.customer_email || o.customer_phone || "NOT ADDED"}</b></div>
+                    <div><span>EMAIL</span><b>{o.customer_email || "NOT ADDED"}</b></div>
+                    <div><span>PHONE</span><b>{o.customer_phone || "NOT ADDED"}</b></div>
                     <div className="order-summary-wide"><span>DELIVERY ADDRESS</span><b>{o.delivery_address || "NOT ADDED"}</b></div>
                   </div>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
