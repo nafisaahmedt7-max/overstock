@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
+import { StatusConnectionGuide } from "./status-connection-guide";
 
 type WorkOrder = {
   id: string; order_number: number; customer_name: string; delivery_address: string | null;
@@ -33,11 +34,20 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
     setNotice(error?.message || "Shared order journey updated.");
     if (!error) window.setTimeout(() => location.reload(), 500);
   }
+  async function requestCancellation(orderId: string) {
+    const reason = window.prompt("Tell admin why this order should be cancelled:");
+    if (reason === null) return;
+    const { error } = await sb.rpc("request_order_cancellation", {
+      target_order_id: orderId,
+      reason: reason.trim() || null,
+    });
+    setNotice(error?.message || "Cancellation request sent to admin for confirmation.");
+  }
   return <main className="partner-page">
     <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div></header>
     {notice && <div className="portal-alert" role="alert">{notice}</div>}
     <div className="portal-summary"><article><span>AWAITING PACKAGE</span><b>{orders.filter(o => o.journey_status === "awaiting_package").length}</b></article><article><span>IN WAREHOUSE</span><b>{orders.filter(o => ["received_by_fulfillment","qc_ongoing","package_prepared"].includes(o.journey_status)).length}</b></article><article><span>WITH COURIER</span><b>{orders.filter(o => ["sent_to_customer","package_in_transit"].includes(o.journey_status)).length}</b></article></div>
-    <TrackingGuide role="fulfillment" />
+    <StatusConnectionGuide role="fulfilment" title="FULFILMENT STATUS DICTIONARY" />
     <div className="order-card-list">
       {orders.map(order => {
         const action = next[order.journey_status];
@@ -48,6 +58,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
             {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER (OPTIONAL FOR NOW)<input name="courier" placeholder="EXAMPLE: DHL" defaultValue={order.courier || ""} /></label><label>CUSTOMER TRACKING (OPTIONAL FOR NOW)<input name="tracking" placeholder="EXAMPLE: DHL-10245" defaultValue={order.tracking_number || ""} /></label></>}
             <button className="fulfilment-action">{action.label}</button>
           </form>}
+          {!["delivered","cancelled"].includes(order.journey_status) && <footer><span>NEED ADMIN HELP?</span><b>Cancellation requires admin confirmation.</b><button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button></footer>}
         </article>;
       })}
     </div>
