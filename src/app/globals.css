@@ -1998,6 +1998,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .cancellation-request .danger-action { background: #8e241c; color: #fff; border-color: #8e241c; }
 .cancellation-request-button { color: #8e241c; margin-left: auto; }
 .fulfilment-timeline-list { display: grid; gap: 1rem; margin: 1rem 0 2rem; }
+.partner-header-actions { display: flex !important; align-items: stretch; gap: .65rem; }
+.partner-header-actions > div { display: grid; align-content: center; gap: .25rem; }
+.partner-header-actions > button { min-height: 3rem; padding: .75rem 1rem; border: 1px solid #111; background: #111; color: #fff; font: 700 .68rem var(--font-mono), monospace; }
 
 @media (max-width: 900px) {
   .order-timeline {
@@ -2009,4 +2012,5 @@ input[type="number"]::-webkit-outer-spin-button {
   }
   .cancellation-request { align-items: stretch; flex-direction: column; }
   .cancellation-request > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
+  .partner-header-actions { width: 100%; justify-content: space-between; }
 }

@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
 import { StatusConnectionGuide } from "./status-connection-guide";
@@ -21,6 +22,13 @@ const next: Partial<Record<JourneyStatus, { status: JourneyStatus; label: string
 export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
   const sb = createClient();
   const [notice, setNotice] = useState("");
+  const router = useRouter();
+  async function signOut() {
+    const { error } = await sb.auth.signOut();
+    if (error) { setNotice(error.message); return; }
+    router.replace("/portal/login");
+    router.refresh();
+  }
   async function advance(event: FormEvent<HTMLFormElement>, order: WorkOrder, target: JourneyStatus) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -44,7 +52,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
     setNotice(error?.message || "Cancellation request sent to admin for confirmation.");
   }
   return <main className="partner-page">
-    <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div></header>
+    <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div className="partner-header-actions"><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div><button onClick={() => void signOut()}>SIGN OUT</button></div></header>
     {notice && <div className="portal-alert" role="alert">{notice}</div>}
     <div className="portal-summary"><article><span>AWAITING PACKAGE</span><b>{orders.filter(o => o.journey_status === "awaiting_package").length}</b></article><article><span>IN WAREHOUSE</span><b>{orders.filter(o => ["received_by_fulfillment","qc_ongoing","package_prepared"].includes(o.journey_status)).length}</b></article><article><span>WITH COURIER</span><b>{orders.filter(o => ["sent_to_customer","package_in_transit"].includes(o.journey_status)).length}</b></article></div>
     <StatusConnectionGuide role="fulfilment" title="FULFILMENT STATUS DICTIONARY" />
