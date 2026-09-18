@@ -26,6 +26,12 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "The assigned fulfilment team completes the warehouse stages.",
       "Every fulfilment update is shown automatically to the seller and admin.",
     ],
+    [
+      "CANCELLATION REQUEST",
+      "Seller request",
+      "The seller can alert admin that the order should be reviewed.",
+      "The order stays active unless admin confirms cancellation.",
+    ],
   ],
   fulfilment: [
     [
@@ -69,6 +75,12 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Fulfilment button",
       "The courier delivered the customer order.",
       "The shared order journey is complete for every role.",
+    ],
+    [
+      "CANCELLATION REQUEST",
+      "Fulfilment request",
+      "The team can alert admin when the order cannot continue.",
+      "Only admin can confirm and apply the red Cancelled status.",
     ],
   ],
   "admin-orders": [
@@ -126,6 +138,18 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "The customer order was delivered.",
       "The shared operational journey is complete.",
     ],
+    [
+      "SELLER PAYMENT",
+      "Admin control",
+      "Admin records Not Due, Due, Scheduled, Paid, or Held.",
+      "The seller balance and payment record use the same payout status.",
+    ],
+    [
+      "CANCELLATION REQUEST",
+      "Admin approval",
+      "A seller or fulfilment member requested cancellation.",
+      "Admin either keeps the order active or confirms the red Cancelled status.",
+    ],
   ],
   "admin-fulfilment": [
     [
@@ -157,6 +181,12 @@ const guides: Record<Role, Array<[string, string, string, string]>> = {
       "Fulfilment buttons",
       "The team hands off the parcel, then records final delivery.",
       "Both updates are shared with admin and seller automatically.",
+    ],
+    [
+      "CANCELLATION REQUEST",
+      "Admin approval",
+      "Seller or fulfilment can request review but cannot cancel.",
+      "Admin confirms cancellation or keeps the shared order active.",
     ],
   ],
 };

@@ -42,17 +42,3 @@ export function OrderTimeline({
     </ol>
   );
 }
-
-export function TrackingGuide({ role }: { role: "admin" | "seller" | "fulfillment" }) {
-  return (
-    <details className="tracking-guide">
-      <summary>How does order tracking work?</summary>
-      <div>
-        <p>There is one shared order journey. A change made here appears for every authorised role.</p>
-        {role === "admin" && <p><b>Admin:</b> confirms new orders, assigns packages to one team member, can correct any stage, and is the only role allowed to cancel.</p>}
-        {role === "seller" && <p><b>Seller:</b> after “Order confirmed,” press “Seller preparing order.” When the package leaves for the warehouse, add inbound details and press “Package sent to fulfilment.”</p>}
-        {role === "fulfillment" && <p><b>Fulfillment:</b> only assigned orders appear here. Complete Package received → QC ongoing → Package prepared → Sent to courier → In transit → Delivered.</p>}
-      </div>
-    </details>
-  );
-}

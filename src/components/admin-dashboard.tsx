@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { StatusConnectionGuide } from "./status-connection-guide";
-import { JOURNEY, journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { JOURNEY, journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
 
 type Seller = {
   id: string;
@@ -34,6 +34,7 @@ type Product = {
   condition: string | null;
 };
 type FinanceLine = {
+  order_id: string;
   seller_id: string | null;
   ownership: string;
   gross_amount: number | null;
@@ -53,31 +54,14 @@ type Order = {
   delivery_address: string | null;
   sales_channel: string;
   status: string;
-  payment_status: string;
   placed_at: string;
   journey_status: JourneyStatus;
   journey_timestamps: Record<string, string>;
-};
-type Fulfillment = {
-  id: string;
-  order_id: string;
-  assigned_to: string | null;
-  status: string;
-  courier: string | null;
-  tracking_reference: string | null;
-  due_at: string | null;
-  orders: { order_number: number; customer_name: string } | null;
+  cancellation_requested_at: string | null;
+  cancellation_requested_by_role: string | null;
+  cancellation_request_reason: string | null;
 };
 type Partner = { id: string; name: string; warehouse_address: string | null };
-type Package = {
-  id: string;
-  order_id: string;
-  package_number: number;
-  status: string;
-  seller_id: string;
-  fulfillment_partner_id: string | null;
-  inbound_tracking: string | null;
-};
 type Shipment = {
   id: string;
   order_id: string;
@@ -95,9 +79,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [sellers, setSellers] = useState<Seller[]>([]),
     [products, setProducts] = useState<Product[]>([]),
     [orders, setOrders] = useState<Order[]>([]),
-    [fulfillments, setFulfillments] = useState<Fulfillment[]>([]),
     [partners, setPartners] = useState<Partner[]>([]),
-    [packages, setPackages] = useState<Package[]>([]),
     [shipments, setShipments] = useState<Shipment[]>([]),
     [finance, setFinance] = useState<FinanceLine[]>([]),
     [imagePreview, setImagePreview] = useState<string | null>(null),
@@ -112,7 +94,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const [supabase] = useState(createClient);
   const router = useRouter();
   const load = useCallback(async () => {
-    const [s, p, o, f, fp, ip, os, fin] = await Promise.all([
+    const [s, p, o, fp, os, fin] = await Promise.all([
       supabase
         .from("sellers")
         .select("id,seller_code,display_name,email,commission_percent,status")
@@ -126,24 +108,12 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,payment_status,placed_at,journey_status,journey_timestamps",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason",
         )
         .order("placed_at", { ascending: false }),
       supabase
-        .from("fulfillments")
-        .select(
-          "id,order_id,assigned_to,status,courier,tracking_reference,due_at,orders(order_number,customer_name)",
-        )
-        .order("created_at", { ascending: false }),
-      supabase
         .from("fulfillment_partners")
         .select("id,name,warehouse_address")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("inbound_packages")
-        .select(
-          "id,order_id,package_number,status,seller_id,fulfillment_partner_id,inbound_tracking",
-        )
         .order("created_at", { ascending: false }),
       supabase
         .from("outbound_shipments")
@@ -153,22 +123,19 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status"),
+        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status"),
     ]);
-    if (s.error || p.error || o.error || f.error)
+    if (s.error || p.error || o.error)
       setNotice(
         s.error?.message ||
           p.error?.message ||
           o.error?.message ||
-          f.error?.message ||
           "Could not load data",
       );
     setSellers(s.data ?? []);
     setProducts(p.data ?? []);
     setOrders(o.data ?? []);
-    setFulfillments((f.data ?? []) as unknown as Fulfillment[]);
     setPartners(fp.data ?? []);
-    setPackages(ip.data ?? []);
     setShipments(os.data ?? []);
     setFinance(fin.data ?? []);
   }, [supabase]);
@@ -422,18 +389,6 @@ export function AdminDashboard({ email }: { email: string }) {
       await load();
     }
   }
-  async function updateOrder(
-    id: string,
-    field: "status" | "payment_status",
-    value: string,
-  ) {
-    const { error } = await supabase
-      .from("orders")
-      .update({ [field]: value })
-      .eq("id", id);
-    setNotice(error?.message || "Order updated.");
-    if (!error) await load();
-  }
   async function addOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget,
@@ -479,54 +434,31 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "Shared journey updated for every role.");
     if (!error) await load();
   }
-  async function updateFulfillment(id: string, status: string) {
-    const values: Record<string, string> = { status };
-    if (status === "shipped") values.shipped_at = new Date().toISOString();
-    if (status === "delivered") values.delivered_at = new Date().toISOString();
+  async function updateSellerPayment(orderId: string, payoutStatus: string) {
     const { error } = await supabase
-      .from("fulfillments")
-      .update(values)
-      .eq("id", id);
-    setNotice(error?.message || "Fulfilment updated.");
+      .from("order_items")
+      .update({ payout_status: payoutStatus })
+      .eq("order_id", orderId)
+      .not("seller_id", "is", null);
+    setNotice(error?.message || "Seller payment record updated.");
     if (!error) await load();
   }
-  async function updateAdminShipment(id: string, status: string) {
-    const values: Record<string, string> = { status };
-    if (status === "outbound_shipped")
-      values.shipped_at = new Date().toISOString();
-    if (status === "delivered") values.delivered_at = new Date().toISOString();
-    const { error } = await supabase
-      .from("outbound_shipments")
-      .update(values)
-      .eq("id", id);
-    setNotice(error?.message || "Shared shipment status updated.");
-    if (!error) await load();
-  }
-  async function addPartner(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget,
-      f = new FormData(form);
-    const { data: partner, error } = await supabase
-      .from("fulfillment_partners")
-      .insert({
-        name: String(f.get("name")),
-        warehouse_address: String(f.get("address")),
-      })
-      .select("id")
-      .single();
-    if (error || !partner) {
-      setNotice(error?.message || "Could not add partner.");
-      return;
-    }
-    const invite = await supabase.from("fulfillment_invites").insert({
-      email: String(f.get("email")).toLowerCase(),
-      partner_id: partner.id,
+  async function clearCancellationRequest(orderId: string) {
+    const { error } = await supabase.rpc("resolve_cancellation_request", {
+      target_order_id: orderId,
+      approve_cancellation: false,
     });
-    setNotice(invite.error?.message || "Internal fulfilment team login added.");
-    if (!invite.error) {
-      form.reset();
-      await load();
-    }
+    setNotice(error?.message || "Cancellation request dismissed.");
+    if (!error) await load();
+  }
+  async function approveCancellation(orderId: string) {
+    if (!window.confirm("Confirm cancellation of this order? This is the final admin approval.")) return;
+    const { error } = await supabase.rpc("resolve_cancellation_request", {
+      target_order_id: orderId,
+      approve_cancellation: true,
+    });
+    setNotice(error?.message || "Order cancelled by admin confirmation.");
+    if (!error) await load();
   }
   async function assignOrder(orderId: string, partnerId: string) {
     if (!partnerId) return;
@@ -1145,7 +1077,7 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "orders" && (
           <>
-            <TrackingGuide role="admin" />
+            <StatusConnectionGuide role="admin-orders" title="FULL ORDER STATUS DICTIONARY" />
             <section className="order-entry-panel">
               <header>
                 <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
@@ -1171,27 +1103,19 @@ export function AdminDashboard({ email }: { email: string }) {
                 <button>CREATE ORDER</button>
               </form>
             </section>
-            <details className="order-process-guide">
-              <summary>HOW MONEY AND FULFILMENT WORK</summary>
-              <div>
-                <p>The customer payment is collected by OVERSTOCK first. The seller is not paid immediately because the product still needs to be purchased, received, checked, and delivered.</p>
-                <ol>
-                  <li><b>1</b><span><strong>CUSTOMER PAYS OVERSTOCK</strong>The full customer payment is recorded against the order.</span></li>
-                  <li><b>2</b><span><strong>OVERSTOCK KEEPS AGREED FEES</strong>Platform fees and fulfilment fees are reserved so OVERSTOCK can pay for operating and delivery services.</span></li>
-                  <li><b>3</b><span><strong>OVERSTOCK SENDS THE REST TO THE SELLER</strong>The seller receives their calculated share according to the agreed commission and costs.</span></li>
-                  <li><b>4</b><span><strong>SELLER BUYS THE PRODUCT</strong>The seller purchases the item from the market and keeps the profit remaining from their share.</span></li>
-                  <li><b>5</b><span><strong>SELLER SENDS IT TO FULFILMENT</strong>The seller prepares the correct item and sends it to the OVERSTOCK fulfilment team with inbound tracking.</span></li>
-                  <li><b>6</b><span><strong>FULFILMENT COMPLETES THE ORDER</strong>The team receives, checks, packs, ships, and marks the customer order delivered.</span></li>
-                </ol>
-              </div>
-            </details>
             <div className="order-card-list admin-orders">
-              {orders.map((o) => (
-                <article className="order-card" key={o.id}>
+              {orders.map((o) => {
+                const sellerFinance = finance.find((line) => line.order_id === o.id && line.seller_id);
+                const sellerPayment = sellerFinance?.payout_status || "not_due";
+                return <article className="order-card" key={o.id}>
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
-                    <label className="payment-control"><span>CUSTOMER PAYMENT</span><select data-status={o.payment_status} value={o.payment_status} onChange={(e) => void updateOrder(o.id, "payment_status", e.target.value)}><option value="unpaid">PAYMENT PENDING</option><option value="paid">PAYMENT RECEIVED</option></select></label>
+                    {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="not_due">NOT DUE</option><option value="due">PAYMENT DUE</option><option value="scheduled">PAYMENT SCHEDULED</option><option value="paid">SELLER PAID</option><option value="held">PAYMENT HELD</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>NO SELLER ATTACHED</b></div>}
                   </header>
+                  {o.cancellation_requested_at && o.journey_status !== "cancelled" && <section className="cancellation-request">
+                    <div><span>CANCELLATION REQUEST</span><b>{(o.cancellation_requested_by_role || "TEAM").toUpperCase()} REQUESTED ADMIN REVIEW</b><small>{o.cancellation_request_reason || "No reason added."}</small></div>
+                    <div><button onClick={() => void clearCancellationRequest(o.id)}>KEEP ORDER</button><button className="danger-action" onClick={() => void approveCancellation(o.id)}>CONFIRM CANCELLATION</button></div>
+                  </section>}
                   <div className="order-summary-grid order-receipt">
                     <div><span>ORDER VALUE</span><b>{money(o.subtotal)}</b></div>
                     <div><span>CUSTOMER TOTAL</span><b>{money(o.total)}</b></div>
@@ -1213,8 +1137,8 @@ export function AdminDashboard({ email }: { email: string }) {
                       <option value="cancelled">CANCELLED</option>
                     </select>
                   </label>
-                </article>
-              ))}
+                </article>;
+              })}
             </div>
           </>
         )}
@@ -1224,49 +1148,6 @@ export function AdminDashboard({ email }: { email: string }) {
               role="admin-fulfilment"
               title="PACKAGE AND SHIPMENT CONNECTIONS"
             />
-            <section className="portal-setup-guide">
-              <p className="eyebrow">INTERNAL ACCESS</p>
-              <h2>ADD A FULFILMENT TEAM ACCOUNT</h2>
-              <ol>
-                <li>
-                  <b>1</b>
-                  <span>
-                    Add the team member or warehouse below using their exact
-                    work email.
-                  </span>
-                </li>
-                <li>
-                  <b>2</b>
-                  <span>
-                    In Supabase open Authentication → Users → Add user → Create
-                    new user.
-                  </span>
-                </li>
-                <li>
-                  <b>3</b>
-                  <span>
-                    Use the same email, choose a temporary password and enable
-                    Auto Confirm User.
-                  </span>
-                </li>
-                <li>
-                  <b>4</b>
-                  <span>
-                    Give the login privately. They use /portal/login and are
-                    routed to the internal Package Desk.
-                  </span>
-                </li>
-              </ol>
-              <p>
-                Use one account per worker. Never share your admin password.
-              </p>
-            </section>
-            <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
-              <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM AHMED" required /></label>
-              <label><span>ASSIGNED LOCATION / ADDRESS</span><input name="address" placeholder="EXAMPLE: DHAKA DESK — 12 ROAD 4" required /></label>
-              <label><span>WORKER LOGIN EMAIL</span><input name="email" type="email" placeholder="worker@example.com" required /></label>
-              <button>ADD TEAM</button>
-            </form>
             <section className="assignment-queue">
               <header>
                 <p className="eyebrow">ADMIN ACTION</p>
@@ -1293,93 +1174,17 @@ export function AdminDashboard({ email }: { email: string }) {
                 </article>;
               })}
             </section>
-            <div className="fulfilment-list">
-              {packages.map((p) => (
-                <article key={p.id} className="package-assignment-row">
-                  <div>
-                    <b>PKG-{p.package_number}</b>
-                    <span>
-                      {sellers.find((s) => s.id === p.seller_id)
-                        ?.display_name || "SELLER"}
-                    </span>
-                    <small>
-                      {p.status} / {p.inbound_tracking || "NO TRACKING"}
-                    </small>
-                  </div>
-                  <span className="status-badge" data-status={orders.find((o) => o.id === p.order_id)?.journey_status}>{journeyLabel(orders.find((o) => o.id === p.order_id)?.journey_status || "order_placed")}</span>
-                </article>
-              ))}
-            </div>
-            <h2>OUTBOUND CUSTOMER TRACKING</h2>
-            <div className="fulfilment-list">
+            <h2>FULFILMENT ORDER TIMELINES</h2>
+            <div className="fulfilment-timeline-list">
               {shipments.map((shipment) => (
-                <article key={shipment.id}>
-                  <div>
-                    <b>SHIP-{shipment.shipment_number}</b>
-                    <span>{shipment.recipient_name}</span>
-                    <small>
-                      {shipment.status} / {shipment.courier || "NO COURIER"} /{" "}
-                      {shipment.tracking_number || "NO CUSTOMER TRACKING"}
-                    </small>
-                  </div>
-                  <select
-                    data-status={shipment.status}
-                    value={shipment.status}
-                    aria-label={`Override status for shipment ${shipment.shipment_number}`}
-                    onChange={(e) =>
-                      void updateAdminShipment(shipment.id, e.target.value)
-                    }
-                  >
-                    {[
-                      "ready_to_pack",
-                      "packed",
-                      "outbound_shipped",
-                      "delivered",
-                      "cancelled",
-                    ].map((status) => (
-                      <option key={status} value={status}>
-                        {status.replaceAll("_", " ").toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
+                <article className="order-card" key={shipment.id}>
+                  {(() => { const order = orders.find((item) => item.id === shipment.order_id); return order ? <>
+                    <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{shipment.recipient_name}</h2><small>{shipment.courier || "COURIER NOT SET"} / {shipment.tracking_number || "TRACKING NOT SET"}</small></div><span className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</span></header>
+                    <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
+                  </> : null; })()}
                 </article>
               ))}
             </div>
-            {fulfillments.length > 0 && <><h2>PREVIOUS ORDER RECORDS</h2>
-            <div className="fulfilment-list">
-              {fulfillments.map((f) => (
-                <article key={f.id}>
-                  <div>
-                    <b>#{f.orders?.order_number}</b>
-                    <span>{f.orders?.customer_name}</span>
-                    <small>
-                      {f.courier || "COURIER NOT SET"} /{" "}
-                      {f.tracking_reference || "NO TRACKING"}
-                    </small>
-                  </div>
-                  <select
-                    data-status={f.status}
-                    value={f.status}
-                    onChange={(e) =>
-                      void updateFulfillment(f.id, e.target.value)
-                    }
-                  >
-                    {[
-                      "unassigned",
-                      "assigned",
-                      "packing",
-                      "shipped",
-                      "delivered",
-                      "cancelled",
-                    ].map((s) => (
-                      <option key={s} value={s}>
-                        {s.toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
-                </article>
-              ))}
-            </div></>}
           </>
         )}{" "}
       </section>

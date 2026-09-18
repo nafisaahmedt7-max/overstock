@@ -172,11 +172,14 @@ button {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   min-width: 0;
+  overflow: hidden;
+  background: #c8c8c4;
 }
 .product-card > a {
+  width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: minmax(0, auto) 6.5rem;
+  grid-template-rows: auto 6.5rem;
   overflow: hidden;
 }
 .product-card:nth-child(3n) {
@@ -185,13 +188,17 @@ button {
 .product-placeholder {
   aspect-ratio: 4/5;
   width: 100%;
+  height: auto;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  isolation: isolate;
+  background: #c8c8c4 !important;
   transition: filter 0.2s ease;
   color: #111;
 }
@@ -199,6 +206,7 @@ button {
   position: absolute;
   top: 1rem;
   left: 1rem;
+  z-index: 2;
   font:
     500 0.7rem var(--font-mono),
     monospace;
@@ -214,6 +222,10 @@ button {
   font:
     400 0.65rem var(--font-mono),
     monospace;
+}
+.product-placeholder img {
+  z-index: 1;
+  display: block;
 }
 .product-card a:hover .product-placeholder {
   filter: brightness(0.94);
@@ -1827,7 +1839,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .order-action-form label,.journey-override{display:grid;gap:.4rem;font:600 .68rem var(--font-mono),monospace}
 .order-action-form input,.journey-override select{min-height:3rem;border:1px solid;background:transparent;padding:.7rem}
 .payment-control{min-width:12.5rem;display:grid;align-content:center;gap:.4rem;font:700 .64rem var(--font-mono),monospace;letter-spacing:.04em}.payment-control select{height:2.75rem;border:1px solid;padding:.65rem 2.5rem .65rem .75rem;appearance:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 1rem) 50%,calc(100% - .7rem) 50%;background-size:.32rem .32rem;background-repeat:no-repeat;font:700 .68rem var(--font-mono),monospace}
-.order-timeline{list-style:none;display:grid;grid-template-columns:repeat(11,minmax(8.5rem,1fr));padding:1.35rem 1rem 1.5rem;overflow-x:auto}
+.order-timeline{list-style:none;display:grid;grid-template-columns:repeat(11,minmax(0,1fr));width:100%;max-width:100%;min-width:0;padding:1.35rem 1rem 1.5rem;overflow:hidden}
 .order-timeline li{min-width:0;display:grid;grid-template-columns:1rem minmax(0,1fr);grid-template-rows:1rem auto;column-gap:.6rem;row-gap:.65rem;padding-right:1rem;position:relative;font:600 .64rem/1.4 var(--font-mono),monospace}.order-timeline li>div{grid-column:1/-1;grid-row:2;padding-right:.5rem}
 .order-timeline li::after{content:"";height:2px;background:#aaa;position:absolute;z-index:0;top:.45rem;left:.5rem;right:-.5rem}.order-timeline li:last-child::after{display:none}
 .order-timeline i{width:1rem;height:1rem;border:2px solid;border-radius:50%;background:var(--paper);position:relative;z-index:1}
@@ -1959,4 +1971,42 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 100%;
     justify-content: center;
   }
+}
+
+.cancellation-request {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #8e241c;
+  background: #f1c1bd;
+  color: #42120e;
+}
+.cancellation-request > div { display: grid; gap: .35rem; }
+.cancellation-request > div:last-child { display: flex; }
+.cancellation-request span { font: 700 .65rem var(--font-mono), monospace; }
+.cancellation-request small { font: 500 .72rem/1.4 var(--font-mono), monospace; }
+.cancellation-request button,
+.cancellation-request-button {
+  min-height: 2.75rem;
+  padding: .7rem 1rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  font: 700 .65rem var(--font-mono), monospace;
+}
+.cancellation-request .danger-action { background: #8e241c; color: #fff; border-color: #8e241c; }
+.cancellation-request-button { color: #8e241c; margin-left: auto; }
+.fulfilment-timeline-list { display: grid; gap: 1rem; margin: 1rem 0 2rem; }
+
+@media (max-width: 900px) {
+  .order-timeline {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 8.5rem;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+  .cancellation-request { align-items: stretch; flex-direction: column; }
+  .cancellation-request > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
 }

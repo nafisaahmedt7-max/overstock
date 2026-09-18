@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { journeyLabel, JourneyStatus, OrderTimeline, TrackingGuide } from "./order-timeline";
+import { journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
+import { StatusConnectionGuide } from "./status-connection-guide";
 
 export type SellerOrder = {
   id: string; order_number: number; journey_status: JourneyStatus;
@@ -28,19 +29,28 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
     setNotice(error?.message || "Order progress updated for OVERSTOCK and fulfillment.");
     if (!error) window.setTimeout(() => location.reload(), 500);
   }
+  async function requestCancellation(orderId: string) {
+    const reason = window.prompt("Tell admin why this order should be cancelled:");
+    if (reason === null) return;
+    const { error } = await sb.rpc("request_order_cancellation", {
+      target_order_id: orderId,
+      reason: reason.trim() || null,
+    });
+    setNotice(error?.message || "Cancellation request sent to admin for confirmation.");
+  }
   const actionCount = orders.filter(o => ["admin_confirmed", "seller_preparing"].includes(o.journey_status)).length;
   return <main className="partner-page">
     <header><div><p className="eyebrow">OVERSTOCK / SELLER PORTAL</p><h1>MY ORDERS</h1></div><div><span>AMOUNT DUE</span><b>{due}</b></div></header>
     {notice && <div className="portal-alert" role="status">{notice}</div>}
     <div className="portal-summary"><article><span>ACTION REQUIRED</span><b>{actionCount}</b></article><article><span>TOTAL ORDERS</span><b>{orders.length}</b></article><article><span>SELLER BALANCE</span><b>{due}</b></article></div>
-    <TrackingGuide role="seller" />
+    <StatusConnectionGuide role="seller" title="SELLER STATUS DICTIONARY" />
     <div className="order-card-list">
       {orders.length ? orders.map(order => <article className="order-card" key={order.id}>
         <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div><span className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</span></header>
         <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
         {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press when you begin sourcing and preparing it.</p><button className="seller-action">SELLER PREPARING ORDER</button></form>}
         {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER TO FULFILMENT<input name="courier" placeholder="EXAMPLE: PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>PACKAGE TRACKING<input name="tracking" placeholder="EXAMPLE: PKG-10245" defaultValue={order.inbound_tracking || ""} required /></label><button className="seller-action">PACKAGE SENT TO FULFILMENT</button></form>}
-        <footer><span>YOUR EARNINGS</span><b>A\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status.replaceAll("_", " ")}</span></footer>
+        <footer><span>YOUR EARNINGS</span><b>A\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status.replaceAll("_", " ")}</span>{!["delivered","cancelled"].includes(order.journey_status) && <button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button>}</footer>
       </article>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
     </div>
   </main>;
