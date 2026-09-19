@@ -41,6 +41,8 @@ type FinanceLine = {
   platform_fee: number | null;
   seller_due: number | null;
   payout_status: string;
+  fulfillment_fee: number | null;
+  fulfillment_payment_status: string;
 };
 type Order = {
   id: string;
@@ -123,7 +125,7 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status"),
+        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -469,6 +471,14 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "Seller payment record updated.");
     if (!error) await load();
   }
+  async function updateFulfillmentPayment(orderId: string, paymentStatus: string) {
+    const { error } = await supabase
+      .from("order_items")
+      .update({ fulfillment_payment_status: paymentStatus })
+      .eq("order_id", orderId);
+    setNotice(error?.message || "Fulfilment payment record updated.");
+    if (!error) await load();
+  }
   async function clearCancellationRequest(orderId: string) {
     const { error } = await supabase.rpc("resolve_cancellation_request", {
       target_order_id: orderId,
@@ -521,12 +531,21 @@ export function AdminDashboard({ email }: { email: string }) {
   const sellerPaid = activeFinance
     .filter((x) => x.ownership === "seller" && x.payout_status === "paid")
     .reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const fulfillmentDue = activeFinance
+    .filter((x) => x.fulfillment_payment_status === "due")
+    .reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
+  const fulfillmentPaid = activeFinance
+    .filter((x) => x.fulfillment_payment_status === "paid")
+    .reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
   const ownSales = activeFinance
     .filter((x) => x.ownership === "own_stock")
     .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const chartTotal = ownSales + sellerDue + sellerPaid || 1;
-  const ownEnd = (ownSales / chartTotal) * 100;
-  const dueEnd = ownEnd + (sellerDue / chartTotal) * 100;
+  const overstockSales = Math.max(0, totalSales - sellerDue - sellerPaid - fulfillmentDue - fulfillmentPaid);
+  const chartTotal = totalSales || 1;
+  const overstockEnd = (overstockSales / chartTotal) * 100;
+  const sellerDueEnd = overstockEnd + (sellerDue / chartTotal) * 100;
+  const sellerPaidEnd = sellerDueEnd + (sellerPaid / chartTotal) * 100;
+  const fulfillmentDueEnd = sellerPaidEnd + (fulfillmentDue / chartTotal) * 100;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -568,9 +587,9 @@ export function AdminDashboard({ email }: { email: string }) {
               <div
                 className="balance-chart"
                 style={{
-                  background: `conic-gradient(#1d73d2 0 ${ownEnd}%, #7651a8 ${ownEnd}% ${dueEnd}%, #2f7d42 ${dueEnd}% 100%)`,
+                  background: `conic-gradient(#1d73d2 0 ${overstockEnd}%, #7651a8 ${overstockEnd}% ${sellerDueEnd}%, #a98bd2 ${sellerDueEnd}% ${sellerPaidEnd}%, #d49b4a ${sellerPaidEnd}% ${fulfillmentDueEnd}%, #2f7d42 ${fulfillmentDueEnd}% 100%)`,
                 }}
-                aria-label="Sales split between own inventory, seller payments due, and seller payments paid"
+                aria-label="Total sales split between OVERSTOCK retained revenue, seller payments, and fulfilment payments"
               >
                 <span>
                   {money(totalSales)}
@@ -598,8 +617,29 @@ export function AdminDashboard({ email }: { email: string }) {
                   <span data-balance="paid">SELLER PAID</span>
                   <b>{money(sellerPaid)}</b>
                 </article>
+                <article>
+                  <span data-balance="fulfillment-due">FULFILMENT DUE</span>
+                  <b>{money(fulfillmentDue)}</b>
+                </article>
+                <article>
+                  <span data-balance="fulfillment-paid">FULFILMENT PAID</span>
+                  <b>{money(fulfillmentPaid)}</b>
+                </article>
+                <article>
+                  <span data-balance="overstock">OVERSTOCK RETAINED</span>
+                  <b>{money(overstockSales)}</b>
+                </article>
               </div>
             </div>
+            <details className="admin-help-dropdown money-guide">
+              <summary>HOW THE OVERVIEW IS CALCULATED</summary>
+              <div>
+                <p><b>TOTAL SALES</b> — Every dollar paid by customers, including any amount collected for delivery.</p>
+                <p><b>SELLER DUE / PAID</b> — The seller share is counted once: under Due before settlement, then under Paid after settlement.</p>
+                <p><b>FULFILMENT DUE / PAID</b> — US$5 per item is recorded once: under Due before settlement, then under Paid after settlement.</p>
+                <p><b>OVERSTOCK RETAINED</b> — Total Sales minus all seller shares and fulfilment costs, whether those obligations are still due or already paid.</p>
+              </div>
+            </details>
             <div className="admin-stats">
               <article>
                 <span>SELLERS</span>
@@ -1152,16 +1192,20 @@ export function AdminDashboard({ email }: { email: string }) {
             <div className="order-card-list admin-orders">
               {orders.map((o) => {
                 const sellerFinance = finance.find((line) => line.order_id === o.id && line.seller_id);
+                const orderFinance = finance.find((line) => line.order_id === o.id);
                 const sellerPayment = sellerFinance?.payout_status === "paid" ? "paid" : sellerFinance?.payout_status === "held" ? "held" : "due";
                 return <details className="order-card order-receipt-details" key={o.id}>
                   <summary>
                     <span><small>ORDER</small><b>#{o.order_number}</b></span>
-                    <span><small>CURRENT STATUS</small><b className="status-badge" data-status={o.journey_status}>{journeyLabel(o.journey_status)}</b></span>
+                    <span className="order-summary-status"><small>CURRENT STATUS</small><b className="status-badge" data-status={o.journey_status}>{journeyLabel(o.journey_status)}</b></span>
                   </summary>
                   <div className="order-receipt-body">
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
-                    {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option><option value="held">REFUND REQUESTED</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
+                    <div className="order-payment-controls">
+                      {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option><option value="held">REFUND REQUESTED</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
+                      {orderFinance && <label className="payment-control"><span>FULFILMENT PAYMENT</span><select data-status={orderFinance.fulfillment_payment_status} value={orderFinance.fulfillment_payment_status} onChange={(e) => void updateFulfillmentPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option></select></label>}
+                    </div>
                   </header>
                   {o.cancellation_requested_at && o.journey_status !== "cancelled" && <section className="cancellation-request">
                     <div><span>CANCELLATION REQUEST</span><b>{(o.cancellation_requested_by_role || "TEAM").toUpperCase()} REQUESTED ADMIN REVIEW</b><small>{o.cancellation_request_reason || "No reason added."}</small></div>
@@ -1206,7 +1250,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
                 <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="rahim@example.com" required /></label>
                 <label><span>ADDRESS</span><input name="address" placeholder="EXAMPLE: WAREHOUSE OR WORK ADDRESS" required /></label>
-                <button>ADD TEAM MEMBER</button>
+                <div className="fulfilment-form-action"><button>ADD TEAM MEMBER</button></div>
               </form>
             </details>
             <section className="assignment-queue">
