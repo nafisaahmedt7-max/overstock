@@ -203,6 +203,32 @@ export function AdminDashboard({ email }: { email: string }) {
       await load();
     }
   }
+  async function addPartner(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const { data: partner, error } = await supabase
+      .from("fulfillment_partners")
+      .insert({
+        name: String(f.get("name")).trim(),
+        warehouse_address: String(f.get("address")).trim(),
+      })
+      .select("id")
+      .single();
+    if (error || !partner) {
+      setNotice(error?.message || "Could not add team member.");
+      return;
+    }
+    const invite = await supabase.from("fulfillment_invites").insert({
+      email: String(f.get("email")).trim().toLowerCase(),
+      partner_id: partner.id,
+    });
+    setNotice(invite.error?.message || "Fulfilment team member added. No orders were assigned automatically.");
+    if (!invite.error) {
+      form.reset();
+      await load();
+    }
+  }
   async function saveSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editingSeller) return;
@@ -479,18 +505,28 @@ export function AdminDashboard({ email }: { email: string }) {
       style: "currency",
       currency: "USD",
     }).format(n);
-  const gross = finance.reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const sellerDue = finance.reduce((n, x) => n + Number(x.seller_due || 0), 0);
-  const platformFees = finance.reduce(
-    (n, x) => n + Number(x.platform_fee || 0),
-    0,
-  );
-  const ownSales = finance
+  const totalSales = orders
+    .filter((order) => order.journey_status !== "cancelled")
+    .reduce((n, order) => n + Number(order.total || 0), 0);
+  const activeFinance = finance.filter((line) => {
+    const order = orders.find((item) => item.id === line.order_id);
+    return order?.journey_status !== "cancelled";
+  });
+  const sellerSales = activeFinance
+    .filter((x) => x.ownership === "seller")
+    .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
+  const sellerDue = activeFinance
+    .filter((x) => x.ownership === "seller" && x.payout_status === "due")
+    .reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const sellerPaid = activeFinance
+    .filter((x) => x.ownership === "seller" && x.payout_status === "paid")
+    .reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const ownSales = activeFinance
     .filter((x) => x.ownership === "own_stock")
     .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const sellerPercent = gross ? Math.round((sellerDue / gross) * 100) : 0;
-  const platformPercent = gross ? Math.round((platformFees / gross) * 100) : 0;
-  const platformEnd = Math.min(100, sellerPercent + platformPercent);
+  const chartTotal = ownSales + sellerDue + sellerPaid || 1;
+  const ownEnd = (ownSales / chartTotal) * 100;
+  const dueEnd = ownEnd + (sellerDue / chartTotal) * 100;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -532,27 +568,35 @@ export function AdminDashboard({ email }: { email: string }) {
               <div
                 className="balance-chart"
                 style={{
-                  background: `conic-gradient(#4f6fa8 0 ${sellerPercent}%, #c28a3d ${sellerPercent}% ${platformEnd}%, #7d9b76 ${platformEnd}% 100%)`,
+                  background: `conic-gradient(#1d73d2 0 ${ownEnd}%, #7651a8 ${ownEnd}% ${dueEnd}%, #2f7d42 ${dueEnd}% 100%)`,
                 }}
-                aria-label={`Sales split: ${sellerPercent}% seller balance, ${platformPercent}% platform commission, and the remainder own-stock sales`}
+                aria-label="Sales split between own inventory, seller payments due, and seller payments paid"
               >
                 <span>
-                  {money(gross)}
-                  <small>RECORDED SALES</small>
+                  {money(totalSales)}
+                  <small>TOTAL SALES</small>
                 </span>
               </div>
               <div className="balance-list">
                 <article>
-                  <span data-balance="seller">SELLER BALANCE</span>
-                  <b>{money(sellerDue)}</b>
+                  <span data-balance="total">TOTAL SALES</span>
+                  <b>{money(totalSales)}</b>
                 </article>
                 <article>
                   <span data-balance="own">OWN-STOCK SALES</span>
                   <b>{money(ownSales)}</b>
                 </article>
                 <article>
-                  <span data-balance="platform">PLATFORM COMMISSION</span>
-                  <b>{money(platformFees)}</b>
+                  <span data-balance="seller">SELLER SALES</span>
+                  <b>{money(sellerSales)}</b>
+                </article>
+                <article>
+                  <span data-balance="due">SELLER DUE</span>
+                  <b>{money(sellerDue)}</b>
+                </article>
+                <article>
+                  <span data-balance="paid">SELLER PAID</span>
+                  <b>{money(sellerPaid)}</b>
                 </article>
               </div>
             </div>
@@ -748,8 +792,10 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>ACTIVE</b> — Seller can sign in and view their assigned orders.</p>
                 <p><b>INACTIVE</b> — Seller access is paused but their records remain saved.</p>
                 <p><b>ARCHIVED</b> — Seller is retained for order history and no longer used for new products.</p>
-                <p><b>BALANCE DUE</b> — The unpaid seller share from their connected order items.</p>
-                <p><b>PAID OUT</b> — Seller shares already marked as paid. This is separate from the customer payment status on an order.</p>
+                <p><b>SELLER SHARE</b> — The agreed percentage of each connected product sale paid to that seller. OVERSTOCK retains the remainder for platform and fulfilment fees.</p>
+                <p><b>PAYMENT DUE</b> — The seller share has been created and has not been paid yet.</p>
+                <p><b>PAID</b> — The seller share has been settled.</p>
+                <p><b>REFUND REQUESTED</b> — A paid seller order was cancelled and admin must recover that seller payment.</p>
               </div>
             </details>
             <form className="admin-form seller-entry-form" onSubmit={addSeller}>
@@ -757,7 +803,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" required /></label>
               <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" required /></label>
               <label className="percent-field">
-                <span>COMMISSION</span>
+                <span>SELLER SHARE</span>
                 <span className="percent-input">
                   <input
                     name="commission"
@@ -767,7 +813,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     step="0.01"
                     defaultValue="20"
                     placeholder="20%"
-                    aria-label="Seller commission percentage"
+                    aria-label="Seller payout share percentage"
                     required
                   />
                 </span>
@@ -775,7 +821,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <button>ADD SELLER</button>
             </form>
             <DataTable
-              headings={["CODE", "SELLER", "EMAIL", "COMMISSION", "BALANCE DUE", "PAID OUT", "STATUS", "ACTIONS"]}
+              headings={["CODE", "SELLER", "EMAIL", "SELLER SHARE", "PAYMENT DUE", "PAID", "STATUS", "ACTIONS"]}
               rows={sellers.map((s) => [
                 s.seller_code,
                 s.display_name,
@@ -798,7 +844,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
                   <div className="edit-grid">
                     <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>COMMISSION</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="20%" defaultValue={editingSeller.commission_percent} required /></span></label>
+                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
                     <label className="edit-field edit-field-wide"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
                   <button className="admin-primary">SAVE SELLER</button>
@@ -1106,11 +1152,16 @@ export function AdminDashboard({ email }: { email: string }) {
             <div className="order-card-list admin-orders">
               {orders.map((o) => {
                 const sellerFinance = finance.find((line) => line.order_id === o.id && line.seller_id);
-                const sellerPayment = sellerFinance?.payout_status || "not_due";
-                return <article className="order-card" key={o.id}>
+                const sellerPayment = sellerFinance?.payout_status === "paid" ? "paid" : sellerFinance?.payout_status === "held" ? "held" : "due";
+                return <details className="order-card order-receipt-details" key={o.id}>
+                  <summary>
+                    <span><small>ORDER</small><b>#{o.order_number}</b></span>
+                    <span><small>CURRENT STATUS</small><b className="status-badge" data-status={o.journey_status}>{journeyLabel(o.journey_status)}</b></span>
+                  </summary>
+                  <div className="order-receipt-body">
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
-                    {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="not_due">NOT DUE</option><option value="due">PAYMENT DUE</option><option value="scheduled">PAYMENT SCHEDULED</option><option value="paid">SELLER PAID</option><option value="held">PAYMENT HELD</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>NO SELLER ATTACHED</b></div>}
+                    {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option><option value="held">REFUND REQUESTED</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
                   </header>
                   {o.cancellation_requested_at && o.journey_status !== "cancelled" && <section className="cancellation-request">
                     <div><span>CANCELLATION REQUEST</span><b>{(o.cancellation_requested_by_role || "TEAM").toUpperCase()} REQUESTED ADMIN REVIEW</b><small>{o.cancellation_request_reason || "No reason added."}</small></div>
@@ -1137,7 +1188,8 @@ export function AdminDashboard({ email }: { email: string }) {
                       <option value="cancelled">CANCELLED</option>
                     </select>
                   </label>
-                </article>;
+                  </div>
+                </details>;
               })}
             </div>
           </>
@@ -1148,6 +1200,15 @@ export function AdminDashboard({ email }: { email: string }) {
               role="admin-fulfilment"
               title="PACKAGE AND SHIPMENT CONNECTIONS"
             />
+            <details className="admin-help-dropdown team-member-panel">
+              <summary>ADD FULFILMENT TEAM MEMBER</summary>
+              <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
+                <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
+                <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="rahim@example.com" required /></label>
+                <label><span>ADDRESS</span><input name="address" placeholder="EXAMPLE: WAREHOUSE OR WORK ADDRESS" required /></label>
+                <button>ADD TEAM MEMBER</button>
+              </form>
+            </details>
             <section className="assignment-queue">
               <header>
                 <p className="eyebrow">ADMIN ACTION</p>
@@ -1158,6 +1219,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 <div className="empty-state">NO ORDERS ARE READY TO ASSIGN</div>
               ) : orders.filter((order) => ["sent_to_fulfillment", "awaiting_package"].includes(order.journey_status)).map((order) => {
                 const shipment = shipments.find((item) => item.order_id === order.id);
+                const assignedPartnerId = order.journey_status === "awaiting_package" ? shipment?.fulfillment_partner_id || "" : "";
                 return <article key={order.id}>
                   <div>
                     <span>ORDER #{order.order_number}</span>
@@ -1165,8 +1227,8 @@ export function AdminDashboard({ email }: { email: string }) {
                     <small className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</small>
                   </div>
                   <label className="package-assignment-control">
-                    <span>{shipment?.fulfillment_partner_id ? "ASSIGNED TEAM MEMBER" : "SELECT ONE TEAM MEMBER"}</span>
-                    <select value={shipment?.fulfillment_partner_id || ""} onChange={(e) => void assignOrder(order.id, e.target.value)}>
+                    <span>{assignedPartnerId ? "ASSIGNED TEAM MEMBER" : "SELECT ONE TEAM MEMBER — ADMIN ACTION REQUIRED"}</span>
+                    <select value={assignedPartnerId} onChange={(e) => void assignOrder(order.id, e.target.value)}>
                       <option value="">SELECT TEAM MEMBER</option>
                       {partners.map((partner) => <option key={partner.id} value={partner.id}>{partner.name}</option>)}
                     </select>
