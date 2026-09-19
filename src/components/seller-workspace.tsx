@@ -53,13 +53,16 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
     <div className="portal-summary"><article><span>ACTION REQUIRED</span><b>{actionCount}</b></article><article><span>TOTAL ORDERS</span><b>{orders.length}</b></article><article><span>SELLER BALANCE</span><b>{due}</b></article></div>
     <StatusConnectionGuide role="seller" title="SELLER STATUS DICTIONARY" />
     <div className="order-card-list">
-      {orders.length ? orders.map(order => <article className="order-card" key={order.id}>
-        <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div><span className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</span></header>
+      {orders.length ? orders.map(order => <details className="order-card order-receipt-details" key={order.id}>
+        <summary><span><small>ORDER</small><b>#{order.order_number}</b></span><span className="order-summary-status"><small>CURRENT STATUS</small><b className="status-badge" data-status={order.journey_status}>{journeyLabel(order.journey_status)}</b></span></summary>
+        <div className="order-receipt-body">
+        <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div></header>
         <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
         {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press when you begin sourcing and preparing it.</p><button className="seller-action">SELLER PREPARING ORDER</button></form>}
         {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER TO FULFILMENT<input name="courier" placeholder="EXAMPLE: PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>PACKAGE TRACKING<input name="tracking" placeholder="EXAMPLE: PKG-10245" defaultValue={order.inbound_tracking || ""} required /></label><button className="seller-action">PACKAGE SENT TO FULFILMENT</button></form>}
         <footer><span>YOUR SHARE</span><b>US\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status === "held" ? "REFUND REQUESTED" : order.payout_status === "paid" ? "PAID" : "PAYMENT DUE"}</span>{!["delivered","cancelled"].includes(order.journey_status) && <button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button>}</footer>
-      </article>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
+        </div>
+      </details>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
     </div>
   </main>;
 }
