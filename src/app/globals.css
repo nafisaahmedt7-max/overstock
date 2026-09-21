@@ -2034,3 +2034,5 @@ input[type="number"]::-webkit-outer-spin-button {
 .order-entry-panel.product-entry-panel>header{background:#d0d0cc}.order-entry-panel.team-member-panel>header{background:#d0d0cc}.order-entry-panel.team-member-panel .fulfilment-account-form{border-top:0}.order-entry-panel.team-member-panel{border:1px solid var(--line)}
 
 .order-entry-panel.seller-entry-panel .seller-entry-form{margin:0;border:0}.order-entry-panel.seller-entry-panel>header{background:#d0d0cc}
+
+.order-admin-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.order-admin-actions .danger-action{min-height:3rem;padding:.75rem 1rem;border:1px solid #7d2620;background:#f3e5e3;color:#5b1612;font:700 .68rem var(--font-mono),monospace}
