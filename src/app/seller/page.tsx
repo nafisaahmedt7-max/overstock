@@ -14,7 +14,7 @@ export default async function SellerPortal() {
     .eq("user_id", user.id)
     .maybeSingle();
   if (!member) redirect("/portal");
-  const { data, error } = await sb.rpc("get_my_seller_orders");
+  const { data, error } = await sb.rpc("get_my_seller_orders_v2");
   const orders: SellerOrder[] = error ? [] : ((data ?? []) as SellerOrder[]);
   const due = orders
       .filter((x) => x.payout_status === "due")
