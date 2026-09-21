@@ -48,6 +48,7 @@ type FinanceLine = {
   inbound_delivery_fee: number | null;
   fulfillment_service_fee: number | null;
   gpo_fee: number | null;
+  seller_payout_total: number | null;
 };
 type Order = {
   id: string;
@@ -132,7 +133,7 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee"),
+        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -517,6 +518,16 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "Order cancelled by admin confirmation.");
     if (!error) await load();
   }
+  async function requestRefund(orderId: string) {
+    const { error } = await supabase.rpc("admin_request_order_refund", { target_order_id: orderId });
+    setNotice(error?.message || "Refund requested from seller.");
+    if (!error) await load();
+  }
+  async function completeRefund(orderId: string) {
+    const { error } = await supabase.rpc("admin_complete_order_refund", { target_order_id: orderId });
+    setNotice(error?.message || "Refund received and marked complete.");
+    if (!error) await load();
+  }
   async function assignOrder(orderId: string, partnerId: string) {
     if (!partnerId) return;
     const { error } = await supabase.rpc("assign_fulfillment_team", {
@@ -550,7 +561,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const sellerDelivery = activeFinance.reduce((n, x) => n + Number(x.inbound_delivery_fee || 0), 0);
   const fulfillmentService = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0), 0);
   const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
-  const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_due || 0), 0);
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
   const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
@@ -590,7 +601,7 @@ export function AdminDashboard({ email }: { email: string }) {
             {notice} ×
           </button>
         )}
-        {tab === "overview" && (<><section className="finance-ledger"><header><p className="eyebrow">LIVE ORDER LEDGER</p><h2>WHERE EACH CUSTOMER PAYMENT GOES</h2><p>Cancelled orders are kept out of sales and shown separately as refunds.</p></header><div className="finance-ledger-grid"><article><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>COST OF GOODS</span><b>{money(costOfGoods)}</b><small>Product cost, before seller profit</small></article><article><span>SELLER SALES</span><b>{money(sellerSales)}</b><small>Customer sales of seller-owned products</small></article><article><span>SELLER DUE</span><b>{money(sellerDue)}</b><small>Seller payment still outstanding</small></article><article><span>SELLER PAID</span><b>{money(sellerPaid)}</b><small>Seller payment already sent</small></article><article><span>FULFILMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Service and GPO costs outstanding</small></article><article><span>FULFILMENT PAID</span><b>{money(fulfillmentPaid)}</b><small>Service and GPO costs paid</small></article><article className="ledger-result"><span>OVERSTOCK SALES</span><b>{money(overstockSales)}</b><small>Amount remaining after every order cost</small></article></div><div className="ledger-formula"><b>{money(totalSales)}</b><span>total sales</span><i>−</i><b>{money(costOfGoods)}</b><span>cost of goods</span><i>−</i><b>{money(sellerProfit + sellerDelivery)}</b><span>seller profit + delivery to fulfilment</span><i>−</i><b>{money(fulfillmentService + gpoFees)}</b><span>fulfilment service + GPO</span><i>=</i><strong>{money(overstockSales)}</strong><span>OVERSTOCK SALES</span></div></section><section className="refund-ledger"><header><p className="eyebrow">CANCELLED ORDERS</p><h2>REFUND TRACKER</h2></header><div><article><span>REFUNDS REQUESTED</span><b>{money(totalRefunds)}</b></article><article><span>REFUND DUE FROM SELLER</span><b>{money(refundsDue)}</b></article><article><span>SELLER REFUND SENT</span><b>{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>{money(completedRefunds)}</b></article></div></section></>)}
+        {tab === "overview" && (<><section className="finance-ledger"><header><p className="eyebrow">LIVE ORDER LEDGER</p><h2>WHERE EACH CUSTOMER PAYMENT GOES</h2><p>Cancelled orders are kept out of sales and shown separately as refunds.</p></header><div className="finance-ledger-grid"><article><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>COST OF GOODS</span><b>{money(costOfGoods)}</b><small>Product cost, before seller profit</small></article><article><span>SELLER SALES</span><b>{money(sellerSales)}</b><small>Customer sales of seller-owned products</small></article><article><span>SELLER DUE</span><b>{money(sellerDue)}</b><small>Seller payment still outstanding</small></article><article><span>SELLER PAID</span><b>{money(sellerPaid)}</b><small>Seller payment already sent</small></article><article><span>FULFILMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Service and GPO costs outstanding</small></article><article><span>FULFILMENT PAID</span><b>{money(fulfillmentPaid)}</b><small>Service and GPO costs paid</small></article><article className="ledger-result"><span>OVERSTOCK SALES</span><b>{money(overstockSales)}</b><small>Amount remaining after every order cost</small></article></div><div className="ledger-formula"><b>{money(totalSales)}</b><span>total sales</span><i>−</i><b>{money(costOfGoods)}</b><span>cost of goods</span><i>−</i><b>{money(sellerProfit + sellerDelivery)}</b><span>seller profit + delivery to fulfilment</span><i>−</i><b>{money(fulfillmentService + gpoFees)}</b><span>fulfilment service + GPO</span><i>=</i><strong>{money(overstockSales)}</strong><span>OVERSTOCK SALES</span></div></section><section className="refund-ledger"><header><p className="eyebrow">CANCELLED ORDERS</p><h2>REFUND TRACKER</h2></header><div><article><span>REFUNDS REQUESTED</span><b>{money(totalRefunds)}</b></article><article><span>REFUND DUE FROM SELLER</span><b>{money(refundsDue)}</b></article><article><span>SELLER REFUND SENT</span><b>{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>{money(completedRefunds)}</b></article></div></section><section className="ledger-guide"><header><p className="eyebrow">OPERATING GUIDE</p><h2>HOW THE MONEY MOVES</h2></header><ol><li><b>Customer pays.</b> The full amount becomes Total Sales.</li><li><b>Seller is due.</b> Their payout is cost of goods + seller profit share + delivery to fulfilment.</li><li><b>Fulfilment is due.</b> Service fee and weight-based GPO fee are recorded separately.</li><li><b>OVERSTOCK keeps the remainder.</b> This is total sales less product cost and every seller and fulfilment cost.</li><li><b>If admin cancels before shipment,</b> request the refund. The seller marks it sent, then you confirm receipt to complete it.</li></ol></section></>)}
         {tab === "sellers" && (
           <>
             <details className="admin-help-dropdown">
@@ -994,6 +1005,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     <div><span>ADMIN CONFIRMATION</span><b>{o.journey_status === "order_placed" ? "NEW ORDER — REVIEW REQUIRED" : journeyLabel(o.journey_status)}</b></div>
                     <div className="order-admin-actions">{o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}<button className="danger-action" type="button" onClick={() => void deleteOrder(o)}>DELETE ORDER</button></div>
                   </section>
+                  {o.journey_status === "cancelled" && <section className="refund-order-control"><div><span>REFUND STATUS</span><b>{o.refund_status.replaceAll("_", " ").toUpperCase()}</b><small>{money(Number(o.refund_amount || 0))}</small></div><div>{o.refund_status === "not_requested" && <button className="admin-action" onClick={() => void requestRefund(o.id)}>REQUEST REFUND</button>}{o.refund_status === "due_from_seller" && <b>WAITING FOR SELLER</b>}{o.refund_status === "sent_by_seller" && <button className="admin-action" onClick={() => void completeRefund(o.id)}>CONFIRM REFUND RECEIVED</button>}{o.refund_status === "completed" && <b>REFUND COMPLETE</b>}</div></section>}
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
                   </div>
                 </details>;
