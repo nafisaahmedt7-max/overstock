@@ -38,6 +38,7 @@ type Product = {
   gpo_fee_per_500g: number;
   weight_grams: number;
   overstock_profit_target: number;
+  minimum_overstock_profit: number;
 };
 type FinanceLine = {
   order_id: string;
@@ -119,7 +120,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("products")
         .select(
-          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target",
+          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target,minimum_overstock_profit",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -324,13 +325,13 @@ export function AdminDashboard({ email }: { email: string }) {
           color: String(f.get("color") || ""),
           condition: String(f.get("condition") || ""),
           sizes,
-          price: 0,
+          price: Number(f.get("price")),
+          minimum_overstock_profit: Number(f.get("minimum_overstock_profit")),
           cost_of_goods: Number(f.get("cost_of_goods")),
           inbound_delivery_fee: Number(f.get("inbound_delivery_fee") || 0),
           fulfillment_service_fee: Number(f.get("fulfillment_service_fee")),
           gpo_fee_per_500g: Number(f.get("gpo_fee_per_500g")),
           weight_grams: Number(f.get("weight_grams")),
-          overstock_profit_target: Number(f.get("overstock_profit_target")),
           stock_quantity: 1,
           ownership: seller ? "seller" : "own_stock",
           seller_id: seller || null,
@@ -771,13 +772,14 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="SIZES: XS, S, M, L, XL"
                 required
               />
-              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the profit you want OVERSTOCK to keep. Seller share is set on the seller profile (maximum 50% of profit).</small></div>
+              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the customer selling price and the minimum profit you want to keep. Seller share is set on the seller profile (maximum 50% of profit).</small></div>
               <input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="ITEM COST (USD)" required />
               <input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="DELIVERY TO FULFILMENT (USD)" defaultValue="0" />
               <input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="FULFILMENT SERVICE FEE (USD)" required />
               <input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="GPO FEE PER 500G (USD)" required />
               <input name="weight_grams" type="number" min="1" step="1" placeholder="ITEM WEIGHT (GRAMS)" required />
-              <input name="overstock_profit_target" type="number" min="0" step="0.01" placeholder="OVERSTOCK PROFIT TO KEEP (USD)" required />
+              <input name="price" type="number" min="0" step="0.01" placeholder="CUSTOMER SELLING PRICE (USD)" required />
+              <input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="MINIMUM OVERSTOCK PROFIT (USD)" required />
               <select name="seller">
                 <option value="">OWN STOCK</option>
                 {sellers.map((s) => (
