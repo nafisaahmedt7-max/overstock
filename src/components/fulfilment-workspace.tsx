@@ -65,7 +65,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
           <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.customer_name}</h2><small>{order.delivery_address || "ADDRESS PENDING"}</small></div></header>
           <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
           {action && <form className="order-action-form" onSubmit={e => void advance(e, order, action.status)}>
-            {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER (OPTIONAL FOR NOW)<input name="courier" placeholder="EXAMPLE: DHL" defaultValue={order.courier || ""} /></label><label>CUSTOMER TRACKING (OPTIONAL FOR NOW)<input name="tracking" placeholder="EXAMPLE: DHL-10245" defaultValue={order.tracking_number || ""} /></label></>}
+            {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER<input name="courier" placeholder="EXAMPLE: GPO" defaultValue={order.courier || ""} required /></label><label>CUSTOMER TRACKING NUMBER<input name="tracking" inputMode="numeric" pattern="[0-9]{6,30}" title="Use 6 to 30 tracking digits only." placeholder="NUMBERS ONLY" defaultValue={order.tracking_number || ""} required /></label></>}
             <button className="fulfilment-action">{action.label}</button>
           </form>}
           {!["delivered","cancelled"].includes(order.journey_status) && <footer><span>NEED ADMIN HELP?</span><b>Cancellation requires admin confirmation.</b><button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button></footer>}
