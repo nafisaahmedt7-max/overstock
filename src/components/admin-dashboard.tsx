@@ -569,7 +569,9 @@ export function AdminDashboard({ email }: { email: string }) {
   const grossSales = orders.reduce((n, order) => n + Number(order.total || 0), 0);
   const totalSales = orders.filter((order) => order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
   const sellerSales = activeFinance.filter((x) => x.ownership === "seller").reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const sellerCost = activeFinance.reduce((n, x) => n + Number(x.item_cost || 0) + Number(x.inbound_delivery_fee || 0), 0);
+  const itemCost = activeFinance.reduce((n, x) => n + Number(x.item_cost || 0), 0);
+  const inboundDelivery = activeFinance.reduce((n, x) => n + Number(x.inbound_delivery_fee || 0), 0);
+  const sellerCost = itemCost + inboundDelivery;
   const sellerShare = activeFinance.reduce((n, x) => n + Number(x.seller_profit_amount || 0), 0);
   const fulfillmentService = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0), 0);
   const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
@@ -623,7 +625,7 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "overview" && (<>
           <section className="finance-ledger">
-            <header><p className="eyebrow">FINANCIAL OVERVIEW</p><h2>CASH FLOW & PROFITABILITY</h2><p>Live order accounting across sales, supplier payments, fulfilment, and refunds.</p></header>
+            <header><p className="eyebrow">FINANCIAL OVERVIEW</p><h2>SALES & PROFIT</h2><p>A clear view of customer sales, operating costs, and OVERSTOCK profit.</p></header>
             <div className="cash-flow-summary">
               <article className="cash-in"><span>CASH RECEIVED</span><b>{money(cashIn)}</b><small>All customer payments</small></article>
               <article className="cash-out"><span>CASH PAID OUT</span><b>−{money(cashOut)}</b><small>Seller, fulfilment, and completed refunds</small></article>
@@ -632,19 +634,18 @@ export function AdminDashboard({ email }: { email: string }) {
               <article className="cash-projected"><span>PROJECTED CASH POSITION</span><b>{money(projectedCash)}</b><small>After all open obligations are settled</small></article>
             </div>
             <div className="finance-ledger-grid">
-              <article><span>NET SALES</span><b>{money(totalSales)}</b><small>Completed and active customer orders</small></article>
-              <article><span>SELLER PRODUCT SALES</span><b>{money(sellerSales)}</b><small>Sales from seller-owned inventory</small></article>
-              <article className="negative-ledger"><span>ITEM COST & INBOUND DELIVERY</span><b>−{money(sellerCost)}</b><small>Seller item cost and delivery to fulfilment</small></article>
-              <article className="negative-ledger"><span>SELLER PROFIT SHARE</span><b>−{money(sellerShare)}</b><small>Seller percentage of profit after all costs</small></article>
-              <article className="negative-ledger"><span>FULFILMENT SERVICE FEES</span><b>−{money(fulfillmentService)}</b><small>Team handling and service costs</small></article>
-              <article className="negative-ledger"><span>GPO SHIPPING FEES</span><b>−{money(gpoFees)}</b><small>Weight-based courier charges</small></article>
+              <article className="sales-ledger-total"><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article>
+              <article className="negative-ledger"><span>ITEM COST</span><b>−{money(itemCost)}</b><small>Cost of each product</small></article>
+              <article className="negative-ledger"><span>SELLER SHARE</span><b>−{money(sellerShare)}</b><small>Seller share of profit</small></article>
+              <article className="negative-ledger"><span>DELIVERY TO FULFILMENT</span><b>−{money(inboundDelivery)}</b><small>Seller-to-fulfilment delivery</small></article>
+              <article className="negative-ledger"><span>FULFILMENT SERVICES</span><b>−{money(fulfillmentService)}</b><small>Handling and service fees</small></article>
+              <article className="negative-ledger"><span>GPO SHIPPING</span><b>−{money(gpoFees)}</b><small>Weight-based courier charges</small></article>
               <article><span>SELLER PAYMENT DUE</span><b>{money(sellerDue)}</b><small>Unpaid seller amount</small></article>
-              <article><span>SELLER PAYMENT PAID</span><b>{money(sellerPaid)}</b><small>Seller amount already paid</small></article>
               <article><span>FULFILMENT PAYMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Unpaid fulfilment amount</small></article>
-              <article className="ledger-result"><span>OVERSTOCK PROFIT</span><b>{money(overstockProfit)}</b><small>Profit after cost of goods and fulfilment</small></article>
+              <article className="ledger-result"><span>OVERSTOCK PROFIT</span><b>{money(overstockProfit)}</b><small>Sales less every product and delivery cost</small></article>
             </div>
-            <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((sellerCost + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
-            <div className="ledger-key"><span><i className="ledger-bar-cost" />Seller cost + profit share</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
+            <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((itemCost + inboundDelivery + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
+            <div className="ledger-key"><span><i className="ledger-bar-cost" />Item cost, seller share & delivery</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
           </section>
           <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>CUSTOMER REFUND DUE</span><b>−{money(refundsDue)}</b></article><article><span>CUSTOMER REFUND IN TRANSIT</span><b>−{money(refundsSent)}</b></article><article><span>SELLER REFUND RECOVERY</span><b>{money(pendingSellerRecovery + completedSellerRecovery)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article></div></section>
         </>)}
