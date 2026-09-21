@@ -179,8 +179,9 @@ button {
 }
 .product-card > a {
   width: 100%;
-  display: grid;
-  grid-template-rows: auto auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   overflow: hidden;
 }
 .product-card:nth-child(3n) {
@@ -232,8 +233,9 @@ button {
   filter: brightness(0.94);
 }
 .product-meta {
-  aspect-ratio: 4 / .78;
-  min-height: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 4 / .82;
   overflow: hidden;
   padding: 6% 7%;
   display: flex;
