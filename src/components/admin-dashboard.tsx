@@ -922,7 +922,9 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>ARCHIVED</b> — Product is removed from the catalogue without deleting its history.</p>
               </div>
             </details>
-            <form className="admin-form product-form" onSubmit={addProduct}>
+            <section className="product-entry-panel">
+              <header><div><p className="eyebrow">ADD A NEW PRODUCT</p><h2>PRODUCT DETAILS</h2></div></header>
+              <form className="admin-form product-form" onSubmit={addProduct}>
               <input name="sku" placeholder="SKU (3–24 LETTERS / NUMBERS / -)" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required />
               <input name="name" placeholder="PRODUCT NAME (3–80 CHARACTERS)" minLength={3} maxLength={80} required />
               <input name="brand" placeholder="BRAND" maxLength={40} />
@@ -981,7 +983,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 <b>CHOOSE FILE</b>
               </label>
               <button>ADD DRAFT</button>
-            </form>
+              </form>
+            </section>
             <p className="form-help">
               Images must be 4:5 WebP files and no larger than 10 MB. Recommended: 1600 × 2000 px. Need to remove a background or convert? Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> first.
             </p>
@@ -1244,7 +1247,7 @@ export function AdminDashboard({ email }: { email: string }) {
               title="PACKAGE AND SHIPMENT CONNECTIONS"
             />
             <section className="team-member-panel">
-              <header><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2><p>Add the person first; the assignment queue below is where you connect them to an order.</p></header>
+              <header><div><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2></div></header>
               <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
                 <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
                 <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="rahim@example.com" required /></label>
