@@ -43,6 +43,11 @@ type FinanceLine = {
   payout_status: string;
   fulfillment_fee: number | null;
   fulfillment_payment_status: string;
+  item_cost: number | null;
+  seller_profit_amount: number | null;
+  inbound_delivery_fee: number | null;
+  fulfillment_service_fee: number | null;
+  gpo_fee: number | null;
 };
 type Order = {
   id: string;
@@ -62,6 +67,8 @@ type Order = {
   cancellation_requested_at: string | null;
   cancellation_requested_by_role: string | null;
   cancellation_request_reason: string | null;
+  refund_status: string;
+  refund_amount: number;
 };
 type Partner = { id: string; name: string; warehouse_address: string | null };
 type Shipment = {
@@ -110,7 +117,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -125,7 +132,7 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status"),
+        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -529,38 +536,25 @@ export function AdminDashboard({ email }: { email: string }) {
       style: "currency",
       currency: "USD",
     }).format(n);
-  const totalSales = orders
-    .filter((order) => order.journey_status !== "cancelled")
-    .reduce((n, order) => n + Number(order.total || 0), 0);
-  const activeFinance = finance.filter((line) => {
-    const order = orders.find((item) => item.id === line.order_id);
-    return order?.journey_status !== "cancelled";
-  });
-  const sellerSales = activeFinance
-    .filter((x) => x.ownership === "seller")
-    .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const sellerDue = activeFinance
-    .filter((x) => x.ownership === "seller" && x.payout_status === "due")
-    .reduce((n, x) => n + Number(x.seller_due || 0), 0);
-  const sellerPaid = activeFinance
-    .filter((x) => x.ownership === "seller" && x.payout_status === "paid")
-    .reduce((n, x) => n + Number(x.seller_due || 0), 0);
-  const fulfillmentDue = activeFinance
-    .filter((x) => x.fulfillment_payment_status === "due")
-    .reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
-  const fulfillmentPaid = activeFinance
-    .filter((x) => x.fulfillment_payment_status === "paid")
-    .reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
-  const sellerShare = sellerDue + sellerPaid;
-  const fulfilmentCost = fulfillmentDue + fulfillmentPaid;
-  // Every customer dollar lives in exactly one overview segment. "Due" and
-  // "Paid" only show whether that seller/fulfilment segment is settled yet.
-  const overstockSales = Math.max(0, totalSales - sellerShare - fulfilmentCost);
-  const chartTotal = totalSales || 1;
-  const overstockEnd = (overstockSales / chartTotal) * 100;
-  const sellerDueEnd = overstockEnd + (sellerDue / chartTotal) * 100;
-  const sellerPaidEnd = sellerDueEnd + (sellerPaid / chartTotal) * 100;
-  const fulfillmentDueEnd = sellerPaidEnd + (fulfillmentDue / chartTotal) * 100;
+  const refundableOrders = orders.filter((order) => order.journey_status === "cancelled");
+  const totalRefunds = refundableOrders.reduce((n, order) => n + Number(order.refund_amount || 0), 0);
+  const refundsDue = refundableOrders.filter((order) => order.refund_status === "due_from_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
+  const refundsSent = refundableOrders.filter((order) => order.refund_status === "sent_by_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
+  const completedRefunds = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
+  const activeOrderIds = new Set(orders.filter((order) => order.journey_status !== "cancelled").map((order) => order.id));
+  const activeFinance = finance.filter((line) => activeOrderIds.has(line.order_id));
+  const totalSales = orders.filter((order) => order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
+  const sellerSales = activeFinance.filter((x) => x.ownership === "seller").reduce((n, x) => n + Number(x.gross_amount || 0), 0);
+  const costOfGoods = activeFinance.reduce((n, x) => n + Number(x.item_cost || 0), 0);
+  const sellerProfit = activeFinance.reduce((n, x) => n + Number(x.seller_profit_amount || 0), 0);
+  const sellerDelivery = activeFinance.reduce((n, x) => n + Number(x.inbound_delivery_fee || 0), 0);
+  const fulfillmentService = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0), 0);
+  const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
+  const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_due || 0), 0);
+  const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
+  const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
+  const overstockSales = totalSales - costOfGoods - sellerProfit - sellerDelivery - fulfillmentService - gpoFees;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -596,245 +590,7 @@ export function AdminDashboard({ email }: { email: string }) {
             {notice} ×
           </button>
         )}
-        {tab === "overview" && (
-          <>
-            <div className="finance-overview">
-              <div
-                className="balance-chart"
-                style={{
-                  background: `conic-gradient(#1d73d2 0 ${overstockEnd}%, #7651a8 ${overstockEnd}% ${sellerDueEnd}%, #a98bd2 ${sellerDueEnd}% ${sellerPaidEnd}%, #d49b4a ${sellerPaidEnd}% ${fulfillmentDueEnd}%, #2f7d42 ${fulfillmentDueEnd}% 100%)`,
-                }}
-                aria-label="Customer payments split between OVERSTOCK, seller share, and fixed fulfilment costs"
-              >
-                <span>
-                  {money(totalSales)}
-                  <small>TOTAL SALES</small>
-                </span>
-              </div>
-              <div className="balance-list">
-                <article>
-                  <span data-balance="total">TOTAL SALES</span>
-                  <b>{money(totalSales)}</b>
-                </article>
-                <article>
-                  <span data-balance="own">SELLER ORDER SALES</span>
-                  <b>{money(sellerSales)}</b>
-                </article>
-                <article>
-                  <span data-balance="due">SELLER DUE</span>
-                  <b>{money(sellerDue)}</b>
-                </article>
-                <article>
-                  <span data-balance="paid">SELLER PAID</span>
-                  <b>{money(sellerPaid)}</b>
-                </article>
-                <article>
-                  <span data-balance="fulfillment-due">FULFILMENT DUE</span>
-                  <b>{money(fulfillmentDue)}</b>
-                </article>
-                <article>
-                  <span data-balance="fulfillment-paid">FULFILMENT PAID</span>
-                  <b>{money(fulfillmentPaid)}</b>
-                </article>
-                <article>
-                  <span data-balance="overstock">OVERSTOCK SALES</span>
-                  <b>{money(overstockSales)}</b>
-                </article>
-              </div>
-            </div>
-            <details className="admin-help-dropdown money-guide">
-              <summary>HOW THE OVERVIEW IS CALCULATED</summary>
-              <div>
-                <p><b>TOTAL SALES</b> — the entire amount paid by customers.</p>
-                <p><b>SELLER SHARE TOTAL</b> — the amount owed to sellers from seller-stock orders. It moves from Seller Due to Seller Paid, but is never counted twice.</p>
-                <p><b>FULFILMENT COST</b> — the fixed per-item fulfilment fee. It moves from Fulfilment Due to Fulfilment Paid, but is never counted twice.</p>
-                <p><b>OVERSTOCK SALES</b> — Total Sales minus the seller share and fulfilment cost. The pie always adds back up to Total Sales.</p>
-              </div>
-            </details>
-            <div className="admin-stats">
-              <article>
-                <span>SELLERS</span>
-                <b>{sellers.length}</b>
-              </article>
-              <article>
-                <span>PRODUCTS</span>
-                <b>{products.length}</b>
-              </article>
-              <article>
-                <span>ORDERS</span>
-                <b>{orders.length}</b>
-              </article>
-              <article>
-                <span>SELLER STOCK</span>
-                <b>{products.filter((p) => p.ownership === "seller").length}</b>
-              </article>
-            </div>
-            <StatusConnectionGuide role="admin-orders" title="ORDER STATUS DICTIONARY" />
-            <details className="status-guide collapsible-guide legacy-status-guide">
-              <summary>ALL STATUS EXPLANATIONS</summary>
-              <p className="eyebrow">SHARED WORKFLOW</p>
-              <h2>STATUS DICTIONARY</h2>
-              <p className="guide-intro">
-                Everyone reads the same live status. Each role can only update
-                the stages assigned to them; admin can verify and correct all
-                records.
-              </p>
-              <div className="status-table-wrap">
-                <table className="status-table">
-                  <thead>
-                    <tr>
-                      <th>STATUS</th>
-                      <th>WHAT IT MEANS</th>
-                      <th>ADMIN VIEW</th>
-                      <th>SELLER VIEW</th>
-                      <th>FULFILMENT VIEW</th>
-                      <th>CONTROLLED BY</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>DRAFT</td>
-                      <td>
-                        Product is being prepared and is hidden from customers.
-                      </td>
-                      <td>Review or edit</td>
-                      <td>Not published</td>
-                      <td>Not relevant</td>
-                      <td>Admin</td>
-                    </tr>
-                    <tr>
-                      <td>ACTIVE</td>
-                      <td>Product is approved and visible in the shop.</td>
-                      <td>Live product</td>
-                      <td>Approved product</td>
-                      <td>Not relevant</td>
-                      <td>Admin</td>
-                    </tr>
-                    <tr>
-                      <td>AWAITING SELLER</td>
-                      <td>
-                        An order exists and the seller must confirm the item.
-                      </td>
-                      <td>Waiting for seller</td>
-                      <td>Action required</td>
-                      <td>Waiting; read only</td>
-                      <td>Seller</td>
-                    </tr>
-                    <tr>
-                      <td>SELLER CONFIRMED</td>
-                      <td>The seller confirms the item can be supplied.</td>
-                      <td>Confirmed</td>
-                      <td>Prepare parcel</td>
-                      <td>Expected inbound</td>
-                      <td>Seller</td>
-                    </tr>
-                    <tr>
-                      <td>INBOUND TRANSIT</td>
-                      <td>The seller parcel is travelling to OVERSTOCK.</td>
-                      <td>See inbound tracking</td>
-                      <td>See own tracking</td>
-                      <td>Track incoming parcel</td>
-                      <td>Seller</td>
-                    </tr>
-                    <tr>
-                      <td>RECEIVED</td>
-                      <td>
-                        Your internal team physically received the seller
-                        parcel.
-                      </td>
-                      <td>Verified received</td>
-                      <td>Received by OVERSTOCK</td>
-                      <td>Begin inspection</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>QC HOLD</td>
-                      <td>
-                        The item has a quality issue that needs a decision.
-                      </td>
-                      <td>Review issue</td>
-                      <td>Quality issue visible</td>
-                      <td>Record and hold</td>
-                      <td>Fulfilment + Admin</td>
-                    </tr>
-                    <tr>
-                      <td>QC PASSED</td>
-                      <td>The item passed inspection.</td>
-                      <td>Ready for dispatch flow</td>
-                      <td>Inspection passed</td>
-                      <td>Prepare customer parcel</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>READY TO PACK</td>
-                      <td>The customer shipment can be packed.</td>
-                      <td>Awaiting packing</td>
-                      <td>Order progressing</td>
-                      <td>Action required</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>PACKED</td>
-                      <td>
-                        The customer parcel is sealed and ready for courier
-                        pickup.
-                      </td>
-                      <td>Packed</td>
-                      <td>Order progressing</td>
-                      <td>Add outbound courier</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>SHIPPED</td>
-                      <td>
-                        The parcel is travelling from OVERSTOCK to the customer.
-                      </td>
-                      <td>See customer tracking</td>
-                      <td>Order dispatched</td>
-                      <td>Monitor delivery</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>DELIVERED</td>
-                      <td>The customer received the parcel.</td>
-                      <td>Complete order</td>
-                      <td>Sale delivered</td>
-                      <td>Delivery complete</td>
-                      <td>Fulfilment</td>
-                    </tr>
-                    <tr>
-                      <td>CANCELLED</td>
-                      <td>The order was stopped before completion.</td>
-                      <td>Resolve stock and money</td>
-                      <td>Outcome visible</td>
-                      <td>Stop shipment</td>
-                      <td>Admin</td>
-                    </tr>
-                    <tr>
-                      <td>UNPAID / PAID / REFUNDED</td>
-                      <td>
-                        Customer payment record. Stripe will automate this
-                        later.
-                      </td>
-                      <td>Manage payment</td>
-                      <td>Relevant outcome only</td>
-                      <td>Not editable</td>
-                      <td>Admin</td>
-                    </tr>
-                    <tr>
-                      <td>PAYOUT DUE / PAID</td>
-                      <td>Money owed or already settled with the seller.</td>
-                      <td>Approve settlement</td>
-                      <td>See own balance</td>
-                      <td>Not visible</td>
-                      <td>Admin</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </details>
-          </>
-        )}
+        {tab === "overview" && (<><section className="finance-ledger"><header><p className="eyebrow">LIVE ORDER LEDGER</p><h2>WHERE EACH CUSTOMER PAYMENT GOES</h2><p>Cancelled orders are kept out of sales and shown separately as refunds.</p></header><div className="finance-ledger-grid"><article><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>COST OF GOODS</span><b>{money(costOfGoods)}</b><small>Product cost, before seller profit</small></article><article><span>SELLER SALES</span><b>{money(sellerSales)}</b><small>Customer sales of seller-owned products</small></article><article><span>SELLER DUE</span><b>{money(sellerDue)}</b><small>Seller payment still outstanding</small></article><article><span>SELLER PAID</span><b>{money(sellerPaid)}</b><small>Seller payment already sent</small></article><article><span>FULFILMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Service and GPO costs outstanding</small></article><article><span>FULFILMENT PAID</span><b>{money(fulfillmentPaid)}</b><small>Service and GPO costs paid</small></article><article className="ledger-result"><span>OVERSTOCK SALES</span><b>{money(overstockSales)}</b><small>Amount remaining after every order cost</small></article></div><div className="ledger-formula"><b>{money(totalSales)}</b><span>total sales</span><i>−</i><b>{money(costOfGoods)}</b><span>cost of goods</span><i>−</i><b>{money(sellerProfit + sellerDelivery)}</b><span>seller profit + delivery to fulfilment</span><i>−</i><b>{money(fulfillmentService + gpoFees)}</b><span>fulfilment service + GPO</span><i>=</i><strong>{money(overstockSales)}</strong><span>OVERSTOCK SALES</span></div></section><section className="refund-ledger"><header><p className="eyebrow">CANCELLED ORDERS</p><h2>REFUND TRACKER</h2></header><div><article><span>REFUNDS REQUESTED</span><b>{money(totalRefunds)}</b></article><article><span>REFUND DUE FROM SELLER</span><b>{money(refundsDue)}</b></article><article><span>SELLER REFUND SENT</span><b>{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>{money(completedRefunds)}</b></article></div></section></>)}
         {tab === "sellers" && (
           <>
             <details className="admin-help-dropdown">
