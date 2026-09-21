@@ -2048,3 +2048,5 @@ input[type="number"]::-webkit-outer-spin-button {
 .calculated-order-note{border:1px solid #171717;background:#e7edf8;padding:.8rem 1rem;display:flex;flex-direction:column;gap:.22rem}.calculated-order-note span{font-size:.68rem;font-weight:800;letter-spacing:.07em}.calculated-order-note b{font-size:.8rem}.calculated-order-note small{font-size:.72rem;line-height:1.35}
 
 .sales-ledger-total{background:#e6edf7}.sales-ledger-total b{color:#174f93}
+
+.product-pricing-fields{grid-column:1/-1;margin:0;border:1px solid #171717;background:#e6edf7;padding:1rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}.product-pricing-fields legend{padding:0 .4rem;font-size:.72rem;font-weight:900;letter-spacing:.08em}.product-pricing-fields>p,.product-pricing-fields>small{grid-column:1/-1;margin:0;font-size:.75rem;line-height:1.4}.product-pricing-fields label{display:flex;flex-direction:column;gap:.35rem}.product-pricing-fields label span{font-size:.67rem;font-weight:800;letter-spacing:.04em}.product-pricing-fields input{width:100%;box-sizing:border-box}@media(max-width:760px){.product-pricing-fields{grid-template-columns:1fr}}
