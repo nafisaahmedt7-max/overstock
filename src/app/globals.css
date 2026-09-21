@@ -178,7 +178,7 @@ button {
 .product-card > a {
   width: 100%;
   display: grid;
-  grid-template-rows: auto 5.75rem;
+  grid-template-rows: auto auto;
   overflow: hidden;
 }
 .product-card:nth-child(3n) {
@@ -230,18 +230,16 @@ button {
   filter: brightness(0.94);
 }
 .product-meta {
-  height: 5.75rem;
+  aspect-ratio: 4 / .78;
   min-height: 0;
   overflow: hidden;
-  padding: 1rem;
+  padding: 6% 7%;
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: .75rem;
   border-top: 1px solid var(--line);
-  font:
-    500 0.78rem var(--font-mono),
-    monospace;
-  background:#e7e7e3;
+  font: 500 clamp(.68rem, 1.1vw, .82rem) var(--font-mono), monospace;
+  background: var(--paper);
 }
 .product-meta h2 {
   font-size: inherit;
@@ -454,10 +452,7 @@ button {
     border-right: 1px solid var(--line);
     scroll-snap-align: start;
   }
-  .product-meta {
-    height: 5.75rem;
-    display: flex;
-  }
+  .product-meta { display: flex; }
   .product-page {
     grid-template-columns: 1fr;
   }
