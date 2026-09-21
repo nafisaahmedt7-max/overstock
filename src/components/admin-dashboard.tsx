@@ -922,7 +922,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>ARCHIVED</b> — Product is removed from the catalogue without deleting its history.</p>
               </div>
             </details>
-            <section className="product-entry-panel">
+            <section className="order-entry-panel product-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW PRODUCT</p><h2>PRODUCT DETAILS</h2></div></header>
               <form className="admin-form product-form" onSubmit={addProduct}>
               <input name="sku" placeholder="SKU (3–24 LETTERS / NUMBERS / -)" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required />
@@ -1246,7 +1246,7 @@ export function AdminDashboard({ email }: { email: string }) {
               role="admin-fulfilment"
               title="PACKAGE AND SHIPMENT CONNECTIONS"
             />
-            <section className="team-member-panel">
+            <section className="order-entry-panel team-member-panel">
               <header><div><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2></div></header>
               <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
                 <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
