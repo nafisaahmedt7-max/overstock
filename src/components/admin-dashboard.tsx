@@ -679,7 +679,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     step="0.01"
                     defaultValue="20"
                     placeholder="20%"
-                    aria-label="Seller share of profit (maximum 50 percent)"re percentage"
+                    aria-label="Seller share of profit (maximum 50 percent)"
                     required
                   />
                 </span>
