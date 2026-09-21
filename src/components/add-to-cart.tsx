@@ -27,7 +27,9 @@ export function AddToCart({ product }: { product: Product }) {
       <button
         className="add-button"
         type="button"
+        disabled={product.status === "sold_out"}
         onClick={() => {
+          if (product.status === "sold_out") return;
           add({
             slug: product.slug,
             name: product.name,
@@ -38,7 +40,7 @@ export function AddToCart({ product }: { product: Product }) {
           window.setTimeout(() => setAdded(false), 2400);
         }}
       >
-        {added ? "ADDED TO CART" : "ADD TO CART"}
+        {product.status === "sold_out" ? "CURRENTLY OUT OF STOCK" : added ? "ADDED TO CART" : "ADD TO CART"}
       </button>
       <div
         className={`store-toast ${added ? "show" : ""}`}
