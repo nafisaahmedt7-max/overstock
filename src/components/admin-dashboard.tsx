@@ -441,12 +441,7 @@ export function AdminDashboard({ email }: { email: string }) {
     const form = e.currentTarget,
       f = new FormData(form),
       product = products.find((p) => p.id === String(f.get("product"))),
-      qty = Number(f.get("quantity")),
-      totalPaid = Number(
-        String(f.get("total_paid") || "0")
-          .trim()
-          .replace(",", "."),
-      );
+      qty = Number(f.get("quantity"));
     if (!product) {
       setNotice("Choose a product.");
       return;
@@ -455,21 +450,17 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice("Quantity must be a whole number of 1 or more.");
       return;
     }
-    if (!Number.isFinite(totalPaid) || totalPaid <= 0) {
-      setNotice("Enter the total amount paid by the customer, such as 120.00.");
-      return;
-    }
     const { error } = await supabase.rpc("admin_create_manual_order", { payload: {
       customer_name: String(f.get("customer")), customer_phone: String(f.get("phone") || ""),
       customer_email: String(f.get("email") || ""), delivery_address: String(f.get("address") || ""),
       product_id: product.id, selected_size: String(f.get("size") || ""), quantity: qty,
-      unit_price: totalPaid / qty, delivery_fee: 0, internal_notes: ""
+      delivery_fee: 0, internal_notes: ""
     }});
     if (error) {
       setNotice(error?.message || "Could not create order.");
       return;
     }
-    setNotice("Order created and assigned to the correct seller automatically.");
+    setNotice("Order created. Customer total was calculated from product costs, seller share, fulfilment, GPO, and OVERSTOCK profit target.");
     form.reset();
     setOrderProductId("");
     await load();
@@ -1015,7 +1006,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <option value="" disabled>CHOOSE</option>
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
                 </select></label>
-                <label><span>TOTAL PAID (USD)</span><input name="total_paid" type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]{1,2})?" placeholder="EXAMPLE: 120.00" required /></label>
+                <div className="calculated-order-note"><span>CUSTOMER TOTAL</span><b>CALCULATED FROM PRODUCT COSTS</b><small>Item cost, seller delivery and share, fulfilment service, GPO, and OVERSTOCK profit target.</small></div>
                 <button>CREATE ORDER</button>
               </form>
             </section>
