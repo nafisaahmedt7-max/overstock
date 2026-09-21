@@ -771,7 +771,13 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="SIZES: XS, S, M, L, XL"
                 required
               />
-              <fieldset className="product-pricing-fields"><legend>PRODUCT PRICING</legend><p>Enter the real costs for this product. The customer price is calculated automatically.</p><label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" required /></label><label><span>DELIVERY TO FULFILMENT (USD)</span><input name="inbound_delivery_fee" type="number" min="0" step="0.01" defaultValue="0" /></label><label><span>FULFILMENT SERVICE FEE (USD)</span><input name="fulfillment_service_fee" type="number" min="0" step="0.01" required /></label><label><span>GPO FEE PER 500G (USD)</span><input name="gpo_fee_per_500g" type="number" min="0" step="0.01" required /></label><label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" required /></label><label><span>OVERSTOCK PROFIT TARGET (USD)</span><input name="overstock_profit_target" type="number" min="0" step="0.01" required /></label><small>Seller share is set on the seller profile and cannot exceed 50% of the profit pool.</small></fieldset>
+              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Customer price is calculated automatically. Seller share comes from the seller profile.</small></div>
+              <input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="ITEM COST (USD)" required />
+              <input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="DELIVERY TO FULFILMENT (USD)" defaultValue="0" />
+              <input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="FULFILMENT SERVICE FEE (USD)" required />
+              <input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="GPO FEE PER 500G (USD)" required />
+              <input name="weight_grams" type="number" min="1" step="1" placeholder="ITEM WEIGHT (GRAMS)" required />
+              <input name="overstock_profit_target" type="number" min="0" step="0.01" placeholder="OVERSTOCK PROFIT TARGET (USD)" required />
               <select name="seller">
                 <option value="">OWN STOCK</option>
                 {sellers.map((s) => (
