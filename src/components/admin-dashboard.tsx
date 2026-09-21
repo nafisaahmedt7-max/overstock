@@ -678,11 +678,11 @@ export function AdminDashboard({ email }: { email: string }) {
                     name="commission"
                     type="number"
                     min="0"
-                    max="100"
+                    max="50"
                     step="0.01"
                     defaultValue="20"
                     placeholder="20%"
-                    aria-label="Seller payout share percentage"
+                    aria-label="Seller share of profit (maximum 50 percent)"re percentage"
                     required
                   />
                 </span>
@@ -714,7 +714,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
                   <div className="edit-grid">
                     <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
+                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="50" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
                     <label className="edit-field edit-field-wide"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
                   <button className="admin-primary">SAVE SELLER</button>
