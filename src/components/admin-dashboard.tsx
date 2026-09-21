@@ -455,6 +455,16 @@ export function AdminDashboard({ email }: { email: string }) {
     setOrderProductId("");
     await load();
   }
+  async function clearAllOrders() {
+    if (!orders.length) {
+      setNotice("There are no orders to remove.");
+      return;
+    }
+    if (!window.confirm("Remove every existing order and its order items? This cannot be undone.")) return;
+    const { error } = await supabase.from("orders").delete().in("id", orders.map((order) => order.id));
+    setNotice(error?.message || "All previous orders were removed. Create the two sample completed orders next.");
+    if (!error) await load();
+  }
   async function advanceOrder(id: string, status: JourneyStatus) {
     const { error } = await supabase.rpc("advance_order_journey", {
       target_order_id: id, target_status: status, note: "Admin update",
@@ -537,10 +547,11 @@ export function AdminDashboard({ email }: { email: string }) {
   const fulfillmentPaid = activeFinance
     .filter((x) => x.fulfillment_payment_status === "paid")
     .reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
-  const ownSales = activeFinance
-    .filter((x) => x.ownership === "own_stock")
-    .reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const overstockSales = Math.max(0, totalSales - sellerDue - sellerPaid - fulfillmentDue - fulfillmentPaid);
+  const sellerShare = sellerDue + sellerPaid;
+  const fulfilmentCost = fulfillmentDue + fulfillmentPaid;
+  // Every customer dollar lives in exactly one overview segment. "Due" and
+  // "Paid" only show whether that seller/fulfilment segment is settled yet.
+  const overstockSales = Math.max(0, totalSales - sellerShare - fulfilmentCost);
   const chartTotal = totalSales || 1;
   const overstockEnd = (overstockSales / chartTotal) * 100;
   const sellerDueEnd = overstockEnd + (sellerDue / chartTotal) * 100;
@@ -589,7 +600,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 style={{
                   background: `conic-gradient(#1d73d2 0 ${overstockEnd}%, #7651a8 ${overstockEnd}% ${sellerDueEnd}%, #a98bd2 ${sellerDueEnd}% ${sellerPaidEnd}%, #d49b4a ${sellerPaidEnd}% ${fulfillmentDueEnd}%, #2f7d42 ${fulfillmentDueEnd}% 100%)`,
                 }}
-                aria-label="Total sales split between OVERSTOCK retained revenue, seller payments, and fulfilment payments"
+                aria-label="Customer payments split between OVERSTOCK, seller share, and fixed fulfilment costs"
               >
                 <span>
                   {money(totalSales)}
@@ -602,12 +613,12 @@ export function AdminDashboard({ email }: { email: string }) {
                   <b>{money(totalSales)}</b>
                 </article>
                 <article>
-                  <span data-balance="own">OWN-STOCK SALES</span>
-                  <b>{money(ownSales)}</b>
+                  <span data-balance="own">SELLER ORDER SALES</span>
+                  <b>{money(sellerSales)}</b>
                 </article>
                 <article>
-                  <span data-balance="seller">SELLER SALES</span>
-                  <b>{money(sellerSales)}</b>
+                  <span data-balance="seller">SELLER SHARE TOTAL</span>
+                  <b>{money(sellerShare)}</b>
                 </article>
                 <article>
                   <span data-balance="due">SELLER DUE</span>
@@ -626,7 +637,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <b>{money(fulfillmentPaid)}</b>
                 </article>
                 <article>
-                  <span data-balance="overstock">OVERSTOCK RETAINED</span>
+                  <span data-balance="overstock">OVERSTOCK SALES</span>
                   <b>{money(overstockSales)}</b>
                 </article>
               </div>
@@ -634,10 +645,10 @@ export function AdminDashboard({ email }: { email: string }) {
             <details className="admin-help-dropdown money-guide">
               <summary>HOW THE OVERVIEW IS CALCULATED</summary>
               <div>
-                <p><b>TOTAL SALES</b> — Every dollar paid by customers, including any amount collected for delivery.</p>
-                <p><b>SELLER DUE / PAID</b> — The seller share is counted once: under Due before settlement, then under Paid after settlement.</p>
-                <p><b>FULFILMENT DUE / PAID</b> — US$5 per item is recorded once: under Due before settlement, then under Paid after settlement.</p>
-                <p><b>OVERSTOCK RETAINED</b> — Total Sales minus all seller shares and fulfilment costs, whether those obligations are still due or already paid.</p>
+                <p><b>TOTAL SALES</b> — the entire amount paid by customers.</p>
+                <p><b>SELLER SHARE TOTAL</b> — the amount owed to sellers from seller-stock orders. It moves from Seller Due to Seller Paid, but is never counted twice.</p>
+                <p><b>FULFILMENT COST</b> — the fixed per-item fulfilment fee. It moves from Fulfilment Due to Fulfilment Paid, but is never counted twice.</p>
+                <p><b>OVERSTOCK SALES</b> — Total Sales minus the seller share and fulfilment cost. The pie always adds back up to Total Sales.</p>
               </div>
             </details>
             <div className="admin-stats">
@@ -1163,6 +1174,10 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "orders" && (
           <>
+            <section className="order-reset-panel">
+              <div><p className="eyebrow">SAMPLE DATA</p><h2>START THE ORDER LIST FRESH</h2><p>Remove old test orders before adding the one or two completed examples you want to keep in the overview.</p></div>
+              <button className="danger-action" type="button" onClick={() => void clearAllOrders()}>REMOVE ALL ORDERS</button>
+            </section>
             <StatusConnectionGuide role="admin-orders" title="FULL ORDER STATUS DICTIONARY" />
             <section className="order-entry-panel">
               <header>
@@ -1197,7 +1212,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 return <details className="order-card order-receipt-details" key={o.id}>
                   <summary>
                     <span><small>ORDER</small><b>#{o.order_number}</b></span>
-                    <span className="order-summary-status"><small>CURRENT STATUS</small><b className="status-badge" data-status={o.journey_status}>{journeyLabel(o.journey_status)}</b></span>
+                    <label className="order-summary-status"><small>CURRENT STATUS</small><select className="order-summary-status-select" value={o.journey_status} data-status={o.journey_status} aria-label={`Order ${o.order_number} status`} onClick={(event) => event.stopPropagation()} onChange={(e) => { const next = e.target.value as JourneyStatus; if (next !== "cancelled" || window.confirm("Cancel this order? Only admin can perform this action.")) void advanceOrder(o.id, next); }}>{JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}<option value="cancelled">CANCELLED</option></select></label>
                   </summary>
                   <div className="order-receipt-body">
                   <header>
@@ -1223,15 +1238,6 @@ export function AdminDashboard({ email }: { email: string }) {
                     {o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}
                   </section>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
-                  <label className="journey-override">ADMIN CORRECTION / OVERRIDE
-                    <select value={o.journey_status} data-status={o.journey_status} onChange={(e) => {
-                      const next = e.target.value as JourneyStatus;
-                      if (next !== "cancelled" || window.confirm("Cancel this order? Only admin can perform this action.")) void advanceOrder(o.id, next);
-                    }}>
-                      {JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}
-                      <option value="cancelled">CANCELLED</option>
-                    </select>
-                  </label>
                   </div>
                 </details>;
               })}
@@ -1244,15 +1250,15 @@ export function AdminDashboard({ email }: { email: string }) {
               role="admin-fulfilment"
               title="PACKAGE AND SHIPMENT CONNECTIONS"
             />
-            <details className="admin-help-dropdown team-member-panel">
-              <summary>ADD FULFILMENT TEAM MEMBER</summary>
+            <section className="team-member-panel">
+              <header><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2><p>Add the person first; the assignment queue below is where you connect them to an order.</p></header>
               <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
                 <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
                 <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="rahim@example.com" required /></label>
                 <label><span>ADDRESS</span><input name="address" placeholder="EXAMPLE: WAREHOUSE OR WORK ADDRESS" required /></label>
                 <div className="fulfilment-form-action"><button>ADD TEAM MEMBER</button></div>
               </form>
-            </details>
+            </section>
             <section className="assignment-queue">
               <header>
                 <p className="eyebrow">ADMIN ACTION</p>
