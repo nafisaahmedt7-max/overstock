@@ -152,11 +152,9 @@ export function AdminDashboard({ email }: { email: string }) {
     if (file.size > 10 * 1024 * 1024)
       throw new Error("Image must be under 10 MB.");
     if (
-      !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
-        file.type,
-      )
+      file.type !== "image/webp"
     )
-      throw new Error("Use JPG, PNG, WebP or AVIF.");
+      throw new Error("Use a WebP image only. Convert the file first, then upload it.");
     const dimensions = await new Promise<{ width: number; height: number }>(
       (resolve, reject) => {
         const img = new window.Image();
@@ -925,11 +923,11 @@ export function AdminDashboard({ email }: { email: string }) {
               </div>
             </details>
             <form className="admin-form product-form" onSubmit={addProduct}>
-              <input name="sku" placeholder="SKU" required />
-              <input name="name" placeholder="PRODUCT NAME" required />
-              <input name="brand" placeholder="BRAND" />
-              <input name="color" placeholder="COLOR" />
-              <input name="condition" placeholder="CONDITION" />
+              <input name="sku" placeholder="SKU (3–24 LETTERS / NUMBERS / -)" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required />
+              <input name="name" placeholder="PRODUCT NAME (3–80 CHARACTERS)" minLength={3} maxLength={80} required />
+              <input name="brand" placeholder="BRAND" maxLength={40} />
+              <input name="color" placeholder="COLOR" maxLength={40} />
+              <input name="condition" placeholder="CONDITION: NEW / LIKE NEW / PRE-OWNED" minLength={3} maxLength={40} required />
               <select name="audience" required>
                 <option value="">MEN / WOMEN</option>
                 <option value="men">MEN</option>
@@ -974,7 +972,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   id="product-image"
                   name="image"
                   type="file"
-                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  accept="image/webp"
                   onChange={(e) => void chooseImage(e.target.files?.[0])}
                 />
                 <span className="image-file-name">
@@ -985,8 +983,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <button>ADD DRAFT</button>
             </form>
             <p className="form-help">
-              Images must be 4:5, JPG/PNG/WebP/AVIF, and no larger than 10 MB.
-              Recommended: 1600 × 2000 px.
+              Images must be 4:5 WebP files and no larger than 10 MB. Recommended: 1600 × 2000 px. Need to remove a background or convert? Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> first.
             </p>
             {imagePreview && (
               <div className="image-preview">
