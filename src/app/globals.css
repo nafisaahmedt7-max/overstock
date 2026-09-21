@@ -153,7 +153,8 @@ button {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  align-items: stretch;
+  align-items: start;
+  grid-auto-rows: min-content;
   width: 100%;
 }
 .product-lane > header {
@@ -169,11 +170,12 @@ button {
   border-top: 1px solid var(--line);
 }
 .product-card {
+  align-self: start;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   min-width: 0;
   overflow: hidden;
-  background: #fff;
+  background: var(--paper);
 }
 .product-card > a {
   width: 100%;
