@@ -403,7 +403,13 @@ export function AdminDashboard({ email }: { email: string }) {
         color: String(f.get("color")),
         condition: String(f.get("condition")),
         sizes,
-        price: Number(f.get("price")),
+        price: 0,
+        cost_of_goods: Number(f.get("cost_of_goods")),
+        inbound_delivery_fee: Number(f.get("inbound_delivery_fee") || 0),
+        fulfillment_service_fee: Number(f.get("fulfillment_service_fee")),
+        gpo_fee_per_500g: Number(f.get("gpo_fee_per_500g")),
+        weight_grams: Number(f.get("weight_grams")),
+        overstock_profit_target: Number(f.get("overstock_profit_target")),
         stock_quantity: 1,
         ownership: seller ? "seller" : "own_stock",
         seller_id: seller || null,
@@ -916,17 +922,12 @@ export function AdminDashboard({ email }: { email: string }) {
                         required
                       />
                     </label>
-                    <label className="edit-field">
-                      <span>PRICE (USD)</span>
-                      <input
-                        name="price"
-                        type="number"
-                        step=".01"
-                        min="0"
-                        defaultValue={editing.price}
-                        required
-                      />
-                    </label>
+                    <label className="edit-field"><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" step=".01" min="0" defaultValue={editing.cost_of_goods} required /></label>
+                    <label className="edit-field"><span>SELLER DELIVERY (USD)</span><input name="inbound_delivery_fee" type="number" step=".01" min="0" defaultValue={editing.inbound_delivery_fee} /></label>
+                    <label className="edit-field"><span>FULFILMENT SERVICE (USD)</span><input name="fulfillment_service_fee" type="number" step=".01" min="0" defaultValue={editing.fulfillment_service_fee} required /></label>
+                    <label className="edit-field"><span>GPO FEE / 500G (USD)</span><input name="gpo_fee_per_500g" type="number" step=".01" min="0" defaultValue={editing.gpo_fee_per_500g} required /></label>
+                    <label className="edit-field"><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" step="1" min="1" defaultValue={editing.weight_grams} required /></label>
+                    <label className="edit-field"><span>OVERSTOCK PROFIT TARGET</span><input name="overstock_profit_target" type="number" step=".01" min="0" defaultValue={editing.overstock_profit_target} required /></label>
                     <label className="edit-field">
                       <span>PRODUCT OWNER</span>
                       <select
