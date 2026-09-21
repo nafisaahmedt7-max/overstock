@@ -70,6 +70,7 @@ type Order = {
   cancellation_request_reason: string | null;
   refund_status: string;
   refund_amount: number;
+  seller_refund_recovery_amount: number;
 };
 type Partner = { id: string; name: string; warehouse_address: string | null };
 type Shipment = {
@@ -118,7 +119,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount,seller_refund_recovery_amount",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -552,6 +553,8 @@ export function AdminDashboard({ email }: { email: string }) {
   const refundsSent = refundableOrders.filter((order) => order.refund_status === "sent_by_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const completedRefunds = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const refundLiability = refundsDue + refundsSent;
+  const pendingSellerRecovery = refundableOrders.filter((order) => ["due_from_seller", "sent_by_seller"].includes(order.refund_status)).reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
+  const completedSellerRecovery = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
   const activeOrderIds = new Set(orders.filter((order) => order.journey_status !== "cancelled").map((order) => order.id));
   const activeFinance = finance.filter((line) => activeOrderIds.has(line.order_id));
   const grossSales = orders.reduce((n, order) => n + Number(order.total || 0), 0);
@@ -567,10 +570,10 @@ export function AdminDashboard({ email }: { email: string }) {
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const overstockProfit = totalSales - sellerCost - sellerShare - fulfillmentService - gpoFees;
-  const cashIn = grossSales;
+  const cashIn = grossSales + completedSellerRecovery;
   const cashOut = sellerPaid + fulfillmentPaid + completedRefunds;
   const cashOnHand = cashIn - cashOut;
-  const outstandingPayables = sellerDue + fulfillmentDue + refundLiability;
+  const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
   const projectedCash = cashOnHand - outstandingPayables;
   return (
     <main className="admin-shell">
@@ -632,7 +635,7 @@ export function AdminDashboard({ email }: { email: string }) {
             <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((sellerCost + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
             <div className="ledger-key"><span><i className="ledger-bar-cost" />Seller cost + profit share</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
           </section>
-          <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>REFUND DUE FROM SELLER</span><b>−{money(refundsDue)}</b></article><article><span>REFUND SENT BY SELLER</span><b>−{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article><article><span>OPEN REFUND LIABILITY</span><b>−{money(refundLiability)}</b></article></div></section>
+          <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>CUSTOMER REFUND DUE</span><b>−{money(refundsDue)}</b></article><article><span>CUSTOMER REFUND IN TRANSIT</span><b>−{money(refundsSent)}</b></article><article><span>SELLER REFUND RECOVERY</span><b>{money(pendingSellerRecovery + completedSellerRecovery)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article></div></section>
         </>)}
         {tab === "sellers" && (
           <>
