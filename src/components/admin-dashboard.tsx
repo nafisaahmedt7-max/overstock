@@ -56,6 +56,7 @@ type FinanceLine = {
   fulfillment_service_fee: number | null;
   gpo_fee: number | null;
   seller_payout_total: number | null;
+  product_name: string;
 };
 type Order = {
   id: string;
@@ -141,7 +142,7 @@ export function AdminDashboard({ email }: { email: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("order_items")
-        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total"),
+        .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total,product_name"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -589,6 +590,11 @@ export function AdminDashboard({ email }: { email: string }) {
   const cashOnHand = cashIn - cashOut;
   const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
   const projectedCash = cashOnHand - outstandingPayables;
+  const exampleLine = activeFinance[0];
+  const exampleOrder = exampleLine ? orders.find((order) => order.id === exampleLine.order_id) : null;
+  const exampleSellerTotal = exampleLine ? Number(exampleLine.item_cost || 0) + Number(exampleLine.inbound_delivery_fee || 0) + Number(exampleLine.seller_profit_amount || 0) : 0;
+  const exampleFulfilmentTotal = exampleLine ? Number(exampleLine.fulfillment_service_fee || 0) + Number(exampleLine.gpo_fee || 0) : 0;
+  const exampleProfit = exampleOrder ? Number(exampleOrder.total || 0) - exampleSellerTotal - exampleFulfilmentTotal : 0;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -647,6 +653,7 @@ export function AdminDashboard({ email }: { email: string }) {
             </div>
             <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((itemCost + inboundDelivery + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
             <div className="ledger-key"><span><i className="ledger-bar-cost" />Item cost, seller share & delivery</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
+            {exampleLine && exampleOrder && <section className="order-profit-example"><header><p className="eyebrow">LIVE EXAMPLE</p><h3>ORDER #{exampleOrder.order_number} · {exampleLine.product_name}</h3></header><div><article><span>TOTAL SALE</span><b>{money(Number(exampleOrder.total || 0))}</b></article><i>−</i><article><span>SELLER</span><b>{money(exampleSellerTotal)}</b><small>Item {money(Number(exampleLine.item_cost || 0))} + delivery {money(Number(exampleLine.inbound_delivery_fee || 0))} + share {money(Number(exampleLine.seller_profit_amount || 0))}</small></article><i>−</i><article><span>FULFILMENT</span><b>{money(exampleFulfilmentTotal)}</b><small>Service {money(Number(exampleLine.fulfillment_service_fee || 0))} + GPO {money(Number(exampleLine.gpo_fee || 0))}</small></article><i>=</i><article className="example-profit"><span>OVERSTOCK PROFIT</span><b>{money(exampleProfit)}</b></article></div></section>}
           </section>
           <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>CUSTOMER REFUND DUE</span><b>−{money(refundsDue)}</b></article><article><span>CUSTOMER REFUND IN TRANSIT</span><b>−{money(refundsSent)}</b></article><article><span>SELLER REFUND RECOVERY</span><b>{money(pendingSellerRecovery + completedSellerRecovery)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article></div></section>
         </>)}
@@ -677,11 +684,11 @@ export function AdminDashboard({ email }: { email: string }) {
                     name="commission"
                     type="number"
                     min="0"
-                    max="50"
+                    max="100"
                     step="0.01"
                     defaultValue="20"
                     placeholder="20%"
-                    aria-label="Seller share of profit, maximum 50 percent"
+                    aria-label="Seller share of profit, 0 to 100 percent"
                     required
                   />
                 </span>
@@ -713,7 +720,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
                   <div className="edit-grid">
                     <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="50" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
+                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
                     <label className="edit-field edit-field-wide"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
                   <button className="admin-primary">SAVE SELLER</button>
@@ -772,7 +779,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="SIZES: XS, S, M, L, XL"
                 required
               />
-              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the customer selling price and the minimum profit you want to keep. Seller share is set on the seller profile (maximum 50% of profit).</small></div>
+              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the customer selling price and the minimum profit you want to keep. Seller share is set on the seller profile (0–100% of profit).</small></div>
               <input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="ITEM COST (USD)" required />
               <input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="DELIVERY TO FULFILMENT (USD)" defaultValue="0" />
               <input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="FULFILMENT SERVICE FEE (USD)" required />
