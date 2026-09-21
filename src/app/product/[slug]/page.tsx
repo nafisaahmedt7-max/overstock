@@ -41,8 +41,8 @@ export default async function ProductPage({
             <dd>{product.color}</dd>
           </div>
           <div>
-            <dt>FULFILLMENT</dt>
-            <dd>BY SELLER</dd>
+            <dt>CONDITION</dt>
+            <dd>{product.condition}</dd>
           </div>
         </dl>
         <AddToCart product={product} />
