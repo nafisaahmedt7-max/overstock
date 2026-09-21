@@ -733,49 +733,24 @@ export function AdminDashboard({ email }: { email: string }) {
             <section className="order-entry-panel product-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW PRODUCT</p><h2>PRODUCT DETAILS</h2></div></header>
               <form className="admin-form product-form" onSubmit={addProduct}>
-              <input name="sku" placeholder="SKU (3–24 LETTERS / NUMBERS / -)" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required />
-              <input name="name" placeholder="PRODUCT NAME (3–80 CHARACTERS)" minLength={3} maxLength={80} required />
-              <input name="brand" placeholder="BRAND" maxLength={40} />
-              <input name="color" placeholder="COLOR" maxLength={40} />
-              <input name="condition" placeholder="CONDITION: NEW / LIKE NEW / PRE-OWNED" minLength={3} maxLength={40} required />
-              <select name="audience" required>
-                <option value="">MEN / WOMEN</option>
-                <option value="men">MEN</option>
-                <option value="women">WOMEN</option>
-                <option value="unisex">UNISEX</option>
-              </select>
-              <select name="category" required>
-                <option value="">APPAREL TYPE</option>
-                <option value="tops">TOPS</option>
-                <option value="bottoms">BOTTOMS</option>
-                <option value="accessories">ACCESSORIES</option>
-              </select>
-              <textarea
-                name="description"
-                placeholder="PRODUCT DESCRIPTION"
-                required
-              />
-              <input
-                name="sizes"
-                placeholder="SIZES: XS, S, M, L, XL"
-                required
-              />
-              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the customer selling price and the minimum profit you want to keep. Seller share is set on the seller profile (0–100% of profit).</small></div>
-              <input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="ITEM COST (USD)" required />
-              <input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="DELIVERY TO FULFILMENT (USD)" defaultValue="0" />
-              <input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="FULFILMENT SERVICE FEE (USD)" required />
-              <input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="GPO FEE PER 500G (USD)" required />
-              <input name="weight_grams" type="number" min="1" step="1" placeholder="ITEM WEIGHT (GRAMS)" required />
-              <input name="price" type="number" min="0" step="0.01" placeholder="CUSTOMER SELLING PRICE (USD)" required />
-              <input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="MINIMUM OVERSTOCK PROFIT (USD)" required />
-              <select name="seller">
-                <option value="">OWN STOCK</option>
-                {sellers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.display_name}
-                  </option>
-                ))}
-              </select>
+              <label><span>SKU</span><input name="sku" placeholder="EXAMPLE: NORTH-HOOD-001" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required /></label>
+              <label><span>PRODUCT NAME</span><input name="name" placeholder="EXAMPLE: HEAVYWEIGHT HOODIE" minLength={3} maxLength={80} required /></label>
+              <label><span>BRAND</span><input name="brand" placeholder="EXAMPLE: NORTH STUDIO" maxLength={40} /></label>
+              <label><span>COLOUR</span><input name="color" placeholder="EXAMPLE: WASHED BLACK" maxLength={40} /></label>
+              <label><span>CONDITION</span><input name="condition" placeholder="EXAMPLE: NEW" minLength={3} maxLength={40} required /></label>
+              <label><span>AUDIENCE</span><select name="audience" required><option value="">SELECT AUDIENCE</option><option value="men">MEN</option><option value="women">WOMEN</option><option value="unisex">UNISEX</option></select></label>
+              <label><span>APPAREL TYPE</span><select name="category" required><option value="">SELECT TYPE</option><option value="tops">TOPS</option><option value="bottoms">BOTTOMS</option><option value="accessories">ACCESSORIES</option></select></label>
+              <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
+              <label><span>AVAILABLE SIZES</span><input name="sizes" placeholder="EXAMPLE: S, M, L, XL" required /></label>
+              <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
+              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the selling price and minimum profit. Seller share is taken from the seller profile.</small></div>
+              <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
+              <label><span>DELIVERY TO FULFILMENT (USD)</span><input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="EXAMPLE: 8.00" defaultValue="0" /></label>
+              <label><span>FULFILMENT SERVICE FEE (USD)</span><input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="EXAMPLE: 8.00" required /></label>
+              <label><span>GPO FEE PER 500G (USD)</span><input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="EXAMPLE: 3.00" required /></label>
+              <label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" placeholder="EXAMPLE: 700" required /></label>
+              <label><span>CUSTOMER SELLING PRICE (USD)</span><input name="price" type="number" min="0" step="0.01" placeholder="EXAMPLE: 145.00" required /></label>
+              <label><span>MINIMUM OVERSTOCK PROFIT (USD)</span><input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="EXAMPLE: 30.00" required /></label>
               <label className="image-upload-field" htmlFor="product-image">
                 <span>PRODUCT IMAGE</span>
                 <input
