@@ -10,6 +10,7 @@ export type SellerOrder = {
   journey_timestamps: Record<string, string>; product_name: string;
   selected_size: string | null; quantity: number; seller_due: number; payout_status: string;
   package_id: string | null; seller_id: string; inbound_courier: string | null; inbound_tracking: string | null;
+  refund_status: string; refund_amount: number;
 };
 
 export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: string }) {
@@ -46,6 +47,11 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
     });
     setNotice(error?.message || "Cancellation request sent to admin for confirmation.");
   }
+  async function markRefundSent(orderId: string) {
+    const { error } = await sb.rpc("seller_mark_refund_sent", { target_order_id: orderId });
+    setNotice(error?.message || "Refund marked sent. OVERSTOCK can now confirm receipt.");
+    if (!error) window.setTimeout(() => location.reload(), 500);
+  }
   const actionCount = orders.filter(o => ["admin_confirmed", "seller_preparing"].includes(o.journey_status)).length;
   return <main className="partner-page">
     <header><div><p className="eyebrow">OVERSTOCK / SELLER PORTAL</p><h1>MY ORDERS</h1></div><div className="partner-header-actions"><div><span>AMOUNT DUE</span><b>{due}</b></div><button onClick={() => void signOut()}>SIGN OUT</button></div></header>
@@ -60,7 +66,7 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
         <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
         {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press when you begin sourcing and preparing it.</p><button className="seller-action">SELLER PREPARING ORDER</button></form>}
         {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER TO FULFILMENT<input name="courier" placeholder="EXAMPLE: PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>PACKAGE TRACKING NUMBER<input name="tracking" inputMode="numeric" pattern="[0-9]{6,30}" title="Use 6 to 30 tracking digits only." placeholder="NUMBERS ONLY" defaultValue={order.inbound_tracking || ""} required /></label><button className="seller-action">PACKAGE SENT TO FULFILMENT</button></form>}
-        <footer><span>YOUR SHARE</span><b>US\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status === "held" ? "REFUND REQUESTED" : order.payout_status === "paid" ? "PAID" : "PAYMENT DUE"}</span>{!["delivered","cancelled"].includes(order.journey_status) && <button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button>}</footer>
+        <footer><span>YOUR SHARE</span><b>US\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status === "held" ? "REFUND REQUESTED" : order.payout_status === "paid" ? "PAID" : "PAYMENT DUE"}</span>{order.journey_status === "cancelled" && order.refund_status === "due_from_seller" && <button className="seller-action" onClick={() => void markRefundSent(order.id)}>MARK REFUND SENT</button>}{!["delivered","cancelled"].includes(order.journey_status) && <button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button>}</footer>
         </div>
       </details>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
     </div>
