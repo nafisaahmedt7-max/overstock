@@ -548,24 +548,27 @@ export function AdminDashboard({ email }: { email: string }) {
       currency: "USD",
     }).format(n);
   const refundableOrders = orders.filter((order) => order.journey_status === "cancelled");
-  const totalRefunds = refundableOrders.reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const refundsDue = refundableOrders.filter((order) => order.refund_status === "due_from_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const refundsSent = refundableOrders.filter((order) => order.refund_status === "sent_by_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const completedRefunds = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
+  const refundLiability = refundsDue + refundsSent;
   const activeOrderIds = new Set(orders.filter((order) => order.journey_status !== "cancelled").map((order) => order.id));
   const activeFinance = finance.filter((line) => activeOrderIds.has(line.order_id));
+  const grossSales = orders.reduce((n, order) => n + Number(order.total || 0), 0);
   const totalSales = orders.filter((order) => order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
   const sellerSales = activeFinance.filter((x) => x.ownership === "seller").reduce((n, x) => n + Number(x.gross_amount || 0), 0);
-  const costOfGoods = activeFinance.reduce((n, x) => n + Number(x.item_cost || 0), 0);
-  const sellerProfit = activeFinance.reduce((n, x) => n + Number(x.seller_profit_amount || 0), 0);
-  const sellerDelivery = activeFinance.reduce((n, x) => n + Number(x.inbound_delivery_fee || 0), 0);
-  const fulfillmentService = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0), 0);
-  const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
+  const costOfGoods = activeFinance.reduce((n, x) => n + Number(x.ownership === "seller" ? x.seller_payout_total || 0 : x.item_cost || 0), 0);
+  const fulfillmentCost = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
-  const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_due || 0), 0);
-  const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
-  const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_fee || 0), 0);
-  const overstockSales = totalSales - costOfGoods - sellerProfit - sellerDelivery - fulfillmentService - gpoFees;
+  const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
+  const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
+  const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
+  const overstockProfit = totalSales - costOfGoods - fulfillmentCost;
+  const cashIn = grossSales;
+  const cashOut = sellerPaid + fulfillmentPaid + completedRefunds;
+  const cashOnHand = cashIn - cashOut;
+  const outstandingPayables = sellerDue + fulfillmentDue + refundLiability;
+  const projectedCash = cashOnHand - outstandingPayables;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -601,7 +604,31 @@ export function AdminDashboard({ email }: { email: string }) {
             {notice} ×
           </button>
         )}
-        {tab === "overview" && (<><section className="finance-ledger"><header><p className="eyebrow">LIVE ORDER LEDGER</p><h2>WHERE EACH CUSTOMER PAYMENT GOES</h2><p>Cancelled orders are kept out of sales and shown separately as refunds.</p></header><div className="finance-ledger-grid"><article><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>COST OF GOODS</span><b>{money(costOfGoods)}</b><small>Product cost, before seller profit</small></article><article><span>SELLER SALES</span><b>{money(sellerSales)}</b><small>Customer sales of seller-owned products</small></article><article><span>SELLER DUE</span><b>{money(sellerDue)}</b><small>Seller payment still outstanding</small></article><article><span>SELLER PAID</span><b>{money(sellerPaid)}</b><small>Seller payment already sent</small></article><article><span>FULFILMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Service and GPO costs outstanding</small></article><article><span>FULFILMENT PAID</span><b>{money(fulfillmentPaid)}</b><small>Service and GPO costs paid</small></article><article className="ledger-result"><span>OVERSTOCK SALES</span><b>{money(overstockSales)}</b><small>Amount remaining after every order cost</small></article></div><div className="ledger-formula"><b>{money(totalSales)}</b><span>total sales</span><i>−</i><b>{money(costOfGoods)}</b><span>cost of goods</span><i>−</i><b>{money(sellerProfit + sellerDelivery)}</b><span>seller profit + delivery to fulfilment</span><i>−</i><b>{money(fulfillmentService + gpoFees)}</b><span>fulfilment service + GPO</span><i>=</i><strong>{money(overstockSales)}</strong><span>OVERSTOCK SALES</span></div><div className="ledger-bar" aria-label="Sales allocation chart"><span className="ledger-bar-cost" style={{width: `${totalSales ? (costOfGoods / totalSales) * 100 : 0}%`}} title="Cost of goods" /><span className="ledger-bar-seller" style={{width: `${totalSales ? ((sellerProfit + sellerDelivery) / totalSales) * 100 : 0}%`}} title="Seller profit and delivery" /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? ((fulfillmentService + gpoFees) / totalSales) * 100 : 0}%`}} title="Fulfilment and GPO" /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockSales, 0) / totalSales) * 100 : 0}%`}} title="OVERSTOCK retained" /></div><div className="ledger-key"><span><i className="ledger-bar-cost" />Cost of goods</span><span><i className="ledger-bar-seller" />Seller profit + delivery</span><span><i className="ledger-bar-fulfillment" />Fulfilment + GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK retained</span></div></section><section className="refund-ledger"><header><p className="eyebrow">CANCELLED ORDERS</p><h2>REFUND TRACKER</h2></header><div><article><span>REFUNDS REQUESTED</span><b>{money(totalRefunds)}</b></article><article><span>REFUND DUE FROM SELLER</span><b>{money(refundsDue)}</b></article><article><span>SELLER REFUND SENT</span><b>{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>{money(completedRefunds)}</b></article></div></section><section className="ledger-guide"><header><p className="eyebrow">OPERATING GUIDE</p><h2>HOW THE MONEY MOVES</h2></header><ol><li><b>Customer pays.</b> The full amount becomes Total Sales.</li><li><b>Seller is due.</b> Their payout is cost of goods + seller profit share + delivery to fulfilment.</li><li><b>Fulfilment is due.</b> Service fee and weight-based GPO fee are recorded separately.</li><li><b>OVERSTOCK keeps the remainder.</b> This is total sales less product cost and every seller and fulfilment cost.</li><li><b>If admin cancels before shipment,</b> request the refund. The seller marks it sent, then you confirm receipt to complete it.</li></ol></section></>)}
+        {tab === "overview" && (<>
+          <section className="finance-ledger">
+            <header><p className="eyebrow">FINANCIAL OVERVIEW</p><h2>CASH FLOW & PROFITABILITY</h2><p>Live order accounting across sales, supplier payments, fulfilment, and refunds.</p></header>
+            <div className="cash-flow-summary">
+              <article className="cash-in"><span>CASH RECEIVED</span><b>{money(cashIn)}</b><small>All customer payments</small></article>
+              <article className="cash-out"><span>CASH PAID OUT</span><b>−{money(cashOut)}</b><small>Seller, fulfilment, and completed refunds</small></article>
+              <article className="cash-balance"><span>CASH ON HAND</span><b>{money(cashOnHand)}</b><small>Received less payments already made</small></article>
+              <article className="cash-pending"><span>OUTSTANDING PAYABLES</span><b>−{money(outstandingPayables)}</b><small>Seller, fulfilment, and pending refunds</small></article>
+              <article className="cash-projected"><span>PROJECTED CASH POSITION</span><b>{money(projectedCash)}</b><small>After all open obligations are settled</small></article>
+            </div>
+            <div className="finance-ledger-grid">
+              <article><span>NET SALES</span><b>{money(totalSales)}</b><small>Completed and active customer orders</small></article>
+              <article><span>SELLER PRODUCT SALES</span><b>{money(sellerSales)}</b><small>Sales from seller-owned inventory</small></article>
+              <article className="negative-ledger"><span>COST OF GOODS</span><b>−{money(costOfGoods)}</b><small>Item cost, seller share, and delivery to fulfilment</small></article>
+              <article className="negative-ledger"><span>FULFILMENT & GPO</span><b>−{money(fulfillmentCost)}</b><small>Fulfilment service and GPO shipping fees</small></article>
+              <article><span>SELLER PAYMENT DUE</span><b>{money(sellerDue)}</b><small>Unpaid seller amount</small></article>
+              <article><span>SELLER PAYMENT PAID</span><b>{money(sellerPaid)}</b><small>Seller amount already paid</small></article>
+              <article><span>FULFILMENT PAYMENT DUE</span><b>{money(fulfillmentDue)}</b><small>Unpaid fulfilment amount</small></article>
+              <article className="ledger-result"><span>OVERSTOCK PROFIT</span><b>{money(overstockProfit)}</b><small>Profit after cost of goods and fulfilment</small></article>
+            </div>
+            <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? (costOfGoods / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
+            <div className="ledger-key"><span><i className="ledger-bar-cost" />Cost of goods</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
+          </section>
+          <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>REFUND DUE FROM SELLER</span><b>−{money(refundsDue)}</b></article><article><span>REFUND SENT BY SELLER</span><b>−{money(refundsSent)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article><article><span>OPEN REFUND LIABILITY</span><b>−{money(refundLiability)}</b></article></div></section>
+        </>)}
         {tab === "sellers" && (
           <>
             <details className="admin-help-dropdown">
