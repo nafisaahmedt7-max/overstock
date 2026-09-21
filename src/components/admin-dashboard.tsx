@@ -567,11 +567,13 @@ export function AdminDashboard({ email }: { email: string }) {
   const fulfillmentCost = fulfillmentService + gpoFees;
   const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
+  const cashSellerPaid = finance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
+  const cashFulfillmentPaid = finance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const overstockProfit = totalSales - sellerCost - sellerShare - fulfillmentService - gpoFees;
   const cashIn = grossSales + completedSellerRecovery;
-  const cashOut = sellerPaid + fulfillmentPaid + completedRefunds;
+  const cashOut = cashSellerPaid + cashFulfillmentPaid + completedRefunds;
   const cashOnHand = cashIn - cashOut;
   const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
   const projectedCash = cashOnHand - outstandingPayables;
