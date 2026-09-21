@@ -7,6 +7,8 @@ export type Product = {
   apparelType: string;
   seller: string;
   color: string;
+  condition: string;
+  status: "active" | "sold_out";
   imageTone: string;
   imageUrl: string | null;
   sizes: string[];
@@ -23,6 +25,8 @@ type Row = {
   description: string | null;
   brand: string | null;
   category: string | null;
+  condition: string | null;
+  status: "active" | "sold_out";
 };
 function map(row: Row): Product {
   return {
@@ -38,6 +42,8 @@ function map(row: Row): Product {
     apparelType: row.category || "other",
     seller: row.brand || "OVERSTOCK",
     color: row.color || "UNSPECIFIED",
+    condition: row.condition || "PRE-OWNED",
+    status: row.status,
     imageTone: "#d0d0cc",
     imageUrl: row.image_url,
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
@@ -50,9 +56,9 @@ export async function getProducts() {
   const { data } = await sb
     .from("products")
     .select(
-      "slug,name,price,audience,category,color,image_url,sizes,description,brand",
+      "slug,name,price,audience,category,color,condition,status,image_url,sizes,description,brand",
     )
-    .eq("status", "active")
+    .in("status", ["active", "sold_out"])
     .order("created_at", { ascending: false });
   return (data ?? []).map(map);
 }
@@ -61,9 +67,9 @@ export async function getProduct(slug: string) {
   const { data } = await sb
     .from("products")
     .select(
-      "slug,name,price,audience,category,color,image_url,sizes,description,brand",
+      "slug,name,price,audience,category,color,condition,status,image_url,sizes,description,brand",
     )
-    .eq("status", "active")
+    .in("status", ["active", "sold_out"])
     .eq("slug", slug)
     .maybeSingle();
   return data ? map(data) : undefined;
