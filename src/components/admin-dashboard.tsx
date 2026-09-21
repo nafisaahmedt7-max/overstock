@@ -680,7 +680,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     step="0.01"
                     defaultValue="20"
                     placeholder="20%"
-                    aria-label="Seller share of profit (maximum 50 percent)"
+                    aria-label="Seller share of profit, maximum 50 percent"
                     required
                   />
                 </span>
@@ -771,13 +771,13 @@ export function AdminDashboard({ email }: { email: string }) {
                 placeholder="SIZES: XS, S, M, L, XL"
                 required
               />
-              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Customer price is calculated automatically. Seller share comes from the seller profile.</small></div>
+              <div className="product-pricing-heading"><span>PRODUCT PRICING</span><small>Set the profit you want OVERSTOCK to keep. Seller share is set on the seller profile (maximum 50% of profit).</small></div>
               <input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="ITEM COST (USD)" required />
               <input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="DELIVERY TO FULFILMENT (USD)" defaultValue="0" />
               <input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="FULFILMENT SERVICE FEE (USD)" required />
               <input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="GPO FEE PER 500G (USD)" required />
               <input name="weight_grams" type="number" min="1" step="1" placeholder="ITEM WEIGHT (GRAMS)" required />
-              <input name="overstock_profit_target" type="number" min="0" step="0.01" placeholder="OVERSTOCK PROFIT TARGET (USD)" required />
+              <input name="overstock_profit_target" type="number" min="0" step="0.01" placeholder="OVERSTOCK PROFIT TO KEEP (USD)" required />
               <select name="seller">
                 <option value="">OWN STOCK</option>
                 {sellers.map((s) => (
