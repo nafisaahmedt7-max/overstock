@@ -847,7 +847,9 @@ export function AdminDashboard({ email }: { email: string }) {
                 <p><b>REFUND REQUESTED</b> — A paid seller order was cancelled and admin must recover that seller payment.</p>
               </div>
             </details>
-            <form className="admin-form seller-entry-form" onSubmit={addSeller}>
+            <section className="order-entry-panel seller-entry-panel">
+              <header><div><p className="eyebrow">ADD A NEW SELLER</p><h2>SELLER DETAILS</h2></div></header>
+              <form className="admin-form seller-entry-form" onSubmit={addSeller}>
               <label><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
               <label><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" required /></label>
               <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" required /></label>
@@ -868,7 +870,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 </span>
               </label>
               <button>ADD SELLER</button>
-            </form>
+              </form>
+            </section>
             <DataTable
               headings={["CODE", "SELLER", "EMAIL", "SELLER SHARE", "PAYMENT DUE", "PAID", "STATUS", "ACTIONS"]}
               rows={sellers.map((s) => [
