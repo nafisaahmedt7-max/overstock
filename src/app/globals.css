@@ -2032,3 +2032,5 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Keep every admin entry form visually identical to Record a Customer Sale */
 .order-entry-panel.product-entry-panel>header{background:#d0d0cc}.order-entry-panel.team-member-panel>header{background:#d0d0cc}.order-entry-panel.team-member-panel .fulfilment-account-form{border-top:0}.order-entry-panel.team-member-panel{border:1px solid var(--line)}
+
+.order-entry-panel.seller-entry-panel .seller-entry-form{margin:0;border:0}.order-entry-panel.seller-entry-panel>header{background:#d0d0cc}
