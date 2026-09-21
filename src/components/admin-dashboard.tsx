@@ -1171,10 +1171,6 @@ export function AdminDashboard({ email }: { email: string }) {
         )}
         {tab === "orders" && (
           <>
-            <section className="order-reset-panel">
-              <div><p className="eyebrow">SAMPLE DATA</p><h2>START THE ORDER LIST FRESH</h2><p>Remove old test orders before adding the one or two completed examples you want to keep in the overview.</p></div>
-              <button className="danger-action" type="button" onClick={() => void clearAllOrders()}>REMOVE ALL ORDERS</button>
-            </section>
             <StatusConnectionGuide role="admin-orders" title="FULL ORDER STATUS DICTIONARY" />
             <section className="order-entry-panel">
               <header>
