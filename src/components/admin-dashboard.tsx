@@ -463,6 +463,12 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "All previous orders were removed. Create the two sample completed orders next.");
     if (!error) await load();
   }
+  async function deleteOrder(order: Order) {
+    if (!window.confirm(`Delete order #${order.order_number}? This removes its order record permanently.`)) return;
+    const { error } = await supabase.from("orders").delete().eq("id", order.id);
+    setNotice(error?.message || `Order #${order.order_number} deleted.`);
+    if (!error) await load();
+  }
   async function advanceOrder(id: string, status: JourneyStatus) {
     const { error } = await supabase.rpc("advance_order_journey", {
       target_order_id: id, target_status: status, note: "Admin update",
@@ -613,10 +619,6 @@ export function AdminDashboard({ email }: { email: string }) {
                 <article>
                   <span data-balance="own">SELLER ORDER SALES</span>
                   <b>{money(sellerSales)}</b>
-                </article>
-                <article>
-                  <span data-balance="seller">SELLER SHARE TOTAL</span>
-                  <b>{money(sellerShare)}</b>
                 </article>
                 <article>
                   <span data-balance="due">SELLER DUE</span>
@@ -1234,7 +1236,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   </div>
                   <section className="order-confirmation-control">
                     <div><span>ADMIN CONFIRMATION</span><b>{o.journey_status === "order_placed" ? "NEW ORDER — REVIEW REQUIRED" : journeyLabel(o.journey_status)}</b></div>
-                    {o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}
+                    <div className="order-admin-actions">{o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}<button className="danger-action" type="button" onClick={() => void deleteOrder(o)}>DELETE ORDER</button></div>
                   </section>
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
                   </div>
