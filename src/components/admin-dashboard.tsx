@@ -1205,7 +1205,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 return <details className="order-card order-receipt-details" key={o.id}>
                   <summary>
                     <span><small>ORDER</small><b>#{o.order_number}</b></span>
-                    <span className="order-summary-status"><small>CURRENT STATUS</small><b className="status-badge" data-status={o.journey_status}>{journeyLabel(o.journey_status)}</b></span>
+                    <label className="order-summary-status"><small>CURRENT STATUS</small><select className="order-summary-status-select" value={o.journey_status} data-status={o.journey_status} aria-label={`Order ${o.order_number} status`} onClick={(event) => event.stopPropagation()} onChange={(e) => { const next = e.target.value as JourneyStatus; if (next !== "cancelled" || window.confirm("Cancel this order? Only admin can perform this action.")) void advanceOrder(o.id, next); }}>{JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}<option value="cancelled">CANCELLED</option></select></label>
                   </summary>
                   <div className="order-receipt-body">
                   <header>
