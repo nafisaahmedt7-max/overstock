@@ -489,13 +489,19 @@ export function AdminDashboard({ email }: { email: string }) {
     setNotice(error?.message || "Shared journey updated for every role.");
     if (!error) await load();
   }
-  async function updateSellerPayment(orderId: string, payoutStatus: string) {
+  async function updateSellerPayment(orderId: string, sellerId: string, payoutStatus: string) {
+    const order = orders.find((item) => item.id === orderId);
+    if (order?.payment_status !== "paid") {
+      setNotice("Seller payout becomes due only after Square confirms the customer payment.");
+      return;
+    }
+    if (payoutStatus === "paid" && !window.confirm("Only mark this seller paid after you have sent their money outside Square. Have you sent it?")) return;
     const { error } = await supabase
       .from("order_items")
       .update({ payout_status: payoutStatus })
       .eq("order_id", orderId)
-      .not("seller_id", "is", null);
-    setNotice(error?.message || "Seller payment record updated.");
+      .eq("seller_id", sellerId);
+    setNotice(error?.message || "Seller payout record updated.");
     if (!error) await load();
   }
   async function updateFulfillmentPayment(orderId: string, paymentStatus: string) {
@@ -559,10 +565,10 @@ export function AdminDashboard({ email }: { email: string }) {
   const refundLiability = refundsDue + refundsSent;
   const pendingSellerRecovery = refundableOrders.filter((order) => ["due_from_seller", "sent_by_seller"].includes(order.refund_status)).reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
   const completedSellerRecovery = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
-  const activeOrderIds = new Set(orders.filter((order) => order.journey_status !== "cancelled").map((order) => order.id));
+  const grossSales = orders.filter((order) => order.payment_status !== "unpaid").reduce((n, order) => n + Number(order.total || 0), 0);
+  const activeOrderIds = new Set(orders.filter((order) => order.payment_status === "paid" && order.journey_status !== "cancelled").map((order) => order.id));
   const activeFinance = finance.filter((line) => activeOrderIds.has(line.order_id));
-  const grossSales = orders.reduce((n, order) => n + Number(order.total || 0), 0);
-  const totalSales = orders.filter((order) => order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
+  const totalSales = orders.filter((order) => order.payment_status === "paid" && order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
   const sellerSales = activeFinance.filter((x) => x.ownership === "seller").reduce((n, x) => n + Number(x.gross_amount || 0), 0);
   const itemCost = activeFinance.reduce((n, x) => n + Number(x.item_cost || 0), 0);
   const inboundDelivery = activeFinance.reduce((n, x) => n + Number(x.inbound_delivery_fee || 0), 0);
@@ -674,8 +680,8 @@ export function AdminDashboard({ email }: { email: string }) {
                 s.display_name,
                 s.email || "—",
                 `${s.commission_percent}%`,
-                money(finance.filter((line) => line.seller_id === s.id && line.payout_status !== "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
-                money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
+                money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "due").reduce((sum, line) => sum + Number(line.seller_payout_total || 0), 0)),
+                money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_payout_total || 0), 0)),
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
@@ -970,9 +976,26 @@ export function AdminDashboard({ email }: { email: string }) {
             </section>
             <div className="order-card-list admin-orders">
               {orders.map((o) => {
-                const sellerFinance = finance.find((line) => line.order_id === o.id && line.seller_id);
+                const sellerFinance = finance.filter((line) => line.order_id === o.id && line.seller_id);
+                const sellerIds = Array.from(new Set(sellerFinance.map((line) => line.seller_id).filter((id): id is string => Boolean(id))));
+                const sellerGroups = sellerIds.map((sellerId) => {
+                  const lines = sellerFinance.filter((line) => line.seller_id === sellerId);
+                  const status = lines.every((line) => line.payout_status === "paid")
+                    ? "paid"
+                    : lines.some((line) => line.payout_status === "held")
+                      ? "held"
+                      : lines.some((line) => line.payout_status === "due")
+                        ? "due"
+                        : lines.some((line) => line.payout_status === "scheduled")
+                          ? "scheduled"
+                          : "not_due";
+                  return {
+                    sellerId,
+                    status,
+                    total: lines.reduce((sum, line) => sum + Number(line.seller_payout_total || 0), 0),
+                  };
+                });
                 const orderFinance = finance.find((line) => line.order_id === o.id);
-                const sellerPayment = sellerFinance?.payout_status === "paid" ? "paid" : sellerFinance?.payout_status === "held" ? "held" : "due";
                 return <details className="order-card order-receipt-details" key={o.id}>
                   <summary>
                     <span><small>ORDER</small><b>#{o.order_number}</b></span>
@@ -983,7 +1006,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
                     <div className="order-payment-controls">
                       <div className="payment-control"><span>CUSTOMER PAYMENT</span><b data-status={o.payment_status}>{(o.payment_status || "unpaid").replaceAll("_", " ").toUpperCase()}</b>{o.payment_amount_aud != null && <small>{Number(o.payment_amount_aud).toFixed(2)} AUD</small>}{o.square_payment_id && <small>Square payment ID saved</small>}</div>
-                      {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option><option value="held">REFUND REQUESTED</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
+                      {sellerGroups.length ? <div className="seller-payment-groups"><span>SELLER PAYOUTS</span>{sellerGroups.map((group) => <label className="payment-control" key={group.sellerId}><span>{sellers.find((seller) => seller.id === group.sellerId)?.display_name || "SELLER"} — {money(group.total)}</span><select data-status={group.status} value={group.status} disabled={o.payment_status !== "paid"} onChange={(e) => void updateSellerPayment(o.id, group.sellerId, e.target.value)}><option value="not_due">AWAITING CUSTOMER PAYMENT</option><option value="due">PAYMENT DUE</option><option value="scheduled">SCHEDULED</option><option value="paid">PAID — SENT OUTSIDE SQUARE</option><option value="held">ON HOLD</option></select></label>)}</div> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
                       {orderFinance && <label className="payment-control"><span>FULFILMENT PAYMENT</span><select data-status={orderFinance.fulfillment_payment_status} value={orderFinance.fulfillment_payment_status} onChange={(e) => void updateFulfillmentPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option></select></label>}
                     </div>
                   </header>
