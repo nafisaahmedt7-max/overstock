@@ -7,7 +7,9 @@ type VerificationStatus = "checking" | "paid" | "pending" | "error";
 
 export default function CheckoutReturnPage() {
   const [status, setStatus] = useState<VerificationStatus>("checking");
-  const [orderNumber, setOrderNumber] = useState("");
+  const orderNumber = typeof window === "undefined"
+    ? ""
+    : new URLSearchParams(window.location.search).get("order") || "";
 
   const verifyPayment = useCallback(async (number: string, active?: () => boolean) => {
     if (!number) {
@@ -40,14 +42,12 @@ export default function CheckoutReturnPage() {
   }, []);
 
   useEffect(() => {
-    const number = new URLSearchParams(window.location.search).get("order") || "";
-    setOrderNumber(number);
     let mounted = true;
-    void verifyPayment(number, () => mounted);
+    void verifyPayment(orderNumber, () => mounted);
     return () => {
       mounted = false;
     };
-  }, [verifyPayment]);
+  }, [orderNumber, verifyPayment]);
 
   return (
     <main className="checkout-return">
