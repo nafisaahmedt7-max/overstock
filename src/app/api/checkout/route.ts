@@ -21,8 +21,16 @@ export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!accessToken || !locationId || !supabaseUrl || !serviceRoleKey) {
-    return jsonError("Checkout is not configured yet.", 503);
+  const missingConfiguration: string[] = [];
+  if (!accessToken) missingConfiguration.push("SQUARE_ACCESS_TOKEN");
+  if (!locationId) missingConfiguration.push("SQUARE_LOCATION_ID");
+  if (!supabaseUrl) missingConfiguration.push("NEXT_PUBLIC_SUPABASE_URL");
+  if (!serviceRoleKey) missingConfiguration.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (missingConfiguration.length) {
+    return jsonError(
+      "Checkout is not configured yet. Missing: " + missingConfiguration.join(", ") + ".",
+      503,
+    );
   }
   if (environment !== "sandbox" && environment !== "production") {
     return jsonError("Square environment is invalid.", 503);
