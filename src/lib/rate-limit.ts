@@ -12,7 +12,7 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const trustedIp =
     request.headers.get("x-real-ip")?.trim() ||
-    request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() ||
+    (request.headers.get("x-forwarded-for")?.split(",").slice(-1)[0] || "").trim() ||
     "unknown";
   const key = scope + ":" + createHash("sha256").update(trustedIp).digest("hex");
   const { data, error } = await supabase.rpc("consume_api_rate_limit", {
