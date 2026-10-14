@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 type CurrencyQuote = {
   country: string;
@@ -13,18 +13,27 @@ const CurrencyContext = createContext<{
   locale: string;
 }>({ quote: null, locale: "en-US" });
 
+const subscribeToLocale = () => () => {};
+const getBrowserLocale = () => navigator.language || "en-US";
+const getServerLocale = () => "en-US";
+
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [quote, setQuote] = useState<CurrencyQuote | null>(null);
-  const [locale, setLocale] = useState("en-US");
+  const locale = useSyncExternalStore(subscribeToLocale, getBrowserLocale, getServerLocale);
 
   useEffect(() => {
-    setLocale(navigator.language || "en-US");
+    let active = true;
     fetch("/api/currency")
       .then((response) => response.json())
-      .then((value: CurrencyQuote) => setQuote(value))
-      .catch(() =>
-        setQuote({ country: "US", currency: "USD", rate: 1, audRate: null }),
-      );
+      .then((value: CurrencyQuote) => {
+        if (active) setQuote(value);
+      })
+      .catch(() => {
+        if (active) setQuote({ country: "US", currency: "USD", rate: 1, audRate: null });
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
