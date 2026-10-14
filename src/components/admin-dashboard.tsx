@@ -70,6 +70,9 @@ type Order = {
   delivery_address: string | null;
   sales_channel: string;
   status: string;
+  payment_status: string;
+  payment_amount_aud: number | null;
+  square_payment_id: string | null;
   placed_at: string;
   journey_status: JourneyStatus;
   journey_timestamps: Record<string, string>;
@@ -127,7 +130,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount,seller_refund_recovery_amount",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,payment_status,payment_amount_aud,square_payment_id,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount,seller_refund_recovery_amount",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -979,6 +982,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
                     <div className="order-payment-controls">
+                      <div className="payment-control"><span>CUSTOMER PAYMENT</span><b data-status={o.payment_status}>{(o.payment_status || "unpaid").replaceAll("_", " ").toUpperCase()}</b>{o.payment_amount_aud != null && <small>{Number(o.payment_amount_aud).toFixed(2)} AUD</small>}{o.square_payment_id && <small>Square payment ID saved</small>}</div>
                       {sellerFinance ? <label className="payment-control"><span>SELLER PAYMENT</span><select data-status={sellerPayment} value={sellerPayment} onChange={(e) => void updateSellerPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option><option value="held">REFUND REQUESTED</option></select></label> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
                       {orderFinance && <label className="payment-control"><span>FULFILMENT PAYMENT</span><select data-status={orderFinance.fulfillment_payment_status} value={orderFinance.fulfillment_payment_status} onChange={(e) => void updateFulfillmentPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option></select></label>}
                     </div>
