@@ -473,16 +473,6 @@ export function AdminDashboard({ email }: { email: string }) {
     setOrderProductId("");
     await load();
   }
-  async function clearAllOrders() {
-    if (!orders.length) {
-      setNotice("There are no orders to remove.");
-      return;
-    }
-    if (!window.confirm("Remove every existing order and its order items? This cannot be undone.")) return;
-    const { error } = await supabase.from("orders").delete().in("id", orders.map((order) => order.id));
-    setNotice(error?.message || "All previous orders were removed. Create the two sample completed orders next.");
-    if (!error) await load();
-  }
   async function deleteOrder(order: Order) {
     if (!window.confirm(`Delete order #${order.order_number}? This removes its order record permanently.`)) return;
     const { error } = await supabase.from("orders").delete().eq("id", order.id);
@@ -579,17 +569,14 @@ export function AdminDashboard({ email }: { email: string }) {
   const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
   const fulfillmentCost = fulfillmentService + gpoFees;
   const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
-  const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const cashSellerPaid = finance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
-  const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const cashFulfillmentPaid = finance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const overstockProfit = totalSales - sellerCost - sellerShare - fulfillmentService - gpoFees;
   const cashIn = grossSales + completedSellerRecovery;
   const cashOut = cashSellerPaid + cashFulfillmentPaid + completedRefunds;
   const cashOnHand = cashIn - cashOut;
   const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
-  const projectedCash = cashOnHand - outstandingPayables;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
