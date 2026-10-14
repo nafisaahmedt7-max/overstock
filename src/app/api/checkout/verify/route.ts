@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,10 @@ export async function GET(request: Request) {
   const sb = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const limit = await checkRateLimit(sb, request, "verify", 30, 60);
+  if (limit === "limited") return Response.json({ error: "Please wait before checking payment again." }, { status: 429 });
+  if (limit === "unavailable") return Response.json({ error: "Payment verification is temporarily unavailable." }, { status: 503 });
+
   const { data: order, error: lookupError } = await sb
     .from("orders")
     .select("id,order_number,square_order_id,payment_status")
