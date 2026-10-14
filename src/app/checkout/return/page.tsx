@@ -43,9 +43,12 @@ export default function CheckoutReturnPage() {
 
   useEffect(() => {
     let mounted = true;
-    void verifyPayment(orderNumber, () => mounted);
+    const timer = window.setTimeout(() => {
+      void verifyPayment(orderNumber, () => mounted);
+    }, 0);
     return () => {
       mounted = false;
+      window.clearTimeout(timer);
     };
   }, [orderNumber, verifyPayment]);
 
