@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/add-to-cart";
+import { LocalPrice } from "@/components/local-price";
 import { ProductPlaceholder } from "@/components/product-placeholder";
 import { getProduct } from "@/data/products";
 export async function generateMetadata({
@@ -32,18 +33,12 @@ export default async function ProductPage({
         <div>
           <p className="eyebrow">{product.seller}</p>
           <h1>{product.name}</h1>
-          <p>${product.price}</p>
+          <p><LocalPrice amountUsd={product.price} /></p>
         </div>
         <p className="description">{product.description}</p>
         <dl>
-          <div>
-            <dt>COLOR</dt>
-            <dd>{product.color}</dd>
-          </div>
-          <div>
-            <dt>CONDITION</dt>
-            <dd>{product.condition}</dd>
-          </div>
+          <div><dt>COLOR</dt><dd>{product.color}</dd></div>
+          <div><dt>CONDITION</dt><dd>{product.condition}</dd></div>
         </dl>
         <AddToCart product={product} />
       </section>

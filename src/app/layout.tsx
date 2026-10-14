@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CartProvider } from "@/components/cart-provider";
+import { CurrencyProvider } from "@/components/currency-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
@@ -20,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
-        <CartProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );
