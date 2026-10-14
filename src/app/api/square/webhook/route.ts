@@ -10,6 +10,13 @@ export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!signature || !signatureKey || !notificationUrl || !supabaseUrl || !serviceRoleKey) {
+    console.warn("[square-webhook] request reached the app, but required configuration is missing.", {
+      signaturePresent: Boolean(signature),
+      signatureKeyConfigured: Boolean(signatureKey),
+      notificationUrlConfigured: Boolean(notificationUrl),
+      supabaseUrlConfigured: Boolean(supabaseUrl),
+      serviceRoleKeyConfigured: Boolean(serviceRoleKey),
+    });
     return new Response("Webhook is not configured.", { status: 500 });
   }
 
@@ -24,6 +31,18 @@ export async function POST(request: Request) {
     return new Response("Invalid signature.", { status: 401 });
   }
   if (received.length !== expected.length || !timingSafeEqual(received, expected)) {
+    let notificationEndpoint = "invalid";
+    try {
+      const parsedUrl = new URL(notificationUrl);
+      notificationEndpoint = parsedUrl.origin + parsedUrl.pathname;
+    } catch {
+      // Do not print the configured value because it may contain a bypass token.
+    }
+    console.warn("[square-webhook] request reached the app, but Square signature validation failed.", {
+      notificationEndpoint,
+      signatureLength: received.length,
+      expectedSignatureLength: expected.length,
+    });
     return new Response("Invalid signature.", { status: 401 });
   }
 
