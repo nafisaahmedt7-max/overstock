@@ -21,12 +21,12 @@ export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const missingConfiguration: string[] = [];
-  if (!accessToken) missingConfiguration.push("SQUARE_ACCESS_TOKEN");
-  if (!locationId) missingConfiguration.push("SQUARE_LOCATION_ID");
-  if (!supabaseUrl) missingConfiguration.push("NEXT_PUBLIC_SUPABASE_URL");
-  if (!serviceRoleKey) missingConfiguration.push("SUPABASE_SERVICE_ROLE_KEY");
-  if (missingConfiguration.length) {
+  if (!accessToken || !locationId || !supabaseUrl || !serviceRoleKey) {
+    const missingConfiguration: string[] = [];
+    if (!accessToken) missingConfiguration.push("SQUARE_ACCESS_TOKEN");
+    if (!locationId) missingConfiguration.push("SQUARE_LOCATION_ID");
+    if (!supabaseUrl) missingConfiguration.push("NEXT_PUBLIC_SUPABASE_URL");
+    if (!serviceRoleKey) missingConfiguration.push("SUPABASE_SERVICE_ROLE_KEY");
     return jsonError(
       "Checkout is not configured yet. Missing: " + missingConfiguration.join(", ") + ".",
       503,
