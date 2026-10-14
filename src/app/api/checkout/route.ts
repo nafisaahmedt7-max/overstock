@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { getUsdRates } from "@/lib/exchange-rates";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,13 @@ export async function POST(request: Request) {
     return jsonError("Square environment is invalid.", 503);
   }
 
+  const sb = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const limit = await checkRateLimit(sb, request, "checkout", 10, 600);
+  if (limit === "limited") return jsonError("Too many checkout attempts. Please try again in 10 minutes.", 429);
+  if (limit === "unavailable") return jsonError("Checkout is temporarily unavailable. Please try again shortly.", 503);
+
   let body: CheckoutBody;
   try {
     body = (await request.json()) as CheckoutBody;
@@ -71,9 +79,6 @@ export async function POST(request: Request) {
     });
   }
 
-  const sb = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
   const slugs = Array.from(new Set(Array.from(quantities.values(), (item) => item.slug)));
   const { data: products, error: productError } = await sb
     .from("products")
