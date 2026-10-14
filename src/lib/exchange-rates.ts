@@ -2,7 +2,7 @@ export type ExchangeRates = Record<string, number>;
 
 export async function getUsdRates(): Promise<ExchangeRates> {
   const response = await fetch("https://open.er-api.com/v6/latest/USD", {
-    cache: "no-store",
+    next: { revalidate: 3600 },
   });
   if (!response.ok) throw new Error("Exchange-rate service is unavailable.");
   const result = (await response.json()) as {
