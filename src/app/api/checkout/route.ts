@@ -51,6 +51,10 @@ export async function POST(request: Request) {
     return jsonError("Checkout details are invalid.", 400);
   }
 
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return jsonError("Checkout details are invalid.", 400);
+  }
+
   const name = body.customer?.name?.trim();
   const email = body.customer?.email?.trim().toLowerCase();
   const phone = body.customer?.phone?.trim();
