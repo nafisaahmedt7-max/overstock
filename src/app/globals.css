@@ -305,6 +305,17 @@ button {
   max-width: 34rem;
   line-height: 1.5;
 }
+.size-chart-link,
+.current-size-chart {
+  display: inline-flex;
+  align-self: flex-start;
+  font: 600 0.7rem/1.5 var(--font-mono), monospace;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+.current-size-chart {
+  margin: -0.35rem 0 1rem;
+}
 .product-info dl {
   border-top: 1px solid;
 }
