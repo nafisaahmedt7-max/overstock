@@ -15,14 +15,16 @@ type QueuedOrderEmail = {
   items: OrderEmailItem[];
 };
 
+const htmlEscapes: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
 function escapeHtml(value: unknown) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  })[character] || character);
+  return String(value ?? "").replace(/[&<>"']/g, (character) => htmlEscapes[character] || character);
 }
 
 function buildEmailContent(order: QueuedOrderEmail) {
