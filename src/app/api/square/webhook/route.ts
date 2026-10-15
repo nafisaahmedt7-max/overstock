@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { sendNextBrevoOrderConfirmation } from "@/lib/brevo";
 
 export const runtime = "nodejs";
 
@@ -78,6 +79,16 @@ export async function POST(request: Request) {
       code: error.code,
     });
     return new Response("Could not process Square event.", { status: 500 });
+  }
+
+  try {
+    await sendNextBrevoOrderConfirmation(sb);
+  } catch (emailError) {
+    console.error("[square-webhook] Brevo order email delivery failed", {
+      eventType: event.type,
+      message: emailError instanceof Error ? emailError.message : "unknown error",
+    });
+    return new Response("Payment processed; order email will be retried.", { status: 500 });
   }
   return new Response(null, { status: 200 });
 }
