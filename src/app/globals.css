@@ -2079,3 +2079,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Emphasize every contact channel */
 .contact-option>a strong,.contact-option>span strong{font-weight:700}
+
+
+/* Legal page paragraph alignment and Terms headings */
+.legal-page-contact>p:not(.eyebrow),.legal-page-shipping .legal-section p,.legal-page-refunds .legal-section p{text-align:center}
+.legal-page-terms .legal-section h2{font-weight:800}
