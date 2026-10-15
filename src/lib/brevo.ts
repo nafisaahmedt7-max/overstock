@@ -40,9 +40,9 @@ function safeSocialUrl(value: string | undefined, domain: "instagram.com" | "fac
   }
 }
 
-function socialIconLink(href: string | null, label: string, icon: string) {
+function socialIconLink(href: string | null, label: string, iconUrl: string) {
   const content =
-    '<span style="display:block;height:24px;font-family:Arial,Helvetica,sans-serif;font-size:21px;line-height:24px;color:#050505">' + icon + '</span>' +
+    '<span style="display:block;height:24px;line-height:24px"><img src="' + iconUrl + '" width="22" height="22" alt="' + label + '" style="display:inline-block;width:22px;height:22px;border:0;vertical-align:middle"></span>' +
     '<span style="display:block;padding-top:3px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:12px;color:#050505">' + label + '</span>';
   return href
     ? '<a href="' + href + '" aria-label="' + label + '" style="display:block;color:#050505;text-decoration:none">' + content + '</a>'
@@ -63,10 +63,10 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
   const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
     ? escapeHtml(contactEmail)
     : null;
-  // Use text glyphs instead of inline SVG: Gmail strips SVG from email bodies.
-  const instagramIcon = "◎";
-  const facebookIcon = "<strong>f</strong>";
-  const emailIcon = "✉";
+  // Serve PNG logos: Gmail removes inline SVG from email bodies.
+  const instagramIcon = escapeHtml(origin + "/email/social/instagram.png");
+  const facebookIcon = escapeHtml(origin + "/email/social/facebook.png");
+  const emailIcon = escapeHtml(origin + "/email/social/email.png");
   const socialLinks =
     '<tr><td align="center" style="padding:16px 20px 18px;border-top:1px solid #050505;text-align:center">' +
     '<table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0"><tr>' +
