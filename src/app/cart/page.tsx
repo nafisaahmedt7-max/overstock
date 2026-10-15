@@ -49,12 +49,12 @@ function validate(customer: Customer, dialCode: string): FieldErrors {
   const errors: FieldErrors = {};
   const name = customer.name.trim();
   const email = customer.email.trim();
-  const digits = customer.phone.replace(/\\D/g, "").replace(/^0/, "");
-  const e164Digits = dialCode.replace(/\\D/g, "") + digits;
-  if (name.length < 2 || name.length > 100 || !/^[\\p{L}\\p{M} .’'-]+$/u.test(name)) {
+  const digits = customer.phone.replace(/\D/g, "").replace(/^0/, "");
+  const e164Digits = dialCode.replace(/\D/g, "") + digits;
+  if (name.length < 2 || name.length > 100 || !/^[\p{L}\p{M} .’'-]+$/u.test(name)) {
     errors.name = "Enter your first and last name using letters.";
   }
-  if (email.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email)) {
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     errors.email = "Enter a valid email address.";
   }
   if (digits.length < 6 || digits.length > 14 || e164Digits.length < 8 || e164Digits.length > 15) {
@@ -65,7 +65,7 @@ function validate(customer: Customer, dialCode: string): FieldErrors {
   if (address.unit.trim().length > 60) errors.unit = "Keep this under 60 characters.";
   if (address.city.trim().length < 2 || address.city.trim().length > 80) errors.city = "Enter your city or suburb.";
   if (address.region.trim().length < 2 || address.region.trim().length > 80) errors.region = "Enter your state, province, or region.";
-  if (address.postalCode.trim().length < 2 || address.postalCode.trim().length > 20 || !/^[\\p{L}\\p{N} -]+$/u.test(address.postalCode.trim())) {
+  if (address.postalCode.trim().length < 2 || address.postalCode.trim().length > 20 || !/^[\p{L}\p{N} -]+$/u.test(address.postalCode.trim())) {
     errors.postalCode = "Enter a valid postal or ZIP code.";
   }
   if (!countries.some((country) => country.iso === address.country)) errors.country = "Choose your country.";
@@ -115,7 +115,7 @@ export default function CartPage() {
     }
     setBusy(true);
     try {
-      const phoneDigits = customer.phone.replace(/\\D/g, "").replace(/^0/, "");
+      const phoneDigits = customer.phone.replace(/\D/g, "").replace(/^0/, "");
       const phone = selectedCountry.dial + phoneDigits;
       const response = await fetch("/api/checkout", {
         method: "POST",
