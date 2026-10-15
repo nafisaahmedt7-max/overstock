@@ -178,12 +178,11 @@ export default function CartPage() {
           </div>
           <aside>
             <div><span>SUBTOTAL</span><strong><LocalPrice amountUsd={total} /></strong></div>
-            <p className="currency-note">Shown in {quote?.currency || "your local currency"} as an estimate. Square checkout charges in AUD.</p>
-            <p className="checkout-disclosure">Shipping and taxes are not included. The Square payment page will show the AUD amount for the products before you pay.</p>
+            <p className="checkout-price-note">Estimated in {quote?.currency || "your local currency"} · Charged in AUD · Shipping and tax not included</p>
             <form className="checkout-form checkout-form-professional" onSubmit={checkout} noValidate>
               <div className="checkout-section-heading">
                 <span className="checkout-step">01</span>
-                <div><h2>Contact details</h2><p>We’ll send your order confirmation here.</p></div>
+                <div><h2>Contact details</h2><p>Order receipt sent by email</p></div>
               </div>
               <label className="checkout-field">
                 <span>Full name <b>*</b></span>
@@ -211,7 +210,7 @@ export default function CartPage() {
               </label>
               <div className="checkout-section-heading checkout-address-heading">
                 <span className="checkout-step">02</span>
-                <div><h2>Delivery address</h2><p>Enter the address where you’d like your order delivered.</p></div>
+                <div><h2>Delivery address</h2><p>Where should we send your order?</p></div>
               </div>
               <label className="checkout-field">
                 <span>Street address <b>*</b></span>
@@ -247,7 +246,6 @@ export default function CartPage() {
                 </select>
                 {fieldError("country")}
               </label>
-              <p className="checkout-secure-note">Your details are used to process and deliver this order.</p>
               {error && <p className="checkout-error" role="alert">{error}</p>}
               <button type="submit" disabled={busy}>{busy ? "OPENING SQUARE..." : "CONTINUE TO CHECKOUT"}</button>
             </form>
