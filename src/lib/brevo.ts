@@ -28,29 +28,13 @@ function escapeHtml(value: unknown) {
 }
 
 function buildEmailContent(order: QueuedOrderEmail) {
-  const itemLines = (order.items || []).map((item) => {
-    const size = item.size ? ` — size ${item.size}` : "";
-    return `${item.quantity} × ${item.name}${size}`;
-  });
   const safeName = escapeHtml(order.customer_name);
   const itemsHtml = order.items.map((item) => {
     const size = item.size ? ` — size ${escapeHtml(item.size)}` : "";
     return `<li>${item.quantity} × ${escapeHtml(item.name)}${size}</li>`;
   }).join("");
   const total = Number(order.total_aud || 0).toFixed(2);
-  return {
-    text: [
-      `Hi ${order.customer_name},`,
-      "",
-      `Your OVERSTOCK order #${order.order_number} is confirmed.`,
-      ...itemLines,
-      "",
-      `Paid total: AUD $${total}`,
-      "",
-      "Thank you for shopping with OVERSTOCK.",
-    ].join("\n"),
-    html: `<!doctype html><html><body style="margin:0;background:#f5f3ef;padding:32px;font-family:Arial,sans-serif;color:#24231f"><main style="max-width:560px;margin:0 auto;background:#fff;padding:32px;border:1px solid #e5e1d9"><p style="letter-spacing:.16em;font-size:12px;font-weight:bold">OVERSTOCK</p><h1 style="font-size:24px">Order confirmed</h1><p>Hi ${safeName}, your order <strong>#${order.order_number}</strong> is confirmed.</p><ul>${itemsHtml}</ul><p style="border-top:1px solid #e5e1d9;padding-top:16px"><strong>Paid total: AUD $${total}</strong></p><p>Thank you for shopping with OVERSTOCK.</p></main></body></html>`,
-  };
+  return `<!doctype html><html><body style="margin:0;background:#f5f3ef;padding:32px;font-family:Arial,sans-serif;color:#24231f"><main style="max-width:560px;margin:0 auto;background:#fff;padding:32px;border:1px solid #e5e1d9"><p style="letter-spacing:.16em;font-size:12px;font-weight:bold">OVERSTOCK</p><h1 style="font-size:24px">Order confirmed</h1><p>Hi ${safeName}, your order <strong>#${order.order_number}</strong> is confirmed.</p><ul>${itemsHtml}</ul><p style="border-top:1px solid #e5e1d9;padding-top:16px"><strong>Paid total: AUD ${total}</strong></p><p>Thank you for shopping with OVERSTOCK.</p></main></body></html>`;
 }
 
 export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient) {
@@ -83,8 +67,7 @@ export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient) {
         },
         to: [{ email: queued.email, name: queued.customer_name }],
         subject: `Order #${queued.order_number} confirmed — OVERSTOCK`,
-        htmlContent: content.html,
-        textContent: content.text,
+        htmlContent: content,
         tags: ["order-confirmation"],
       }),
       signal: AbortSignal.timeout(10000),
