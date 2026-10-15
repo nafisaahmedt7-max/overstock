@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     addressParts.region.length < 2 || addressParts.region.length > 80 ||
     addressParts.postalCode.length < 2 || addressParts.postalCode.length > 20 ||
     !/^[\p{L}\p{N} -]+$/u.test(addressParts.postalCode) ||
-    !/^[\\p{L} .'-]{2,80}$/u.test(addressParts.country)
+    !/^[\p{L} .'-]{2,80}$/u.test(addressParts.country)
   ) {
     return jsonError("Enter a complete and valid delivery address.", 400);
   }
