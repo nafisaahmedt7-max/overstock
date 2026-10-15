@@ -68,7 +68,7 @@ function validate(customer: Customer, dialCode: string): FieldErrors {
   if (address.postalCode.trim().length < 2 || address.postalCode.trim().length > 20 || !/^[\p{L}\p{N} -]+$/u.test(address.postalCode.trim())) {
     errors.postalCode = "Enter a valid postal or ZIP code.";
   }
-  if (!countries.some((country) => country.iso === address.country)) errors.country = "Choose your country.";
+  if (!countries.some((country) => country.name === address.country)) errors.country = "Choose your country.";
   return errors;
 }
 
@@ -79,7 +79,7 @@ export default function CartPage() {
     name: "",
     email: "",
     phone: "",
-    address: { street: "", unit: "", city: "", region: "", postalCode: "", country: "AU" },
+    address: { street: "", unit: "", city: "", region: "", postalCode: "", country: "Australia" },
   });
   const [phoneCountryIso, setPhoneCountryIso] = useState("AU");
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
@@ -243,7 +243,7 @@ export default function CartPage() {
               <label className="checkout-field">
                 <span>Country <b>*</b></span>
                 <select autoComplete="country" required value={customer.address.country} {...inputProps("country")} onChange={(e) => setAddress("country", e.target.value)}>
-                  {countries.map((country) => <option key={country.iso} value={country.iso}>{country.name}</option>)}
+                  {countries.map((country) => <option key={country.iso} value={country.name}>{country.name}</option>)}
                 </select>
                 {fieldError("country")}
               </label>
