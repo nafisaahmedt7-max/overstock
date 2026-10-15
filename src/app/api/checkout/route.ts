@@ -88,7 +88,8 @@ export async function POST(request: Request) {
     .from("products")
     .select("id,slug,name,sku,price,status,stock_quantity,sizes")
     .in("slug", slugs)
-    .eq("status", "active");
+    .in("status", ["active", "sold_out"])
+    .gt("stock_quantity", 0);
   if (productError || !products || products.length !== slugs.length) {
     return jsonError("A product in your cart is no longer available.", 409);
   }
