@@ -70,7 +70,7 @@ export async function getProduct(slug: string) {
   const { data } = await sb
     .from("products")
     .select(
-      "slug,name,price,audience,category,color,condition,status,image_url,sizes,description,brand",
+      "slug,name,price,audience,category,color,condition,status,image_url,size_chart_url,sizes,description,brand",
     )
     .in("status", ["active", "sold_out"])
     .eq("slug", slug)
