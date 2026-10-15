@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 export function ProductPlaceholder({
   name,
@@ -10,21 +13,25 @@ export function ProductPlaceholder({
   imageUrl?: string | null;
   index?: number;
 }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const imageFailed = Boolean(imageUrl && failedUrl === imageUrl);
+
   return (
     <div className="product-placeholder" style={{ backgroundColor: tone }}>
       <span>{String((index ?? 0) + 1).padStart(2, "0")}</span>
-      {imageUrl ? (
+      {imageUrl && !imageFailed ? (
         <Image
           src={imageUrl}
           alt={name}
           fill
           sizes="(max-width: 800px) 50vw, 33vw"
           style={{ objectFit: "contain", padding: "8%" }}
+          onError={() => setFailedUrl(imageUrl)}
         />
       ) : (
         <>
-          <strong>PRODUCT IMAGE</strong>
-          <small>ADD IN ADMIN</small>
+          <strong>{imageFailed ? "IMAGE UNAVAILABLE" : "PRODUCT IMAGE"}</strong>
+          <small>{imageFailed ? "PLEASE CHECK BACK" : "IMAGE COMING SOON"}</small>
         </>
       )}
     </div>
