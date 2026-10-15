@@ -45,7 +45,6 @@ const pages: Record<string, LegalContent> = {
         paragraphs: [
           "We aim to describe products and show images accurately. Colours and appearance can vary between screens. Product availability can change, and adding an item to your cart does not guarantee it will remain available.",
           "Submitting an order is a request to buy the listed items. An order is accepted after payment is completed and OVERSTOCK sends an order confirmation. If an item is unavailable or a clear pricing or listing error affects an order, we may contact you to arrange a correction, cancellation, or refund.",
-          "During checkout, stock may be held for up to 30 minutes while you complete payment. If payment is not completed in that time, the hold expires and the stock may become available to other customers.",
         ],
       },
       {
@@ -58,21 +57,29 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "Delivery",
         paragraphs: [
-          "Please review the delivery information available before placing an order and provide a complete, accurate address. Delivery estimates may change because of courier or other events outside our control. If we cannot ship within the time stated for your order, we will contact you and provide the options required by applicable law.",
-          "For shipping updates and tracking information, see our Shipping page and the updates sent with your order. This does not limit any rights you have under applicable consumer law.",
+          "Please review the delivery information available before placing an order and provide a complete, accurate address. We ship within the timeframe stated for your order or, if no timeframe is stated, within the period required by law. If we cannot ship on time, we will give you the notice and options required by applicable law, which may include agreeing to a delay or cancelling for a full refund.",
+          "For shipping updates and tracking information, see our Shipping page and the updates sent with your order. Delivery estimates may change because of courier or other events outside our control. This does not limit any rights you have under applicable consumer law.",
         ],
       },
       {
-        heading: "Cancellations, returns, and consumer rights",
+        heading: "Cancellations, damaged items, and consumer rights",
         paragraphs: [
-          "Before shipment, you may email us to request cancellation. If we confirm the order can be stopped before dispatch, we will cancel it and refund the payment to the original payment method. Once an order has shipped, we do not accept cancellation or returns for change of mind.",
-          "If an item arrives damaged, contact us by email through the Contact page with your order number and photos of the item and packaging. We will review the issue and may offer a voucher where permitted by applicable law. A voucher does not replace a refund, replacement, or other remedy that applicable law requires or gives you the right to choose. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
+          "You may email us to request cancellation before your order ships. If we confirm we can cancel it before dispatch, we will cancel the order and refund the amount paid for it to the original payment method. After an order ships, we do not accept cancellations or returns for change of mind. This policy does not limit a right to cancel or receive a refund where applicable law provides one.",
+          "If an item arrives damaged, email us through the Contact page promptly with your order number and photos of the item and packaging. We will review the issue and may offer a voucher as a resolution where permitted by law and accepted by you. A voucher will not replace a repair, replacement, refund, or other remedy required by law. Under the Australian Consumer Law, the remedy depends on the problem and may include a free repair or, for a major failure, your choice of a refund or replacement. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
+        ],
+      },
+      {
+        heading: "Consumer law",
+        paragraphs: [
+          "For Australian consumers, the Australian Consumer Law in Schedule 2 to the Competition and Consumer Act 2010 (Cth) provides consumer guarantees that cannot be excluded. Nothing in these terms excludes, restricts, or modifies those guarantees or any remedy available under them.",
+          "For U.S. consumers, applicable federal and state consumer protection laws continue to apply. Under the U.S. Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule, we will meet the shipping time stated when you order or, if none is stated, the applicable 30-day period. If we cannot do so, we will provide the notice and cancellation/refund options required by that Rule.",
+          "These terms are subject to any mandatory consumer protections that apply to your purchase. If a term conflicts with a non-excludable legal right, that right prevails to the extent of the conflict.",
         ],
       },
       {
         heading: "Website use and content",
         paragraphs: [
-          "You must not misuse the site, interfere with its operation, attempt unauthorised access, or use it to commit fraud or break the law. OVERSTOCK and its licensors retain rights in the site's design, text, and other content. Product names, images, and other materials may belong to their respective owners or sellers.",
+          "You must not misuse the site, interfere with its operation, attempt unauthorised access, or use it to commit fraud or break the law. OVERSTOCK and its licensors retain rights in the site's design, text, and other content. Product names, images, and other materials remain subject to the rights of their respective owners.",
         ],
       },
       {
@@ -87,23 +94,23 @@ const pages: Record<string, LegalContent> = {
   privacy: {
     title: "PRIVACY",
     copy: [
-      "We collect the information needed to manage accounts, orders, delivery and seller payments.",
-      "Order information is only shown to authorised OVERSTOCK administrators, the relevant seller and the internal fulfillment team where required.",
-      "Contact us to request access or correction of your personal information.",
+      "We collect the information needed to manage customer accounts, orders, delivery, and support.",
+      "We use order information to process purchases, arrange delivery, and respond to customer requests. Access is limited to people who need the information for these purposes.",
+      "Contact us to request access to or correction of your personal information.",
     ],
   },
   shipping: {
     title: "SHIPPING",
     copy: [
-      "Independent sellers send sold products to OVERSTOCK fulfillment. After receipt and preparation, OVERSTOCK sends the customer parcel.",
-      "Tracking is added when available. Delivery estimates are not guarantees and may vary by destination and courier.",
+      "OVERSTOCK prepares and sends customer parcels to the delivery address provided at checkout.",
+      "Tracking is added when available. Delivery estimates are not guarantees and may vary by destination and courier. If we cannot ship within the timeframe stated for your order, we will provide the notice and options required by applicable law.",
     ],
   },
   refunds: {
     title: "REFUND POLICY",
     copy: [
-      "You may request cancellation by email before your order is shipped. If we confirm we can stop the order before dispatch, we will cancel it and refund the payment to the original payment method. Once an order has shipped, we do not accept cancellations or returns for change of mind.",
-      "If an item arrives damaged, email us with your order number and photos of the item and packaging. We will review the issue and may offer a voucher where permitted by applicable law. A voucher does not replace a refund, replacement, or other remedy that applicable law requires or gives you the right to choose. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
+      "You may request cancellation by email before your order ships. If we confirm we can stop it before dispatch, we will cancel the order and refund the amount paid to the original payment method. After an order ships, we do not offer cancellations or returns for change of mind. This does not limit any cancellation or refund right that applicable law gives you.",
+      "If an item arrives damaged, email us promptly with your order number and photos of the item and packaging. We will review the issue and may offer a voucher as a resolution where permitted by law and accepted by you. A voucher will not replace any repair, replacement, refund, or other remedy required by law. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
       "Nothing in this policy limits rights that cannot lawfully be excluded, including consumer guarantees and remedies that may apply under Australian or U.S. law.",
     ],
   },
