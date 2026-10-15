@@ -325,7 +325,7 @@ const pages: Record<string, LegalContent> = {
     title: "SHIPPING",
     updated: "LAST UPDATED OCTOBER 15, 2026",
     copy: [
-      "**OVERSTOCK dispatches orders in approximately **3–4 weeks** after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
+      "**OVERSTOCK dispatches orders in approximately 3–4 weeks after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
       "Please check your delivery details carefully at checkout. If you need to correct an address, email operations.overstock@gmail.com as soon as possible. An address change cannot be guaranteed once dispatch processing has begun.",
       "If OVERSTOCK cannot dispatch within the timeframe stated for your order, we will notify you and provide the revised timing and options required by law. For eligible U.S. orders, the **FTC Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435)** requires the option to agree to a delay or cancel for a prompt refund when the promised timeframe cannot be met.",
       "For an order that is delayed, lost, or arrives damaged, contact OVERSTOCK at operations.overstock@gmail.com and include your order number. Your rights under the **Australian Consumer Law** and applicable U.S. consumer-protection laws are not affected."
