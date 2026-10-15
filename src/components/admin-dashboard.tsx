@@ -58,6 +58,30 @@ type FinanceLine = {
   seller_payout_total: number | null;
   product_name: string;
 };
+type InventoryMovement = {
+  id: string;
+  product_id: string;
+  order_id: string | null;
+  movement_type: string;
+  quantity_delta: number;
+  stock_before: number;
+  stock_after: number;
+  reason: string;
+  created_at: string;
+};
+type CashflowEntry = {
+  id: string;
+  order_id: string | null;
+  order_item_id: string | null;
+  entry_type: string;
+  direction: "inflow" | "outflow";
+  amount: number;
+  currency: string;
+  payment_method: string;
+  status: string;
+  description: string;
+  occurred_at: string;
+};
 type Order = {
   id: string;
   order_number: number;
@@ -82,6 +106,10 @@ type Order = {
   refund_status: string;
   refund_amount: number;
   seller_refund_recovery_amount: number;
+  inventory_status: string;
+  inventory_issue: string | null;
+  square_refunded_amount: number;
+  payment_method: string;
 };
 type Partner = { id: string; name: string; warehouse_address: string | null };
 type Shipment = {
@@ -94,7 +122,7 @@ type Shipment = {
   courier: string | null;
   tracking_number: string | null;
 };
-type Tab = "overview" | "sellers" | "products" | "orders" | "fulfilment";
+type Tab = "overview" | "inventory" | "cashflow" | "sellers" | "products" | "orders" | "fulfilment";
 
 export function AdminDashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<Tab>("overview"),
@@ -104,6 +132,8 @@ export function AdminDashboard({ email }: { email: string }) {
     [partners, setPartners] = useState<Partner[]>([]),
     [shipments, setShipments] = useState<Shipment[]>([]),
     [finance, setFinance] = useState<FinanceLine[]>([]),
+    [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>([]),
+    [cashflowEntries, setCashflowEntries] = useState<CashflowEntry[]>([]),
     [imagePreview, setImagePreview] = useState<string | null>(null),
     [imageFileName, setImageFileName] = useState(""),
     [mobileNavOpen, setMobileNavOpen] = useState(false),
@@ -116,7 +146,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const [supabase] = useState(createClient);
   const router = useRouter();
   const load = useCallback(async () => {
-    const [s, p, o, fp, os, fin] = await Promise.all([
+    const [s, p, o, fp, os, fin, movements, cashflow] = await Promise.all([
       supabase
         .from("sellers")
         .select("id,seller_code,display_name,email,commission_percent,status")
@@ -130,7 +160,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("orders")
         .select(
-          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,payment_status,payment_amount_aud,square_payment_id,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount,seller_refund_recovery_amount",
+          "id,order_number,customer_name,customer_email,customer_phone,delivery_address,subtotal,delivery_fee,total,sales_channel,status,payment_status,payment_amount_aud,square_payment_id,placed_at,journey_status,journey_timestamps,cancellation_requested_at,cancellation_requested_by_role,cancellation_request_reason,refund_status,refund_amount,seller_refund_recovery_amount,inventory_status,inventory_issue,square_refunded_amount,payment_method",
         )
         .order("placed_at", { ascending: false }),
       supabase
@@ -146,12 +176,19 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("order_items")
         .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total,product_name"),
+      supabase
+        .from("inventory_movements")
+        .select("id,product_id,order_id,movement_type,quantity_delta,stock_before,stock_after,reason,created_at")
+        .order("created_at", { ascending: false }).limit(100),
+      supabase
+        .from("cashflow_entries")
+        .select("id,order_id,order_item_id,entry_type,direction,amount,currency,payment_method,status,description,occurred_at")
+        .order("occurred_at", { ascending: false }).limit(200),
     ]);
-    if (s.error || p.error || o.error)
+    if (s.error || p.error || o.error || fin.error || movements.error || cashflow.error)
       setNotice(
-        s.error?.message ||
-          p.error?.message ||
-          o.error?.message ||
+        s.error?.message || p.error?.message || o.error?.message ||
+          fin.error?.message || movements.error?.message || cashflow.error?.message ||
           "Could not load data",
       );
     setSellers(s.data ?? []);
@@ -167,6 +204,8 @@ export function AdminDashboard({ email }: { email: string }) {
     setPartners(fp.data ?? []);
     setShipments(os.data ?? []);
     setFinance(fin.data ?? []);
+    setInventoryMovements(movements.data ?? []);
+    setCashflowEntries(cashflow.data ?? []);
   }, [supabase]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -394,7 +433,6 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!editing) return;
     const f = new FormData(e.currentTarget);
     const seller = String(f.get("seller"));
-    const stockQuantity = Number(f.get("stock_quantity"));
     const sizes = String(f.get("sizes"))
       .split(",")
       .map((x) => x.trim().toUpperCase())
@@ -403,10 +441,6 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice(
         "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
       );
-      return;
-    }
-    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
-      setNotice("Stock quantity must be a whole number of zero or more.");
       return;
     }
     const replacementImage = f.get("image");
@@ -432,7 +466,6 @@ export function AdminDashboard({ email }: { email: string }) {
         gpo_fee_per_500g: Number(f.get("gpo_fee_per_500g")),
         weight_grams: Number(f.get("weight_grams")),
         overstock_profit_target: Number(f.get("overstock_profit_target")),
-        stock_quantity: stockQuantity,
         ownership: seller ? "seller" : "own_stock",
         seller_id: seller || null,
         status: String(f.get("status")),
@@ -464,6 +497,46 @@ export function AdminDashboard({ email }: { email: string }) {
       await load();
     }
   }
+  async function adjustInventory(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form=e.currentTarget, f=new FormData(form);
+    const productId=String(f.get("product_id")||"");
+    const delta=Number(f.get("quantity_change"));
+    const reason=String(f.get("reason")||"").trim();
+    if (!productId || !Number.isInteger(delta) || delta===0 || !reason) {
+      setNotice("Choose an item, enter a positive or negative whole number, and explain the change.");
+      return;
+    }
+    const { data, error } = await supabase.rpc("admin_adjust_inventory", {
+      target_product_id: productId, quantity_change: delta, adjustment_reason: reason,
+    });
+    if (error) { setNotice(error.message); return; }
+    setNotice(`Stock updated. New available quantity: ${data}.`);
+    form.reset();
+    await load();
+  }
+  async function recordCashflowAdjustment(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form=e.currentTarget, f=new FormData(form);
+    const amount=Number(f.get("amount"));
+    const description=String(f.get("description")||"").trim();
+    if (!Number.isFinite(amount) || amount<=0 || !description) {
+      setNotice("Enter a positive amount and explain the cash movement.");
+      return;
+    }
+    const {error}=await supabase.rpc("admin_record_cashflow_adjustment",{
+      target_direction:String(f.get("direction")),
+      target_amount:amount,
+      target_currency:String(f.get("currency")),
+      target_method:String(f.get("method")),
+      target_description:description,
+      request_id:crypto.randomUUID(),
+    });
+    if(error){setNotice(error.message);return;}
+    setNotice("Cash movement recorded. Ledger entries cannot be edited; use a correcting entry if needed.");
+    form.reset();
+    await load();
+  }
   async function addOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget,
@@ -482,6 +555,7 @@ export function AdminDashboard({ email }: { email: string }) {
       customer_name: String(f.get("customer")), customer_phone: String(f.get("phone") || ""),
       customer_email: String(f.get("email") || ""), delivery_address: String(f.get("address") || ""),
       product_id: product.id, selected_size: String(f.get("size") || ""), quantity: qty,
+      payment_method: String(f.get("payment_method") || "cash"),
       delivery_fee: 0, internal_notes: ""
     }});
     if (error) {
@@ -492,12 +566,6 @@ export function AdminDashboard({ email }: { email: string }) {
     form.reset();
     setOrderProductId("");
     await load();
-  }
-  async function deleteOrder(order: Order) {
-    if (!window.confirm(`Delete order #${order.order_number}? This removes its order record permanently.`)) return;
-    const { error } = await supabase.from("orders").delete().eq("id", order.id);
-    setNotice(error?.message || `Order #${order.order_number} deleted.`);
-    if (!error) await load();
   }
   async function advanceOrder(id: string, status: JourneyStatus) {
     const { error } = await supabase.rpc("advance_order_journey", {
@@ -512,7 +580,11 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice("Seller payout becomes due only after Square confirms the customer payment.");
       return;
     }
-    if (payoutStatus === "paid" && !window.confirm("Only mark this seller paid after you have sent their money outside Square. Have you sent it?")) return;
+    if (payoutStatus === "paid" && !window.confirm("Record this seller payout as sent? OVERSTOCK must already have transferred the money outside Square.")) return;
+    if (payoutStatus !== "paid" && sellerFinanceStatus(orderId, sellerId) === "paid") {
+      setNotice("A recorded seller payout cannot be changed back. Use an accounting adjustment if it was entered incorrectly.");
+      return;
+    }
     const { error } = await supabase
       .from("order_items")
       .update({ payout_status: payoutStatus })
@@ -522,12 +594,30 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!error) await load();
   }
   async function updateFulfillmentPayment(orderId: string, paymentStatus: string) {
+    const order=orders.find((item)=>item.id===orderId);
+    if (order?.payment_status!=="paid" || order?.journey_status==="cancelled") {
+      setNotice("Fulfillment can be marked paid only for an active order with confirmed customer payment.");
+      return;
+    }
+    if (paymentStatus==="paid" && !window.confirm("Record this fulfillment payment as sent? OVERSTOCK must already have transferred the money.")) return;
+    if (paymentStatus!=="paid" && orderFinanceStatus(orderId)==="paid") {
+      setNotice("A recorded fulfillment payment cannot be changed back. Use an accounting adjustment if it was entered incorrectly.");
+      return;
+    }
     const { error } = await supabase
       .from("order_items")
       .update({ fulfillment_payment_status: paymentStatus })
       .eq("order_id", orderId);
     setNotice(error?.message || "Fulfilment payment record updated.");
     if (!error) await load();
+  }
+  function sellerFinanceStatus(orderId:string,sellerId:string) {
+    const lines=finance.filter((line)=>line.order_id===orderId && line.seller_id===sellerId);
+    return lines.length && lines.every((line)=>line.payout_status==="paid") ? "paid" : "open";
+  }
+  function orderFinanceStatus(orderId:string) {
+    const lines=finance.filter((line)=>line.order_id===orderId);
+    return lines.length && lines.every((line)=>line.fulfillment_payment_status==="paid") ? "paid" : "open";
   }
   async function clearCancellationRequest(orderId: string) {
     const { error } = await supabase.rpc("resolve_cancellation_request", {
@@ -579,6 +669,8 @@ export function AdminDashboard({ email }: { email: string }) {
       style: "currency",
       currency: "USD",
     }).format(n);
+  const moneyCurrency = (n:number,currency:string) =>
+    new Intl.NumberFormat("en-US",{style:"currency",currency}).format(n);
   const refundableOrders = orders.filter((order) => order.journey_status === "cancelled");
   const refundsDue = refundableOrders.filter((order) => order.refund_status === "due_from_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
   const refundsSent = refundableOrders.filter((order) => order.refund_status === "sent_by_seller").reduce((n, order) => n + Number(order.refund_amount || 0), 0);
@@ -586,7 +678,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const refundLiability = refundsDue + refundsSent;
   const pendingSellerRecovery = refundableOrders.filter((order) => ["due_from_seller", "sent_by_seller"].includes(order.refund_status)).reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
   const completedSellerRecovery = refundableOrders.filter((order) => order.refund_status === "completed").reduce((n, order) => n + Number(order.seller_refund_recovery_amount || 0), 0);
-  const grossSales = orders.filter((order) => order.payment_status !== "unpaid").reduce((n, order) => n + Number(order.total || 0), 0);
+  const grossSales = cashflowEntries.filter((entry) => entry.status === "posted" && entry.direction === "inflow" && entry.entry_type === "customer_payment" && entry.currency === "USD").reduce((n, entry) => n + Number(entry.amount), 0);
   const activeOrderIds = new Set(orders.filter((order) => order.payment_status === "paid" && order.journey_status !== "cancelled").map((order) => order.id));
   const activeFinance = finance.filter((line) => activeOrderIds.has(line.order_id));
   const totalSales = orders.filter((order) => order.payment_status === "paid" && order.journey_status !== "cancelled").reduce((n, order) => n + Number(order.total || 0), 0);
@@ -598,14 +690,20 @@ export function AdminDashboard({ email }: { email: string }) {
   const fulfillmentService = activeFinance.reduce((n, x) => n + Number(x.fulfillment_service_fee || 0), 0);
   const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
   const fulfillmentCost = fulfillmentService + gpoFees;
-  const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
-  const cashSellerPaid = finance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
+  const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && ["due","scheduled"].includes(x.payout_status)).reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
+  const cashSellerPaid = cashflowEntries.filter((e) => e.status === "posted" && e.direction === "outflow" && e.entry_type === "seller_payout" && e.currency === "USD").reduce((n, e) => n + Number(e.amount), 0);
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
-  const cashFulfillmentPaid = finance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
+  const cashFulfillmentPaid = cashflowEntries.filter((e) => e.status === "posted" && e.direction === "outflow" && e.entry_type === "fulfillment_payment" && e.currency === "USD").reduce((n, e) => n + Number(e.amount), 0);
   const overstockProfit = totalSales - sellerCost - sellerShare - fulfillmentService - gpoFees;
-  const cashIn = grossSales + completedSellerRecovery;
-  const cashOut = cashSellerPaid + cashFulfillmentPaid + completedRefunds;
+  const cashIn = cashflowEntries.filter((e) => e.status === "posted" && e.direction === "inflow" && e.currency === "USD").reduce((n, e) => n + Number(e.amount), 0);
+  const cashOut = cashflowEntries.filter((e) => e.status === "posted" && e.direction === "outflow" && e.currency === "USD").reduce((n, e) => n + Number(e.amount), 0);
   const cashOnHand = cashIn - cashOut;
+  const cashflowByCurrency = new Map<string,{inflow:number;outflow:number}>();
+  for (const entry of cashflowEntries.filter((item)=>item.status==="posted")) {
+    const totals=cashflowByCurrency.get(entry.currency)||{inflow:0,outflow:0};
+    totals[entry.direction]+=Number(entry.amount);
+    cashflowByCurrency.set(entry.currency,totals);
+  }
   const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
   return (
     <main className="admin-shell">
@@ -616,14 +714,14 @@ export function AdminDashboard({ email }: { email: string }) {
         </div>
         <nav>
           {(
-            ["overview", "sellers", "products", "orders", "fulfilment"] as Tab[]
+            ["overview", "inventory", "cashflow", "sellers", "products", "orders", "fulfilment"] as Tab[]
           ).map((x) => (
             <button
               key={x}
               className={tab === x ? "active" : ""}
               onClick={() => { setTab(x); setMobileNavOpen(false); }}
             >
-              {x.toUpperCase()}
+              {x === "cashflow" ? "CASH FLOW" : x.toUpperCase()}
             </button>
           ))}
         </nav>
@@ -645,9 +743,9 @@ export function AdminDashboard({ email }: { email: string }) {
         {tab === "overview" && (<>
           <section className="finance-ledger">
             <header><p className="eyebrow">FINANCIAL OVERVIEW</p><h2>SALES & PROFIT</h2><p>A clear view of customer sales, operating costs, and OVERSTOCK profit.</p></header>
-            <section className="overview-money-section"><header><p className="eyebrow">SALES</p><h3>WHAT CUSTOMERS BOUGHT</h3><b className="section-total positive-total">{money(totalSales)}</b></header><div className="finance-ledger-grid"><article className="sales-ledger-total"><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>SELLER PRODUCT SALES</span><b>{money(sellerSales)}</b><small>Sales of seller-owned products</small></article></div></section>
-            <section className="overview-money-section"><header><p className="eyebrow">MONEY IN</p><h3>CASH RECEIVED</h3><b className="section-total positive-total">{money(cashIn)}</b></header><div className="finance-ledger-grid"><article className="cash-in"><span>CUSTOMER PAYMENTS</span><b>{money(grossSales)}</b><small>All cash received from customers</small></article><article className="cash-in"><span>SELLER REFUNDS RECEIVED</span><b>{money(completedSellerRecovery)}</b><small>Only refunds confirmed as received</small></article><article className="cash-balance"><span>CASH ON HAND</span><b>{money(cashOnHand)}</b><small>Cash received less payments already made</small></article></div></section>
-            <section className="overview-money-section"><header><p className="eyebrow">MONEY OUT</p><h3>ORDER COSTS & PAYMENTS</h3><b className="section-total negative-total">−{money(itemCost + sellerShare + inboundDelivery + fulfillmentService + gpoFees)}</b></header><div className="finance-ledger-grid"><article className="negative-ledger"><span>ITEM COST</span><b>−{money(itemCost)}</b><small>Cost of each product</small></article><article className="negative-ledger"><span>SELLER SHARE</span><b>−{money(sellerShare)}</b><small>Seller share of profit</small></article><article className="negative-ledger"><span>DELIVERY TO FULFILMENT</span><b>−{money(inboundDelivery)}</b><small>Seller-to-fulfilment delivery</small></article><article className="negative-ledger"><span>FULFILMENT SERVICES</span><b>−{money(fulfillmentService)}</b><small>Handling and service fees</small></article><article className="negative-ledger"><span>GPO SHIPPING</span><b>−{money(gpoFees)}</b><small>Weight-based courier charges</small></article><article className="cash-out"><span>PAYMENTS ALREADY MADE</span><b>−{money(cashOut)}</b><small>Seller, fulfilment, and completed refunds</small></article><article className="cash-pending"><span>OPEN PAYABLES</span><b>−{money(outstandingPayables)}</b><small>Unpaid seller, fulfilment, and net customer refund amounts</small></article><article><span>EXPECTED SELLER REFUNDS</span><b>{money(pendingSellerRecovery)}</b><small>Refund recovery not received yet</small></article></div></section>
+            <section className="overview-money-section"><header><p className="eyebrow">SALES</p><h3>WHAT CUSTOMERS BOUGHT</h3><b className="section-total positive-total">{money(totalSales)}</b></header><div className="finance-ledger-grid"><article className="sales-ledger-total"><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Paid active orders, shown in USD product pricing</small></article><article><span>SELLER PRODUCT SALES</span><b>{money(sellerSales)}</b><small>Sales of seller-owned products</small></article></div></section>
+            <section className="overview-money-section"><header><p className="eyebrow">MONEY IN</p><h3>USD CASH RECEIVED</h3><b className="section-total positive-total">{money(cashIn)}</b></header><div className="finance-ledger-grid"><article className="cash-in"><span>CUSTOMER PAYMENTS</span><b>{money(grossSales)}</b><small>USD receipts only; AUD Square totals are in Cash Flow</small></article><article className="cash-in"><span>SELLER REFUNDS RECEIVED</span><b>{money(completedSellerRecovery)}</b><small>Only refunds confirmed as received</small></article><article className="cash-balance"><span>CASH ON HAND</span><b>{money(cashOnHand)}</b><small>Recorded USD receipts less recorded USD outflows</small></article></div></section>
+            <section className="overview-money-section"><header><p className="eyebrow">MONEY OUT</p><h3>USD COSTS & PAYMENTS</h3><b className="section-total negative-total">−{money(itemCost + sellerShare + inboundDelivery + fulfillmentService + gpoFees)}</b></header><div className="finance-ledger-grid"><article className="negative-ledger"><span>ITEM COST</span><b>−{money(itemCost)}</b><small>Cost of each product</small></article><article className="negative-ledger"><span>SELLER SHARE</span><b>−{money(sellerShare)}</b><small>Seller share of profit</small></article><article className="negative-ledger"><span>DELIVERY TO FULFILMENT</span><b>−{money(inboundDelivery)}</b><small>Seller-to-fulfilment delivery</small></article><article className="negative-ledger"><span>FULFILMENT SERVICES</span><b>−{money(fulfillmentService)}</b><small>Handling and service fees</small></article><article className="negative-ledger"><span>GPO SHIPPING</span><b>−{money(gpoFees)}</b><small>Weight-based courier charges</small></article><article className="cash-out"><span>PAYMENTS ALREADY MADE</span><b>−{money(cashOut)}</b><small>Seller, fulfilment, and completed refunds</small></article><article className="cash-pending"><span>OPEN PAYABLES</span><b>−{money(outstandingPayables)}</b><small>Unpaid seller, fulfilment, and net customer refund amounts</small></article><article><span>EXPECTED SELLER REFUNDS</span><b>{money(pendingSellerRecovery)}</b><small>Refund recovery not received yet</small></article></div></section>
             <section className="overview-profit-result"><header><p className="eyebrow">PROFIT RECONCILIATION</p><h3>OVERSTOCK PROFIT</h3></header><div className="profit-reconciliation"><span>TOTAL SALES</span><b>{money(totalSales)}</b><span>LESS: SELLER COSTS</span><b>−{money(itemCost + sellerShare + inboundDelivery)}</b><span>LESS: FULFILMENT & GPO</span><b>−{money(fulfillmentService + gpoFees)}</b></div><footer><span>OVERSTOCK PROFIT</span><b>{money(overstockProfit)}</b></footer></section>
             <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((itemCost + inboundDelivery + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
             <div className="ledger-key"><span><i className="ledger-bar-cost" />Item cost, seller share & delivery</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
@@ -655,6 +753,84 @@ export function AdminDashboard({ email }: { email: string }) {
           </section>
           <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>CUSTOMER REFUND DUE</span><b>−{money(refundsDue)}</b></article><article><span>CUSTOMER REFUND IN TRANSIT</span><b>−{money(refundsSent)}</b></article><article><span>SELLER REFUND RECOVERY</span><b>{money(pendingSellerRecovery + completedSellerRecovery)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article></div></section>
         </>)}
+        {tab === "inventory" && (
+          <section className="inventory-dashboard">
+            <header className="inventory-dashboard-header">
+              <p className="eyebrow">LIVE STOCK CONTROL</p>
+              <h2>INVENTORY</h2>
+              <p>Checkout holds stock for 30 minutes. Paid orders consume it. Cancelled orders return it before shipment. Every change is recorded below.</p>
+            </header>
+            <div className="inventory-summary-cards">
+              <article><span>ACTIVE ITEMS</span><b>{products.filter((p)=>p.status==="active").length}</b></article>
+              <article><span>UNITS AVAILABLE</span><b>{products.reduce((sum,p)=>sum+Number(p.stock_quantity||0),0)}</b></article>
+              <article><span>LOW STOCK (1–3)</span><b>{products.filter((p)=>p.stock_quantity>0&&p.stock_quantity<=3).length}</b></article>
+              <article><span>OUT OF STOCK</span><b>{products.filter((p)=>p.stock_quantity===0&&p.status!=="archived").length}</b></article>
+            </div>
+            <form className="inventory-adjustment-form" onSubmit={adjustInventory}>
+              <div><p className="eyebrow">RECEIVE OR CORRECT STOCK</p><h3>RECORD INVENTORY CHANGE</h3></div>
+              <label><span>ITEM</span><select name="product_id" required defaultValue=""><option value="" disabled>Choose item</option>{products.filter((p)=>p.status!=="archived").map((p)=><option key={p.id} value={p.id}>{p.name} · {p.stock_quantity} available</option>)}</select></label>
+              <label><span>CHANGE IN UNITS</span><input name="quantity_change" type="number" step="1" placeholder="For example: 8 or -1" required /></label>
+              <label className="inventory-reason-field"><span>WHY IS STOCK CHANGING?</span><input name="reason" maxLength={240} placeholder="New delivery, stock count correction, damaged item…" required /></label>
+              <button type="submit">SAVE STOCK CHANGE</button>
+            </form>
+            <section className="inventory-product-section">
+              <header><div><p className="eyebrow">CURRENT COUNTS</p><h3>ITEMS AND AVAILABLE UNITS</h3></div></header>
+              <div className="inventory-product-grid">{products.map((p)=><article key={p.id} data-stock={p.stock_quantity===0?"empty":p.stock_quantity<=3?"low":"available"}>
+                <div><span>{p.sku}</span><b>{p.status.replaceAll("_"," ").toUpperCase()}</b></div>
+                <h4>{p.name}</h4><p>{p.ownership==="seller"?"Seller item":"OVERSTOCK item"}{p.seller_id?" · "+(sellers.find((s)=>s.id===p.seller_id)?.display_name||"Seller"):""}</p>
+                <strong>{p.stock_quantity}<small> {p.stock_quantity===1?"unit":"units"} available</small></strong>
+              </article>)}</div>
+            </section>
+            <section className="inventory-movement-section">
+              <header><div><p className="eyebrow">AUDIT TRAIL</p><h3>RECENT STOCK CHANGES</h3></div><small>Latest 100 entries</small></header>
+              {inventoryMovements.length===0?<div className="empty-state">NO STOCK CHANGES RECORDED YET</div>:<div className="operations-table-wrap"><table className="operations-table">
+                <thead><tr><th>WHEN</th><th>ITEM</th><th>CHANGE</th><th>BEFORE → AFTER</th><th>REASON</th><th>ORDER</th></tr></thead>
+                <tbody>{inventoryMovements.map((m)=><tr key={m.id}>
+                  <td>{new Date(m.created_at).toLocaleString("en-AU")}</td>
+                  <td>{products.find((p)=>p.id===m.product_id)?.name||"Archived item"}</td>
+                  <td className={m.quantity_delta<0?"quantity-negative":"quantity-positive"}>{m.quantity_delta>0?"+":""}{m.quantity_delta}</td>
+                  <td>{m.stock_before} → {m.stock_after}</td>
+                  <td>{m.reason}</td>
+                  <td>{orders.find((o)=>o.id===m.order_id)?"#"+orders.find((o)=>o.id===m.order_id)?.order_number:"—"}</td>
+                </tr>)}</tbody>
+              </table></div>}
+            </section>
+          </section>
+        )}
+        {tab === "cashflow" && (
+          <section className="cashflow-dashboard">
+            <header className="cashflow-dashboard-header"><p className="eyebrow">RECONCILED CASH MOVEMENTS</p><h2>CASH FLOW</h2><p>Only money actually received or sent appears here. Amounts stay separated by currency so AUD and USD are never added together.</p></header>
+            <div className="cashflow-currency-cards">{Array.from(cashflowByCurrency.entries()).map(([currency,total])=><article key={currency}>
+              <span>{currency} NET CASH</span><b>{moneyCurrency(total.inflow-total.outflow,currency)}</b>
+              <small>Received {moneyCurrency(total.inflow,currency)} · Sent {moneyCurrency(total.outflow,currency)}</small>
+            </article>)}</div>
+            <section className="cashflow-adjust-panel">
+              <header><p className="eyebrow">RECORD A REAL CASH MOVEMENT</p><h3>ADD OTHER MONEY RECEIVED OR SPENT</h3><small>Use this for costs or receipts that are not already recorded by Square, seller payouts, or fulfilment payments.</small></header>
+              <form onSubmit={recordCashflowAdjustment}>
+                <label><span>DIRECTION</span><select name="direction" defaultValue="outflow"><option value="outflow">MONEY SPENT</option><option value="inflow">MONEY RECEIVED</option></select></label>
+                <label><span>AMOUNT</span><input name="amount" type="number" min="0.01" step="0.01" required /></label>
+                <label><span>CURRENCY</span><select name="currency" defaultValue="USD"><option value="USD">USD</option><option value="AUD">AUD</option><option value="BDT">BDT</option></select></label>
+                <label><span>HOW WAS IT PAID?</span><select name="method" defaultValue="cash"><option value="cash">CASH</option><option value="bank_transfer">BANK TRANSFER</option><option value="other">OTHER</option></select></label>
+                <label className="cashflow-reason"><span>DESCRIPTION</span><input name="description" maxLength={240} placeholder="Packaging supplies, refund received, courier cost…" required /></label>
+                <button type="submit">RECORD MOVEMENT</button>
+              </form>
+            </section>
+            <section className="cashflow-ledger-section">
+              <header><div><p className="eyebrow">IMMUTABLE TRANSACTION RECORD</p><h3>RECENT MONEY MOVEMENTS</h3></div><small>Latest 200 entries</small></header>
+              {cashflowEntries.length===0?<div className="empty-state">NO CASH MOVEMENTS RECORDED YET</div>:<div className="operations-table-wrap"><table className="operations-table">
+                <thead><tr><th>WHEN</th><th>TYPE</th><th>ORDER</th><th>METHOD</th><th>STATUS</th><th>AMOUNT</th></tr></thead>
+                <tbody>{cashflowEntries.map((entry)=><tr key={entry.id}>
+                  <td>{new Date(entry.occurred_at).toLocaleString("en-AU")}</td>
+                  <td><b>{entry.entry_type.replaceAll("_"," ").toUpperCase()}</b><small className="table-subline">{entry.description}</small></td>
+                  <td>{orders.find((o)=>o.id===entry.order_id)?"#"+orders.find((o)=>o.id===entry.order_id)?.order_number:"—"}</td>
+                  <td>{entry.payment_method.replaceAll("_"," ").toUpperCase()}</td>
+                  <td><span className="payment-status-chip" data-status={entry.status}>{entry.status.toUpperCase()}</span></td>
+                  <td className={entry.direction==="inflow"?"quantity-positive":"quantity-negative"}>{entry.direction==="inflow"?"+":"−"}{moneyCurrency(Number(entry.amount),entry.currency)}</td>
+                </tr>)}</tbody>
+              </table></div>}
+            </section>
+          </section>
+        )}
         {tab === "sellers" && (
           <>
             <details className="admin-help-dropdown">
@@ -914,7 +1090,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     <label className="edit-field"><span>GPO FEE / 500G (USD)</span><input name="gpo_fee_per_500g" type="number" step=".01" min="0" defaultValue={editing.gpo_fee_per_500g} required /></label>
                     <label className="edit-field"><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" step="1" min="1" defaultValue={editing.weight_grams} required /></label>
                     <label className="edit-field"><span>OVERSTOCK PROFIT TARGET</span><input name="overstock_profit_target" type="number" step=".01" min="0" defaultValue={editing.overstock_profit_target} required /></label>
-                    <label className="edit-field"><span>AVAILABLE STOCK</span><input name="stock_quantity" type="number" min="0" step="1" defaultValue={editing.stock_quantity} required /></label>
+                    <label className="edit-field inventory-readonly"><span>AVAILABLE STOCK</span><output>{editing.stock_quantity} units</output><small>Change counts in the Inventory tab to keep the stock audit accurate.</small></label>
                     <label className="edit-field">
                       <span>PRODUCT OWNER</span>
                       <select
@@ -988,6 +1164,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <option value="">CHOOSE SIZE</option>
                   {(products.find((p) => p.id === orderProductId)?.sizes || []).map((size) => <option key={size} value={size}>{size}</option>)}
                 </select></label>
+                <label><span>PAYMENT RECEIVED BY</span><select name="payment_method" required defaultValue="cash"><option value="cash">CASH</option><option value="bank_transfer">BANK TRANSFER</option><option value="other">OTHER RECORDED METHOD</option></select></label>
                 <label><span>QUANTITY</span><select name="quantity" required defaultValue="">
                   <option value="" disabled>CHOOSE</option>
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
@@ -1027,9 +1204,10 @@ export function AdminDashboard({ email }: { email: string }) {
                   <header>
                     <div><p className="eyebrow">ORDER #{o.order_number}</p><h2>{o.customer_name}</h2><small>{new Date(o.placed_at).toLocaleDateString("en-US")} / {(o.sales_channel || "website").toUpperCase()}</small></div>
                     <div className="order-payment-controls">
-                      <div className="payment-control"><span>CUSTOMER PAYMENT</span><b data-status={o.payment_status}>{(o.payment_status || "unpaid").replaceAll("_", " ").toUpperCase()}</b>{o.payment_amount_aud != null && <small>{Number(o.payment_amount_aud).toFixed(2)} AUD</small>}{o.square_payment_id && <small>Square payment ID saved</small>}</div>
-                      {sellerGroups.length ? <div className="seller-payment-groups"><span>SELLER PAYOUTS</span>{sellerGroups.map((group) => <label className="payment-control" key={group.sellerId}><span>{sellers.find((seller) => seller.id === group.sellerId)?.display_name || "SELLER"} — {money(group.total)}</span><select data-status={group.status} value={group.status} disabled={o.payment_status !== "paid"} onChange={(e) => void updateSellerPayment(o.id, group.sellerId, e.target.value)}><option value="not_due">AWAITING CUSTOMER PAYMENT</option><option value="due">PAYMENT DUE</option><option value="scheduled">SCHEDULED</option><option value="paid">PAID — SENT OUTSIDE SQUARE</option><option value="held">ON HOLD</option></select></label>)}</div> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
-                      {orderFinance && <label className="payment-control"><span>FULFILMENT PAYMENT</span><select data-status={orderFinance.fulfillment_payment_status} value={orderFinance.fulfillment_payment_status} onChange={(e) => void updateFulfillmentPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option></select></label>}
+                      <div className="payment-control"><span>CUSTOMER PAYMENT</span><b className="payment-status-chip" data-status={o.payment_status}>{(o.payment_status || "unpaid").replaceAll("_", " ").toUpperCase()}</b>{o.payment_amount_aud != null && <small>Square checkout: {Number(o.payment_amount_aud).toFixed(2)} AUD</small>}{Number(o.square_refunded_amount||0)>0 && <small>Square refunds recorded: {Number(o.square_refunded_amount).toFixed(2)} AUD</small>}{o.square_payment_id && <small>Square payment reference saved</small>}{o.payment_method !== "square" && <small>Recorded by {o.payment_method.replaceAll("_"," ")}</small>}</div>
+                      <div className="payment-control inventory-status-control"><span>INVENTORY</span><b data-status={o.inventory_status}>{o.inventory_status === "committed" ? "SOLD / COMMITTED" : o.inventory_status === "reserved" ? "HELD FOR CHECKOUT" : o.inventory_status === "released" ? "RELEASED / REVIEW" : "LEGACY ORDER"}</b>{o.inventory_issue && <small className="inventory-issue">{o.inventory_issue}</small>}</div>
+                      {sellerGroups.length ? <div className="seller-payment-groups"><span>SELLER PAYOUTS</span>{sellerGroups.map((group) => <label className="payment-control" key={group.sellerId}><span>{sellers.find((seller) => seller.id === group.sellerId)?.display_name || "SELLER"} — {money(group.total)}</span><select className="status-select payout-status-select" data-status={group.status} value={group.status} disabled={o.payment_status !== "paid" || group.status === "paid"} onChange={(e) => void updateSellerPayment(o.id, group.sellerId, e.target.value)}><option value="not_due">AWAITING CUSTOMER PAYMENT</option><option value="due">PAYMENT DUE</option><option value="scheduled">SCHEDULED</option><option value="paid">PAID — SENT OUTSIDE SQUARE</option><option value="held">ON HOLD</option></select></label>)}</div> : <div className="payment-control"><span>SELLER PAYMENT</span><b>OWN INVENTORY — NOT APPLICABLE</b></div>}
+                      {orderFinance && <label className="payment-control"><span>FULFILMENT PAYMENT</span><select className="status-select fulfillment-status-select" data-status={orderFinance.fulfillment_payment_status} value={orderFinance.fulfillment_payment_status} disabled={o.payment_status !== "paid" || o.journey_status === "cancelled" || orderFinanceStatus(o.id) === "paid"} onChange={(e) => void updateFulfillmentPayment(o.id, e.target.value)}><option value="due">PAYMENT DUE</option><option value="paid">PAID</option></select></label>}
                     </div>
                   </header>
                   {o.cancellation_requested_at && o.journey_status !== "cancelled" && <section className="cancellation-request">
@@ -1045,7 +1223,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   </div>
                   <section className="order-confirmation-control">
                     <div><span>ADMIN CONFIRMATION</span><b>{o.journey_status === "order_placed" ? "NEW ORDER — REVIEW REQUIRED" : journeyLabel(o.journey_status)}</b></div>
-                    <div className="order-admin-actions">{o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}<button className="danger-action" type="button" onClick={() => void deleteOrder(o)}>DELETE ORDER</button></div>
+                    <div className="order-admin-actions">{o.journey_status === "order_placed" ? <button className="admin-action" onClick={() => void advanceOrder(o.id, "admin_confirmed")}>CONFIRM ORDER</button> : <span className="status-badge" data-status="admin_confirmed">ORDER CONFIRMED</span>}{o.journey_status !== "cancelled" && <button className="danger-action" type="button" onClick={() => { if (window.confirm("Cancel this order? Stock will be returned if the package has not shipped. Issue a Square refund separately when needed.")) void advanceOrder(o.id,"cancelled"); }}>CANCEL ORDER</button>}</div>
                   </section>
                   {o.journey_status === "cancelled" && <section className="refund-order-control"><div><span>REFUND STATUS</span><b>{o.refund_status.replaceAll("_", " ").toUpperCase()}</b><small>{money(Number(o.refund_amount || 0))}</small></div><div>{o.refund_status === "not_requested" && <button className="admin-action" onClick={() => void requestRefund(o.id)}>REQUEST REFUND</button>}{o.refund_status === "due_from_seller" && <b>WAITING FOR SELLER</b>}{o.refund_status === "sent_by_seller" && <button className="admin-action" onClick={() => void completeRefund(o.id)}>CONFIRM REFUND RECEIVED</button>}{o.refund_status === "completed" && <b>REFUND COMPLETE</b>}</div></section>}
                   <OrderTimeline status={o.journey_status} timestamps={o.journey_timestamps} />
