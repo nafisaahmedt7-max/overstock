@@ -295,11 +295,16 @@ export function AdminDashboard({ email }: { email: string }) {
       sizes = String(f.get("sizes") || "")
         .split(",")
         .map((x) => x.trim().toUpperCase())
-        .filter(Boolean);
+        .filter(Boolean),
+      stockQuantity = Number(f.get("stock_quantity"));
     if (sizes.includes("X")) {
       setNotice(
         "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
       );
+      return;
+    }
+    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+      setNotice("Stock quantity must be a whole number of zero or more.");
       return;
     }
     const image = f.get("image");
@@ -336,7 +341,7 @@ export function AdminDashboard({ email }: { email: string }) {
           fulfillment_service_fee: Number(f.get("fulfillment_service_fee")),
           gpo_fee_per_500g: Number(f.get("gpo_fee_per_500g")),
           weight_grams: Number(f.get("weight_grams")),
-          stock_quantity: 1,
+          stock_quantity: stockQuantity,
           ownership: seller ? "seller" : "own_stock",
           seller_id: seller || null,
         },
@@ -368,9 +373,9 @@ export function AdminDashboard({ email }: { email: string }) {
             target_image_url: url,
           }),
         ]);
-        setNotice("Product and image added as draft.");
+        setNotice("Product and image added. Listing status follows the stock quantity.");
       }
-    } else setNotice("Product added as draft.");
+    } else setNotice("Product added. Listing status follows the stock quantity.");
     form.reset();
     setImagePreview(null);
     setImageFileName("");
@@ -382,6 +387,7 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!editing) return;
     const f = new FormData(e.currentTarget);
     const seller = String(f.get("seller"));
+    const stockQuantity = Number(f.get("stock_quantity"));
     const sizes = String(f.get("sizes"))
       .split(",")
       .map((x) => x.trim().toUpperCase())
@@ -390,6 +396,10 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice(
         "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
       );
+      return;
+    }
+    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+      setNotice("Stock quantity must be a whole number of zero or more.");
       return;
     }
     const replacementImage = f.get("image");
@@ -415,7 +425,7 @@ export function AdminDashboard({ email }: { email: string }) {
         gpo_fee_per_500g: Number(f.get("gpo_fee_per_500g")),
         weight_grams: Number(f.get("weight_grams")),
         overstock_profit_target: Number(f.get("overstock_profit_target")),
-        stock_quantity: 1,
+        stock_quantity: stockQuantity,
         ownership: seller ? "seller" : "own_stock",
         seller_id: seller || null,
         status: String(f.get("status")),
@@ -721,9 +731,10 @@ export function AdminDashboard({ email }: { email: string }) {
               <summary>PRODUCT STATUS EXPLANATIONS</summary>
               <div>
                 <p><b>DRAFT</b> — Product is saved but hidden from the shop.</p>
-                <p><b>ACTIVE</b> — Product is approved and visible to customers.</p>
-                <p><b>SOLD OUT</b> — Product remains recorded but cannot be purchased.</p>
-                <p><b>ARCHIVED</b> — Product is removed from the catalogue without deleting its history.</p>
+                <p><b>ACTIVE</b> — Products with stock are visible and purchasable.</p>
+                <p><b>SOLD OUT</b> — Products with zero stock stay listed but cannot be purchased.</p>
+                <p>Stock quantity sets the ACTIVE or SOLD OUT status automatically.</p>
+                <p><b>ARCHIVED</b> — Product is hidden without deleting its history.</p>
               </div>
             </details>
             <section className="order-entry-panel product-entry-panel">
@@ -739,6 +750,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
               <label><span>AVAILABLE SIZES</span><input name="sizes" placeholder="EXAMPLE: S, M, L, XL" required /></label>
               <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
+              <label><span>AVAILABLE STOCK</span><input name="stock_quantity" type="number" min="0" step="1" defaultValue="1" required /></label>
               <div className="product-pricing-heading"><span>PRODUCT PRICING</span></div>
               <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
               <label><span>DELIVERY TO FULFILMENT (USD)</span><input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="EXAMPLE: 8.00" defaultValue="0" /></label>
@@ -891,6 +903,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     <label className="edit-field"><span>GPO FEE / 500G (USD)</span><input name="gpo_fee_per_500g" type="number" step=".01" min="0" defaultValue={editing.gpo_fee_per_500g} required /></label>
                     <label className="edit-field"><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" step="1" min="1" defaultValue={editing.weight_grams} required /></label>
                     <label className="edit-field"><span>OVERSTOCK PROFIT TARGET</span><input name="overstock_profit_target" type="number" step=".01" min="0" defaultValue={editing.overstock_profit_target} required /></label>
+                    <label className="edit-field"><span>AVAILABLE STOCK</span><input name="stock_quantity" type="number" min="0" step="1" defaultValue={editing.stock_quantity} required /></label>
                     <label className="edit-field">
                       <span>PRODUCT OWNER</span>
                       <select
@@ -906,12 +919,10 @@ export function AdminDashboard({ email }: { email: string }) {
                       </select>
                     </label>
                     <label className="edit-field">
-                      <span>PUBLICATION STATUS</span>
-                      <select name="status" defaultValue={editing.status}>
-                        <option value="draft">DRAFT</option>
-                        <option value="active">ACTIVE / APPROVED</option>
-                        <option value="sold_out">SOLD OUT</option>
-                        <option value="archived">ARCHIVED</option>
+                      <span>LISTING STATUS</span>
+                      <select name="status" defaultValue={editing.status === "archived" ? "archived" : "active"}>
+                        <option value="active">AUTOMATIC — BASED ON STOCK</option>
+                        <option value="archived">ARCHIVED — HIDDEN</option>
                       </select>
                     </label>
                   </div>
