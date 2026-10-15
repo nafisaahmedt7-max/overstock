@@ -26,6 +26,7 @@ type Product = {
   status: string;
   sizes: string[];
   image_url: string | null;
+  size_chart_url: string | null;
   description: string | null;
   audience: string | null;
   category: string | null;
@@ -121,7 +122,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("products")
         .select(
-          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target,minimum_overstock_profit",
+          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,size_chart_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target,minimum_overstock_profit",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -184,6 +185,33 @@ export function AdminDashboard({ email }: { email: string }) {
     if (Math.abs(ratio - 0.8) > 0.08)
       throw new Error("Use a 4:5 image. Recommended size: 1600 × 2000 px.");
   }
+  async function validateSizeChartImage(file: File) {
+    if (file.size > 10 * 1024 * 1024)
+      throw new Error("Size chart image must be under 10 MB.");
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
+      throw new Error("Use a PNG, JPEG, or WebP size chart image.");
+  }
+
+  async function uploadSizeChartImage(productId: string, file: File) {
+    const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
+    const path = `${productId}/size-chart-${crypto.randomUUID()}.${extension}`;
+    const upload = await supabase.storage
+      .from("product-images")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upload.error) return upload.error.message;
+
+    const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
+    const update = await supabase.rpc("admin_update_product_size_chart", {
+      target_product_id: productId,
+      target_size_chart_url: url,
+    });
+    if (update.error) {
+      await supabase.storage.from("product-images").remove([path]);
+      return update.error.message;
+    }
+    return null;
+  }
+
   async function chooseImage(file?: File) {
     if (!file) {
       setImagePreview(null);
@@ -300,11 +328,20 @@ export function AdminDashboard({ email }: { email: string }) {
       return;
     }
     const image = f.get("image");
+    const sizeChartImage = f.get("size_chart_image");
     if (image instanceof File && image.size) {
       try {
         await validateImage(image);
       } catch (error) {
         setNotice(error instanceof Error ? error.message : "Invalid image.");
+        return;
+      }
+    }
+    if (sizeChartImage instanceof File && sizeChartImage.size) {
+      try {
+        await validateSizeChartImage(sizeChartImage);
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Invalid size chart image.");
         return;
       }
     }
@@ -343,18 +380,19 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice(error?.message || "Could not add product.");
       return;
     }
+    const uploadIssues: string[] = [];
     if (image instanceof File && image.size) {
-      const ext = image.name.split(".").pop()?.toLowerCase() || "jpg",
-        path = `${productId}/${crypto.randomUUID()}.${ext}`;
+      const ext = image.name.split(".").pop()?.toLowerCase() || "webp";
+      const path = `${productId}/${crypto.randomUUID()}.${ext}`;
       const upload = await supabase.storage
         .from("product-images")
         .upload(path, image, { upsert: false });
       if (upload.error) {
-        setNotice(`Product saved, image failed: ${upload.error.message}`);
+        uploadIssues.push(`Product image failed: ${upload.error.message}`);
       } else {
         const url = supabase.storage.from("product-images").getPublicUrl(path)
           .data.publicUrl;
-        await Promise.all([
+        const [imageRecord, imageUpdate] = await Promise.all([
           supabase.from("product_images").insert({
             product_id: productId,
             storage_path: path,
@@ -365,9 +403,19 @@ export function AdminDashboard({ email }: { email: string }) {
             target_image_url: url,
           }),
         ]);
-        setNotice("Product and image added as draft.");
+        if (imageRecord.error) uploadIssues.push(`Product image record failed: ${imageRecord.error.message}`);
+        if (imageUpdate.error) uploadIssues.push(`Product image link failed: ${imageUpdate.error.message}`);
       }
-    } else setNotice("Product added as draft.");
+    }
+    if (sizeChartImage instanceof File && sizeChartImage.size) {
+      const error = await uploadSizeChartImage(productId, sizeChartImage);
+      if (error) uploadIssues.push(`Size chart failed: ${error}`);
+    }
+    setNotice(
+      uploadIssues.length
+        ? `Product saved as draft. ${uploadIssues.join(" ")}`
+        : "Product and uploaded images added as draft.",
+    );
     form.reset();
     setImagePreview(null);
     setImageFileName("");
@@ -390,9 +438,18 @@ export function AdminDashboard({ email }: { email: string }) {
       return;
     }
     const replacementImage = f.get("image");
+    const replacementSizeChart = f.get("size_chart_image");
     if (replacementImage instanceof File && replacementImage.size) {
       try { await validateImage(replacementImage); }
       catch (error) { setNotice(error instanceof Error ? error.message : "Invalid image."); return; }
+    }
+    if (replacementSizeChart instanceof File && replacementSizeChart.size) {
+      try {
+        await validateSizeChartImage(replacementSizeChart);
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Invalid size chart image.");
+        return;
+      }
     }
     const { error } = await supabase.rpc("admin_update_product", {
       target_product_id: editing.id,
@@ -426,8 +483,14 @@ export function AdminDashboard({ email }: { email: string }) {
         const upload = await supabase.storage.from("product-images").upload(path, replacementImage);
         if (upload.error) { setNotice(`Product updated, image failed: ${upload.error.message}`); return; }
         const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
-        await supabase.rpc("admin_update_product_image", { target_product_id: editing.id, target_image_url: url });
+        const update = await supabase.rpc("admin_update_product_image", { target_product_id: editing.id, target_image_url: url });
+        if (update.error) { setNotice(`Product updated, image link failed: ${update.error.message}`); return; }
       }
+      if (replacementSizeChart instanceof File && replacementSizeChart.size) {
+        const sizeChartError = await uploadSizeChartImage(editing.id, replacementSizeChart);
+        if (sizeChartError) { setNotice(`Product updated, size chart failed: ${sizeChartError}`); return; }
+      }
+      setNotice("Product updated.");
       setEditing(null);
       await load();
     }
@@ -765,11 +828,22 @@ export function AdminDashboard({ email }: { email: string }) {
                 </span>
                 <b>CHOOSE FILE</b>
               </label>
+              <label className="image-upload-field" htmlFor="product-size-chart-image">
+                <span>SIZE CHART IMAGE (OPTIONAL)</span>
+                <input
+                  id="product-size-chart-image"
+                  name="size_chart_image"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                />
+                <span className="image-file-name">PNG, JPEG OR WEBP · MAX 10 MB</span>
+                <b>CHOOSE FILE</b>
+              </label>
               <button>ADD DRAFT</button>
               </form>
             </section>
             <p className="form-help">
-              Images must be 4:5 WebP files and no larger than 10 MB. Recommended: 1600 × 2000 px. Need to remove a background or convert? Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> first.
+              Product images must be 4:5 WebP files up to 10 MB. Size charts may be PNG, JPEG, or WebP up to 10 MB. Recommended product image: 1600 × 2000 px. Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> if you need to remove a background.
             </p>
             {imagePreview && (
               <div className="image-preview">
@@ -843,6 +917,16 @@ export function AdminDashboard({ email }: { email: string }) {
                     <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" />
                     <b>CHOOSE IMAGE</b>
                   </label>
+                  <label className="image-upload-field edit-field-wide">
+                    <span>SIZE CHART IMAGE (OPTIONAL)</span>
+                    <input name="size_chart_image" type="file" accept="image/png,image/jpeg,image/webp" />
+                    <b>CHOOSE IMAGE</b>
+                  </label>
+                  {editing.size_chart_url && (
+                    <a className="current-size-chart" href={editing.size_chart_url} target="_blank" rel="noopener noreferrer">
+                      VIEW CURRENT SIZE CHART ↗
+                    </a>
+                  )}
                   <div className="edit-grid">
                     <label className="edit-field">
                       <span>BRAND</span>
