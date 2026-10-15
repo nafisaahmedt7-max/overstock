@@ -122,7 +122,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "1. Business identity and contact",
         paragraphs: [
-          `These terms are between you and OVERSTOCK, the business operating this website. OVERSTOCK operates from **24 Eolian Loop, Clayton, Sydney, Australia**. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to OVERSTOCK.`,
+          `These terms are between you and **“OVERSTOCK”**, the business operating this website. **“OVERSTOCK”** operates from **24 Eolian Loop, Clayton, Sydney, Australia**. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to OVERSTOCK.`,
           "For questions, complaints, or notices about an order or these terms, contact operations.overstock@gmail.com. Include your order number where relevant."
         ],
       },
@@ -201,7 +201,7 @@ const pages: Record<string, LegalContent> = {
         heading: "11. Copyright, trade marks, and infringement notices",
         paragraphs: [
           "Unless otherwise stated, original website text, layout, graphics, and OVERSTOCK-created photographs are owned by or licensed to OVERSTOCK and protected by applicable intellectual-property laws, including the Copyright Act 1968 (Cth) and U.S. copyright law in Title 17 of the United States Code. You may view and use this material for personal, non-commercial purposes connected with using the website. You must not reproduce, adapt, publish, distribute, or commercially exploit it without permission, except as permitted by law.",
-          "© 2026 OVERSTOCK. Rights in original OVERSTOCK content are reserved, subject to applicable law. Third-party material remains the property of its respective rights holders.",
+          "**© 2026 OVERSTOCK**. Rights in original OVERSTOCK content are reserved, subject to applicable law. Third-party material remains the property of its respective rights holders.",
           "Third-party product names, logos, photographs, and trade marks remain the property of their respective owners. Their use to identify a product does not transfer ownership or imply endorsement.",
           "If you believe material on the website infringes your copyright, email operations.overstock@gmail.com with the page address, identification of the protected work, the material you believe is infringing, your contact details, and a statement explaining your ownership or authority. Copyright notices are handled under applicable law, including the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512) where it applies. OVERSTOCK does not represent that this email address is a registered DMCA designated agent."
         ],
@@ -323,21 +323,61 @@ const pages: Record<string, LegalContent> = {
   shipping: {
     title: "SHIPPING",
     updated: "LAST UPDATED OCTOBER 15, 2026",
-    copy: [
-      "**OVERSTOCK dispatches orders in approximately 3–4 weeks after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
-      "Please check your delivery details carefully at checkout. If you need to correct an address, email operations.overstock@gmail.com as soon as possible. An address change cannot be guaranteed once dispatch processing has begun.",
-      "If OVERSTOCK cannot dispatch within the timeframe stated for your order, we will notify you and provide the revised timing and options required by law. For eligible U.S. orders, the **FTC Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435)** requires the option to agree to a delay or cancel for a prompt refund when the promised timeframe cannot be met.",
-      "For an order that is delayed, lost, or arrives damaged, contact OVERSTOCK at operations.overstock@gmail.com and include your order number. Your rights under the **Australian Consumer Law** and applicable U.S. consumer-protection laws are not affected."
+    sections: [
+      {
+        heading: "1. Dispatch timeframe",
+        paragraphs: [
+          "**OVERSTOCK dispatches orders in approximately 3–4 weeks after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier."
+        ],
+      },
+      {
+        heading: "2. Delivery details",
+        paragraphs: [
+          "Please check your delivery details carefully at checkout. If you need to correct an address, email operations.overstock@gmail.com as soon as possible. An address change cannot be guaranteed once dispatch processing has begun."
+        ],
+      },
+      {
+        heading: "3. Delays",
+        paragraphs: [
+          "If OVERSTOCK cannot dispatch within the timeframe stated for your order, we will notify you and provide the revised timing and options required by law. For eligible U.S. orders, the **FTC Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435)** requires the option to agree to a delay or cancel for a prompt refund when the promised timeframe cannot be met."
+        ],
+      },
+      {
+        heading: "4. Delivery issues",
+        paragraphs: [
+          "For an order that is delayed, lost, or arrives damaged, contact OVERSTOCK at operations.overstock@gmail.com and include your order number. Your rights under the **Australian Consumer Law** and applicable U.S. consumer-protection laws are not affected."
+        ],
+      },
     ],
   },
   refunds: {
     title: "REFUND POLICY",
     updated: "LAST UPDATED OCTOBER 15, 2026",
-    copy: [
-      "**All OVERSTOCK sales are final for change of mind.** Please review the item listing and order details carefully before placing your order.",
-      "You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation is effective only when OVERSTOCK confirms it. If the cancellation is confirmed before dispatch, the amount paid will be refunded to the original payment method.",
-      "After dispatch, OVERSTOCK does not provide change-of-mind refunds, returns, or exchanges. This policy does not limit a refund, repair, replacement, cancellation, or other remedy required by the **Australian Consumer Law**, the **FTC Mail, Internet, or Telephone Order Merchandise Rule**, or other applicable U.S. law.",
-      "If an item is incorrect, arrives damaged, or has an undisclosed fault, email operations.overstock@gmail.com promptly with your order number, a short description, and photos where relevant. For confirmed damage, OVERSTOCK will offer a voucher where permitted by law. You do not have to accept a voucher if the law gives you another remedy or choice."
+    sections: [
+      {
+        heading: "1. Change-of-mind sales",
+        paragraphs: [
+          "**All OVERSTOCK sales are final for change of mind.** Please review the item listing and order details carefully before placing your order."
+        ],
+      },
+      {
+        heading: "2. Cancellation before dispatch",
+        paragraphs: [
+          "You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation is effective only when OVERSTOCK confirms it. If the cancellation is confirmed before dispatch, the amount paid will be refunded to the original payment method."
+        ],
+      },
+      {
+        heading: "3. After dispatch",
+        paragraphs: [
+          "After dispatch, OVERSTOCK does not provide change-of-mind refunds, returns, or exchanges. This policy does not limit a refund, repair, replacement, cancellation, or other remedy required by the **Australian Consumer Law**, the **FTC Mail, Internet, or Telephone Order Merchandise Rule**, or other applicable U.S. law."
+        ],
+      },
+      {
+        heading: "4. Incorrect, damaged, or faulty items",
+        paragraphs: [
+          "If an item is incorrect, arrives damaged, or has an undisclosed fault, email operations.overstock@gmail.com promptly with your order number, a short description, and photos where relevant. For confirmed damage, OVERSTOCK will offer a voucher where permitted by law. You do not have to accept a voucher if the law gives you another remedy or choice."
+        ],
+      },
     ],
   },
   contact: {
