@@ -49,7 +49,7 @@ function socialIconLink(href: string | null, label: string, iconUrl: string) {
     : '<span aria-label="' + label + '" style="display:block;color:#050505">' + content + '</span>';
 }
 
-function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactEmail: string) {
+function buildEmailContent(order: QueuedOrderEmail, contactEmail: string) {
   const publicOrigin = new URL(
     process.env.OVERSTOCK_PUBLIC_URL || "https://overstock-two.vercel.app",
   ).origin;
@@ -121,7 +121,7 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
     .replace("__ADDRESS__", safeAddress);
 }
 
-export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient, siteOrigin: string) {
+export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient, _siteOrigin: string) {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
   if (!apiKey || !senderEmail) {
@@ -136,7 +136,7 @@ export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient, s
   if (!queued) return;
 
   try {
-    const content = buildEmailContent(queued, siteOrigin, senderEmail);
+    const content = buildEmailContent(queued, senderEmail);
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
