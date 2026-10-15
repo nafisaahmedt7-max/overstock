@@ -41,12 +41,7 @@ function safeSocialUrl(value: string | undefined, domain: "instagram.com" | "fac
 }
 
 function socialIconLink(href: string | null, label: string, icon: string) {
-  const content =
-    '<span style="display:inline-block;width:34px;height:34px;padding:7px;border:1px solid #050505;border-radius:50%;vertical-align:middle">' +
-    icon +
-    '</span><span style="display:block;padding-top:6px;font-size:9px;line-height:12px;font-weight:600;letter-spacing:.5px">' +
-    label +
-    '</span>';
+  const content = '<span style="display:inline-block;padding:6px;color:#050505;line-height:0">' + icon + '</span>';
   return href
     ? '<a href="' + href + '" aria-label="' + label + '" style="display:inline-block;color:#050505;text-decoration:none">' + content + '</a>'
     : '<span aria-label="' + label + '" style="display:inline-block;color:#050505">' + content + '</span>';
@@ -60,6 +55,7 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
   const safeTerms = escapeHtml(origin + "/legal/terms");
   const safePrivacy = escapeHtml(origin + "/legal/privacy");
   const safeShipping = escapeHtml(origin + "/legal/shipping");
+  const safeContactUrl = escapeHtml(origin + "/legal/contact");
   const instagramUrl = safeSocialUrl(process.env.OVERSTOCK_INSTAGRAM_URL, "instagram.com");
   const facebookUrl = safeSocialUrl(process.env.OVERSTOCK_FACEBOOK_URL, "facebook.com");
   const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
@@ -69,12 +65,11 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
   const facebookIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#050505"><path d="M13.4 21v-8h2.8l.4-3h-3.2V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.4-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.2v3h2.8v8z"/></svg>';
   const emailIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m4 7 8 6 8-6"/></svg>';
   const socialLinks =
-    '<tr><td align="center" style="padding:20px 20px 14px;border-top:1px solid #050505;text-align:center">' +
-    '<div style="padding-bottom:14px;font-size:9px;line-height:13px;font-weight:600;letter-spacing:1px">FOLLOW / CONTACT</div>' +
+    '<tr><td align="center" style="padding:16px 20px 18px;border-top:1px solid #050505;text-align:center">' +
     '<table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0"><tr>' +
-    '<td align="center" style="padding:0 10px">' + socialIconLink(instagramUrl, "INSTAGRAM", instagramIcon) + '</td>' +
-    '<td align="center" style="padding:0 10px">' + socialIconLink(facebookUrl, "FACEBOOK", facebookIcon) + '</td>' +
-    '<td align="center" style="padding:0 10px">' + socialIconLink(safeContactEmail ? "mailto:" + safeContactEmail : null, "EMAIL", emailIcon) + '</td>' +
+    '<td align="center" style="padding:0 8px">' + socialIconLink(instagramUrl, "Instagram", instagramIcon) + '</td>' +
+    '<td align="center" style="padding:0 8px">' + socialIconLink(facebookUrl, "Facebook", facebookIcon) + '</td>' +
+    '<td align="center" style="padding:0 8px">' + socialIconLink(safeContactEmail ? "mailto:" + safeContactEmail : null, "Email", emailIcon) + '</td>' +
     '</tr></table></td></tr>';
   const itemRows = order.items.map((item) => {
     const size = item.size
@@ -102,15 +97,17 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
     '<tr><td style="padding:0"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="color:#050505"><tr><td style="padding:13px 0 8px;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1px">ITEM</td><td align="right" style="padding:13px 0 8px;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1px">QTY</td></tr>__ITEMS__',
     '<tr><td style="padding:16px 0;font-size:14px;line-height:20px;font-weight:600">Paid total</td><td align="right" style="padding:16px 0;font-size:15px;line-height:20px;font-weight:700">AUD __TOTAL__</td></tr></table></td></tr></table></td></tr>',
 
-    '<tr><td align="center" style="padding:28px 30px;text-align:center"><p style="margin:0"><a href="__STORE_URL__" style="display:inline-block;padding:11px 18px;background:#050505;color:#f1f1ef;text-decoration:none;font-size:11px;line-height:16px;font-weight:600;letter-spacing:.4px">CONTINUE SHOPPING</a></p></td></tr>',
+    '<tr><td align="center" style="padding:28px 30px 22px;text-align:center"><p style="margin:0"><a href="__STORE_URL__" style="display:inline-block;padding:11px 18px;background:#050505;color:#f1f1ef;text-decoration:none;font-size:11px;line-height:16px;font-weight:600;letter-spacing:.4px">CONTINUE SHOPPING</a></p></td></tr>',
+    '<tr><td align="center" style="padding:0 30px 22px;text-align:center"><p style="margin:0;font-size:13px;line-height:20px;font-weight:600">Need help with your order?</p><p style="margin:5px 0 0;font-size:11px;line-height:18px;color:#555">For questions about your purchase or delivery, please contact our team.</p><p style="margin:9px 0 0;font-size:11px;line-height:16px"><a href="__CONTACT_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Contact us</a></p></td></tr>',
     socialLinks,
-    '<tr><td align="center" style="padding:16px 20px;border-top:1px solid #050505;text-align:center;font-size:10px;line-height:17px"><a href="__TERMS_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Terms</a><span> &nbsp;·&nbsp; </span><a href="__PRIVACY_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Privacy</a><span> &nbsp;·&nbsp; </span><a href="__SHIPPING_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Shipping</a></td></tr>',
+    '<tr><td align="center" style="padding:15px 20px;border-top:1px solid #050505;text-align:center;font-size:9px;line-height:16px;color:#555"><div style="font-weight:600;letter-spacing:.5px;color:#050505">© 2026 OVERSTOCK</div><div style="padding-top:5px"><a href="__TERMS_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Terms</a><span> &nbsp;·&nbsp; </span><a href="__PRIVACY_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Privacy</a><span> &nbsp;·&nbsp; </span><a href="__SHIPPING_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">Shipping</a></div></td></tr>',
     '</table></td></tr></table></body></html>',
   ].join("");
   return html
     .replaceAll("__NAME__", safeName)
     .replaceAll("__ORDER__", String(order.order_number))
     .replaceAll("__STORE_URL__", safeOrigin)
+    .replace("__CONTACT_URL__", safeContactUrl)
     .replace("__TERMS_URL__", safeTerms)
     .replace("__PRIVACY_URL__", safePrivacy)
     .replace("__SHIPPING_URL__", safeShipping)
