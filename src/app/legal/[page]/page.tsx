@@ -8,6 +8,26 @@ type LegalContent = {
   updated?: string;
 };
 
+const contactOptions = [
+  {
+    label: "EMAIL",
+    href: process.env.NEXT_PUBLIC_CONTACT_EMAIL
+      ? `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL.trim()}`
+      : "",
+    value: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "Support email to be added",
+  },
+  {
+    label: "FACEBOOK",
+    href: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "",
+    value: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "Facebook profile link to be added",
+  },
+  {
+    label: "INSTAGRAM",
+    href: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "",
+    value: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "Instagram profile link to be added",
+  },
+];
+
 const pages: Record<string, LegalContent> = {
   terms: {
     title: "TERMS AND CONDITIONS",
@@ -17,7 +37,7 @@ const pages: Record<string, LegalContent> = {
         heading: "Using OVERSTOCK",
         paragraphs: [
           "These terms apply when you use the OVERSTOCK website or place an order through it. By using the site or placing an order, you agree to these terms. You must provide accurate contact, payment, and delivery information and use the site lawfully.",
-          "OVERSTOCK lists products supplied by OVERSTOCK and participating independent sellers. Product details and your order information identify the seller for an item where applicable. If you are unsure who is supplying an item, contact us before ordering.",
+          "OVERSTOCK is an Australian-based online retailer selling to customers in the United States and other destinations supported by checkout.",
         ],
       },
       {
@@ -38,15 +58,15 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "Delivery",
         paragraphs: [
-          "Please review our Shipping page and the delivery information available before placing an order. Provide a complete and accurate address. Delivery estimates may change because of courier or other events outside our control.",
+          "Please review the delivery information available before placing an order and provide a complete, accurate address. Delivery estimates may change because of courier or other events outside our control. If we cannot ship within the time stated for your order, we will contact you and provide the options required by applicable law.",
           "For shipping updates and tracking information, see our Shipping page and the updates sent with your order. This does not limit any rights you have under applicable consumer law.",
         ],
       },
       {
         heading: "Cancellations, returns, and consumer rights",
         paragraphs: [
-          "Our Refund Policy explains our change-of-mind policy and how to contact us about an order problem. A change-of-mind return is not available unless our Refund Policy or the product listing says otherwise.",
-          "Nothing in these terms excludes, restricts, or modifies a consumer guarantee or other right that cannot lawfully be excluded. Where the Australian Consumer Law applies, its consumer guarantees and remedies continue to apply. If a product does not meet a consumer guarantee, you may be entitled to a remedy required by law.",
+          "Before shipment, you may email us to request cancellation. If we confirm the order can be stopped before dispatch, we will cancel it and refund the payment to the original payment method. Once an order has shipped, we do not accept cancellation or returns for change of mind.",
+          "If an item arrives damaged, contact us by email through the Contact page with your order number and photos of the item and packaging. We will review the issue and may offer a voucher where permitted by applicable law. A voucher does not replace a refund, replacement, or other remedy that applicable law requires or gives you the right to choose. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
         ],
       },
       {
@@ -82,15 +102,15 @@ const pages: Record<string, LegalContent> = {
   refunds: {
     title: "REFUND POLICY",
     copy: [
-      "We do not offer returns or refunds for change of mind unless a product listing or another written offer says otherwise.",
-      "This policy does not limit your rights under applicable consumer law. If a product is faulty, not as described, or otherwise does not meet a consumer guarantee, you may be entitled to a remedy required by law. Contact us through the Contact page so we can assess the issue.",
+      "You may request cancellation by email before your order is shipped. If we confirm we can stop the order before dispatch, we will cancel it and refund the payment to the original payment method. Once an order has shipped, we do not accept cancellations or returns for change of mind.",
+      "If an item arrives damaged, email us with your order number and photos of the item and packaging. We will review the issue and may offer a voucher where permitted by applicable law. A voucher does not replace a refund, replacement, or other remedy that applicable law requires or gives you the right to choose. Many items are one of one, so an identical replacement may not be available; this does not limit your legal rights.",
+      "Nothing in this policy limits rights that cannot lawfully be excluded, including consumer guarantees and remedies that may apply under Australian or U.S. law.",
     ],
   },
   contact: {
     title: "CONTACT",
     copy: [
-      "For orders, seller onboarding or privacy requests, contact OVERSTOCK through the official WhatsApp or social account used during onboarding.",
-      "Include your order number, but never send passwords or full payment details.",
+      "Choose email, Facebook, or Instagram below to contact OVERSTOCK. For an order issue, include your order number and photos if the item arrived damaged. Never send passwords or full payment-card details.",
     ],
   },
 };
@@ -106,6 +126,26 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
       {content.copy?.map((text) => <p key={text}>{text}</p>)}
+      {page === "contact" && (
+        <section className="contact-options" aria-label="Contact options">
+          {contactOptions.map((option) => (
+            <div className="contact-option" key={option.label}>
+              <h2>{option.label}</h2>
+              {option.href ? (
+                <a
+                  href={option.href}
+                  target={option.label === "EMAIL" ? undefined : "_blank"}
+                  rel={option.label === "EMAIL" ? undefined : "noreferrer"}
+                >
+                  {option.value}
+                </a>
+              ) : (
+                <span>{option.value}</span>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
       {content.sections?.map((section) => (
         <section className="legal-section" key={section.heading}>
           <h2>{section.heading}</h2>
