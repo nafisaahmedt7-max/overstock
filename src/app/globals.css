@@ -2075,6 +2075,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 
 /* Legal page emphasis and centered update date */
-.legal-page>p.legal-updated{text-align:center!important}
+.legal-page>p.legal-updated{width:100%;max-width:none;margin-inline:0!important;text-align:center!important}
 .legal-law-highlight{color:#1d73d2}
 .contact-option a strong{font-weight:700}
