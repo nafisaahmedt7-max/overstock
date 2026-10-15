@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 type LegalSection = { heading: string; paragraphs: string[] };
 const registeredBusinessName = "**[INSERT REGISTERED LEGAL BUSINESS NAME]**";
@@ -22,7 +23,7 @@ const emphasizedTerms = [
 ];
 
 function renderPlain(text: string, keyBase: string) {
-  const nodes = [];
+  const nodes: ReactNode[] = [];
   let rest = text;
   let index = 0;
   while (rest.length > 0) {
