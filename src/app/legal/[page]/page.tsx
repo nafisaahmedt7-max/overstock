@@ -2,6 +2,14 @@ import { notFound } from "next/navigation";
 
 type LegalSection = { heading: string; paragraphs: string[] };
 const registeredBusinessName = "[INSERT REGISTERED LEGAL BUSINESS NAME]";
+function renderFormatted(text: string) {
+  return text.split(/(\\*\\*.*?\\*\\*)/g).map((part, index) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={index}>{part.slice(2, -2)}</strong>
+      : part
+  );
+}
+
 type LegalContent = {
   title: string;
   copy?: string[];
@@ -37,7 +45,7 @@ const contactOptions = [
 const pages: Record<string, LegalContent> = {
   terms: {
     title: "TERMS AND CONDITIONS",
-    updated: "Last updated October 15, 2026",
+    updated: "LAST UPDATED OCTOBER 15, 2026",
     sections: [
       {
         heading: "1. Business identity and contact",
@@ -241,20 +249,22 @@ const pages: Record<string, LegalContent> = {
   },
   shipping: {
     title: "SHIPPING",
+    updated: "LAST UPDATED OCTOBER 15, 2026",
     copy: [
-      "Our current dispatch timeframe is typically 3–4 weeks after an order is accepted. Dispatch means handing the parcel to the delivery carrier. Delivery time follows dispatch and varies by destination and carrier.",
-      "Please provide a complete and accurate delivery address at checkout. We will send order and dispatch updates to the email address provided with your order.",
-      "If we cannot dispatch within the timeframe stated for your order, we will contact you with the revised information and any options required by law. For U.S. orders, federal rules generally require shipment within the promised timeframe or within 30 days if no timeframe is stated, and require a delay notice with the option to accept the delay or cancel for a prompt refund.",
-      "If an order is lost, delayed, or arrives damaged, email operations.overstock@gmail.com with your order number and details. Nothing on this page limits your rights under applicable consumer law.",
+      "**OVERSTOCK dispatches orders in approximately 3–4 weeks after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
+      "Please check your delivery details carefully at checkout. If you need to correct an address, email operations.overstock@gmail.com as soon as possible. An address change cannot be guaranteed once dispatch processing has begun.",
+      "If OVERSTOCK cannot dispatch within the timeframe stated for your order, we will notify you and provide the revised timing and options required by law. For eligible U.S. orders, the **FTC Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435)** requires the option to agree to a delay or cancel for a prompt refund when the promised timeframe cannot be met.",
+      "For an order that is delayed, lost, or arrives damaged, contact OVERSTOCK at operations.overstock@gmail.com and include your order number. Your rights under the **Australian Consumer Law** and applicable U.S. consumer-protection laws are not affected."
     ],
   },
   refunds: {
     title: "REFUND POLICY",
+    updated: "LAST UPDATED OCTOBER 15, 2026",
     copy: [
-      "All sales are final for change of mind. You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation takes effect when we confirm it. If we confirm the order can be cancelled before dispatch, we will refund the amount paid to the original payment method.",
-      "After dispatch, we do not accept change-of-mind cancellations, returns, or exchanges. This does not restrict a cancellation, refund, replacement, repair, or other remedy required by law, including a remedy for an order that cannot be dispatched within the period required by law.",
-      "If an item is incorrect, arrives damaged, or has a fault that was not disclosed before purchase, email us promptly at operations.overstock@gmail.com. Include your order number, a brief description, and photos where relevant. For confirmed damage, we will offer a voucher where permitted by law. You are not required to accept a voucher if applicable law gives you a different remedy or choice.",
-      "Australian Consumer Law guarantees cannot be excluded. U.S. customers retain rights under applicable federal and state consumer-protection laws. Nothing in this policy limits rights or remedies that applicable law does not allow us to exclude.",
+      "**All OVERSTOCK sales are final for change of mind.** Please review the item listing and order details carefully before placing your order.",
+      "You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation is effective only when OVERSTOCK confirms it. If the cancellation is confirmed before dispatch, the amount paid will be refunded to the original payment method.",
+      "After dispatch, OVERSTOCK does not provide change-of-mind refunds, returns, or exchanges. This policy does not limit a refund, repair, replacement, cancellation, or other remedy required by the **Australian Consumer Law**, the **FTC Mail, Internet, or Telephone Order Merchandise Rule**, or other applicable U.S. law.",
+      "If an item is incorrect, arrives damaged, or has an undisclosed fault, email operations.overstock@gmail.com promptly with your order number, a short description, and photos where relevant. For confirmed damage, OVERSTOCK will offer a voucher where permitted by law. You do not have to accept a voucher if the law gives you another remedy or choice."
     ],
   },
   contact: {
@@ -273,9 +283,20 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
   return (
     <main className="legal-page">
       <p className="eyebrow">OVERSTOCK / HELP</p>
+      {page === "shipping" && (
+        <svg className="legal-page-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 5h18v14H3zM3 10h18M7 5v14m5-14v14m5-14v14" />
+        </svg>
+      )}
+      {page === "refunds" && (
+        <svg className="legal-page-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M15.5 8.5h-4a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-4m3.5-10v11" />
+        </svg>
+      )}
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
-      {content.copy?.map((text) => <p key={text}>{text}</p>)}
+      {content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
       {page === "contact" && (
         <section className="contact-options" aria-label="Contact options">
           {contactOptions.map((option) => (
@@ -299,7 +320,7 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
       {content.sections?.map((section) => (
         <section className="legal-section" key={section.heading}>
           <h2>{section.heading}</h2>
-          {section.paragraphs.map((text) => <p key={text}>{text}</p>)}
+          {section.paragraphs.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
         </section>
       ))}
     </main>
