@@ -29,12 +29,34 @@ function escapeHtml(value: unknown) {
 
 function buildEmailContent(order: QueuedOrderEmail) {
   const safeName = escapeHtml(order.customer_name);
-  const itemsHtml = order.items.map((item) => {
-    const size = item.size ? ` — size ${escapeHtml(item.size)}` : "";
-    return `<li>${item.quantity} × ${escapeHtml(item.name)}${size}</li>`;
+  const itemRows = order.items.map((item) => {
+    const size = item.size
+      ? '<div style="padding-top:5px;color:#73736f;font-size:12px;line-height:18px">Size ' + escapeHtml(item.size) + "</div>"
+      : "";
+    return '<tr><td style="padding:18px 0;border-bottom:1px solid #e8e6e1;vertical-align:top"><div style="font-size:14px;line-height:20px;font-weight:700;color:#191918">' +
+      escapeHtml(item.name) + '</div>' + size + '</td><td align="center" style="padding:18px 10px;border-bottom:1px solid #e8e6e1;vertical-align:top;color:#585853;font-size:13px;line-height:20px">' +
+      item.quantity + "</td></tr>";
   }).join("");
   const total = Number(order.total_aud || 0).toFixed(2);
-  return `<!doctype html><html><body style="margin:0;background:#f5f3ef;padding:32px;font-family:Arial,sans-serif;color:#24231f"><main style="max-width:560px;margin:0 auto;background:#fff;padding:32px;border:1px solid #e5e1d9"><p style="letter-spacing:.16em;font-size:12px;font-weight:bold">OVERSTOCK</p><h1 style="font-size:24px">Order confirmed</h1><p>Hi ${safeName}, your order <strong>#${order.order_number}</strong> is confirmed.</p><ul>${itemsHtml}</ul><p style="border-top:1px solid #e5e1d9;padding-top:16px"><strong>Paid total: AUD ${total}</strong></p><p>Thank you for shopping with OVERSTOCK.</p></main></body></html>`;
+  const html = [
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Order confirmed</title></head>',
+    '<body style="margin:0;padding:0;background:#f2f1ed;color:#191918;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased">',
+    '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">Your OVERSTOCK order #__ORDER__ is confirmed. Keep this email for your records.</div>',
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f2f1ed"><tr><td align="center" style="padding:36px 16px">',
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:#ffffff">',
+    '<tr><td style="padding:28px 36px;background:#171715;color:#ffffff"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="font-size:19px;line-height:22px;font-weight:800;letter-spacing:2px">OVERSTOCK</td><td align="right" style="font-size:10px;line-height:16px;letter-spacing:1.4px;color:#d0d0ca">ORDER UPDATE</td></tr></table></td></tr>',
+    '<tr><td style="padding:38px 36px 20px"><div style="display:inline-block;padding:7px 11px;border-radius:20px;background:#e8f3eb;color:#27623c;font-size:10px;line-height:14px;font-weight:700;letter-spacing:1px">PAYMENT CONFIRMED</div>',
+    '<h1 style="margin:18px 0 10px;font-size:30px;line-height:36px;letter-spacing:-.7px;color:#171715">Thank you, __NAME__.</h1><p style="margin:0;color:#5d5d58;font-size:15px;line-height:24px">Your order is confirmed and being prepared. We’ve received your payment successfully.</p></td></tr>',
+    '<tr><td style="padding:8px 36px 26px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f5f2;border:1px solid #e8e6e1"><tr><td style="padding:15px 18px;border-bottom:1px solid #e8e6e1"><div style="font-size:10px;line-height:15px;font-weight:700;letter-spacing:1px;color:#777770">ORDER NUMBER</div><div style="padding-top:4px;font-size:16px;line-height:22px;font-weight:700;color:#191918">#__ORDER__</div></td></tr>',
+    '<tr><td style="padding:0 18px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="padding:14px 0 8px;color:#777770;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1px">ITEM</td><td align="center" style="padding:14px 10px 8px;color:#777770;font-size:10px;line-height:15px;font-weight:700;letter-spacing:1px">QTY</td></tr>__ITEMS__<tr><td style="padding:18px 0 20px;font-size:14px;line-height:20px;font-weight:700;color:#191918">Paid total</td><td align="right" colspan="2" style="padding:18px 0 20px;font-size:15px;line-height:20px;font-weight:700;color:#191918">AUD __TOTAL__</td></tr></table></td></tr></table></td></tr>',
+    '<tr><td style="padding:0 36px 34px"><p style="margin:0;color:#5d5d58;font-size:13px;line-height:21px">Please keep this email as your receipt. We’ll be in touch if we need anything else to complete your order.</p></td></tr>',
+    '<tr><td style="padding:22px 36px;background:#f6f5f2;border-top:1px solid #e8e6e1"><p style="margin:0;color:#66665f;font-size:11px;line-height:18px">OVERSTOCK · Thoughtfully found, ready for its next home.</p><p style="margin:7px 0 0;color:#8a8a83;font-size:10px;line-height:16px">This is an order confirmation for a purchase made with OVERSTOCK.</p></td></tr></table></td></tr></table></body></html>',
+  ].join("");
+  return html
+    .replaceAll("__NAME__", safeName)
+    .replaceAll("__ORDER__", String(order.order_number))
+    .replace("__ITEMS__", itemRows)
+    .replace("__TOTAL__", total);
 }
 
 export async function sendNextBrevoOrderConfirmation(supabase: SupabaseClient) {
