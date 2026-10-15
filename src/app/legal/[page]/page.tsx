@@ -59,7 +59,7 @@ const pages: Record<string, LegalContent> = {
         paragraphs: [
           "Submitting an order is an offer to purchase the products in your cart. An order is accepted when payment is completed and we send an order confirmation. We may decline or cancel an order where permitted by law, including where an item is unavailable, payment is not authorised, or a material pricing or listing error has occurred.",
           "Prices may be displayed in U.S. dollars (USD). The Square hosted checkout displays the amount charged in Australian dollars (AUD). Please review the final amount before authorising payment. Your bank or card issuer may apply its own exchange rate or foreign transaction fee.",
-          "Payments are processed through Square. Payment details entered through Square's hosted checkout are handled under Square's terms and privacy information. Any shipping charges and taxes applicable to your order will be shown during checkout where required.",
+          "Payments are processed through Square. Payment details entered through Square's hosted checkout are handled under Square's terms and privacy information. Any shipping charges or taxes collected by OVERSTOCK will be included in or shown with the order total before payment. Import duties, taxes, or carrier fees not collected at checkout may be payable separately depending on your destination. Check the order summary for details.",
         ],
       },
       {
