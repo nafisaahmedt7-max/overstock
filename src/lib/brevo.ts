@@ -49,7 +49,7 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string) {
     '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Order confirmed</title>',
     '<style>@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap");</style></head>',
     '<body style="margin:0;padding:0;background:#fff;color:#000;font-family:Geist,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased">',
-    '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">Your OVERSTOCK order #__ORDER__ is confirmed. We’ll send your tracking link when it ships.</div>',
+    '<div style="display:none;max-height:0;overflow:hidden;opacity:0">Your OVERSTOCK order #__ORDER__ is confirmed. We’ll send your tracking link when it ships.</div>',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff;color:#000;font-family:Geist,Arial,Helvetica,sans-serif"><tr><td align="center" style="padding:24px 14px">',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background:#fff;border:1px solid #000;color:#000">',
     '<tr><td style="padding:24px 30px;background:#000;color:#fff"><a href="__STORE_URL__" style="color:#fff;text-decoration:none;font-family:Geist,Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:800;letter-spacing:2px">OVERSTOCK</a></td></tr>',
