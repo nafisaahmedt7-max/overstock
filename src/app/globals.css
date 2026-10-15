@@ -158,10 +158,16 @@ button {
 }
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: start;
-  grid-auto-rows: min-content;
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(16rem, 24vw, 20rem);
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: thin;
 }
 .product-lane > header {
   min-height: 3.5rem;
@@ -181,6 +187,7 @@ button {
   min-width: 0;
   overflow: hidden;
   background: #fff;
+  scroll-snap-align: start;
 }
 .product-card > a {
   width: 100%;
@@ -188,9 +195,6 @@ button {
   display: grid;
   grid-template-rows: auto 6.5rem;
   overflow: hidden;
-}
-.product-card:nth-child(3n) {
-  border-right: 0;
 }
 .product-placeholder {
   aspect-ratio: 4/5;
@@ -448,20 +452,7 @@ button {
     font-size: 3.2rem;
   }
   .product-grid {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: clamp(16rem, 64vw, 28rem);
-    align-items: stretch;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-snap-type: inline mandatory;
-    scrollbar-width: thin;
-  }
-  .product-card,
-  .product-card:nth-child(2n),
-  .product-card:nth-child(3n) {
-    border-right: 1px solid var(--line);
-    scroll-snap-align: start;
+    grid-auto-columns: min(78vw, 20rem);
   }
   .product-meta {
     height: 6.5rem;
