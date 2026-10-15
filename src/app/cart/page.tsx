@@ -81,12 +81,13 @@ export default function CartPage() {
     phone: "",
     address: { street: "", unit: "", city: "", region: "", postalCode: "", country: "AU" },
   });
+  const [phoneCountryIso, setPhoneCountryIso] = useState("AU");
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const selectedCountry = countries.find((country) => country.iso === customer.address.country) || countries[0];
-  const errors = validate(customer, selectedCountry.dial);
+  const selectedPhoneCountry = countries.find((country) => country.iso === phoneCountryIso) || countries[0];
+  const errors = validate(customer, selectedPhoneCountry.dial);
   const visibleErrors = Object.fromEntries(
     Object.entries(errors).filter(([key]) => touched[key as FieldKey]),
   ) as FieldErrors;
@@ -116,7 +117,7 @@ export default function CartPage() {
     setBusy(true);
     try {
       const phoneDigits = customer.phone.replace(/\D/g, "").replace(/^0/, "");
-      const phone = selectedCountry.dial + phoneDigits;
+      const phone = selectedPhoneCountry.dial + phoneDigits;
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -197,16 +198,15 @@ export default function CartPage() {
               <label className="checkout-field">
                 <span>Phone number <b>*</b></span>
                 <div className="phone-input-row">
-                  <select aria-label="Phone country code" value={customer.address.country} onChange={(e) => {
-                    setAddress("country", e.target.value);
+                  <select aria-label="Phone country code" value={phoneCountryIso} onChange={(e) => {
+                    setPhoneCountryIso(e.target.value);
                     markTouched("phone");
-                    markTouched("country");
                   }}>
                     {countries.map((country) => <option key={country.iso} value={country.iso}>{country.iso} {country.dial}</option>)}
                   </select>
                   <input type="tel" autoComplete="tel-national" inputMode="tel" required maxLength={24} placeholder="Your number" value={customer.phone} {...inputProps("phone")} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
                 </div>
-                <small className="checkout-field-hint">Country code {selectedCountry.dial} will be added automatically.</small>
+                <small className="checkout-field-hint">Country code {selectedPhoneCountry.dial} will be added automatically.</small>
                 {fieldError("phone")}
               </label>
               <div className="checkout-section-heading checkout-address-heading">
