@@ -2,9 +2,55 @@ import { notFound } from "next/navigation";
 
 type LegalSection = { heading: string; paragraphs: string[] };
 const registeredBusinessName = "**[INSERT REGISTERED LEGAL BUSINESS NAME]**";
+const emphasizedTerms = [
+  "OVERSTOCK",
+  "Competition and Consumer Act 2010 (Cth)",
+  "Australian Consumer Law",
+  "Australian Privacy Principles",
+  "Privacy Act 1988 (Cth)",
+  "FTC Mail, Internet, or Telephone Order Merchandise Rule",
+  "16 C.F.R. Part 435",
+  "Federal Trade Commission Act",
+  "15 U.S.C. § 45",
+  "Copyright Act 1968 (Cth)",
+  "Digital Millennium Copyright Act",
+  "17 U.S.C. § 512",
+  "Electronic Transactions Act 1999 (Cth)",
+  "Electronic Signatures in Global and National Commerce Act",
+  "Australian Spam Act 2003 (Cth)",
+  "U.S. CAN-SPAM Act",
+];
+
+function renderPlain(text: string, keyBase: string) {
+  const nodes = [];
+  let rest = text;
+  let index = 0;
+  while (rest.length > 0) {
+    let nextTerm = "";
+    let nextPosition = rest.length;
+    for (const term of emphasizedTerms) {
+      const position = rest.indexOf(term);
+      if (position >= 0 && position < nextPosition) {
+        nextPosition = position;
+        nextTerm = term;
+      }
+    }
+    if (!nextTerm) {
+      nodes.push(rest);
+      break;
+    }
+    if (nextPosition > 0) nodes.push(rest.slice(0, nextPosition));
+    nodes.push(<strong key={`${keyBase}-${index++}`}>{nextTerm}</strong>);
+    rest = rest.slice(nextPosition + nextTerm.length);
+  }
+  return nodes;
+}
+
 function renderFormatted(text: string) {
-  return text.split("**").map((part, index) =>
-    index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+  return text.split("**").flatMap((part, index) =>
+    index % 2 === 1
+      ? [<strong key={`marked-${index}`}>{part}</strong>]
+      : renderPlain(part, `plain-${index}`)
   );
 }
 
