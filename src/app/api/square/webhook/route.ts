@@ -47,29 +47,37 @@ export async function POST(request: Request) {
   }
 
   let event: {
+    event_id?: string;
     type?: string;
-    data?: { object?: { payment?: { id?: string; order_id?: string; status?: string } } };
+    data?: { object?: unknown };
   };
   try {
     event = JSON.parse(rawBody) as typeof event;
   } catch {
     return new Response("Invalid event body.", { status: 400 });
   }
-  if (event.type !== "payment.created" && event.type !== "payment.updated") {
+  if (!event.type || ![
+    "payment.created",
+    "payment.updated",
+    "refund.created",
+    "refund.updated",
+  ].includes(event.type)) {
     return new Response(null, { status: 200 });
   }
-  const payment = event.data?.object?.payment;
-  if (!payment?.order_id) return new Response(null, { status: 200 });
 
   const sb = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const update: Record<string, unknown> = {};
-  if (payment.id) update.square_payment_id = payment.id;
-  if (payment.status === "COMPLETED") update.payment_status = "paid";
-  if (Object.keys(update).length) {
-    const { error } = await sb.from("orders").update(update).eq("square_order_id", payment.order_id);
-    if (error) return new Response("Could not update order.", { status: 500 });
+  const { error } = await sb.rpc("process_square_webhook_event", {
+    square_event: event,
+  });
+  if (error) {
+    console.error("[square-webhook] event could not be processed", {
+      eventType: event.type,
+      eventIdPresent: Boolean(event.event_id),
+      code: error.code,
+    });
+    return new Response("Could not process Square event.", { status: 500 });
   }
   return new Response(null, { status: 200 });
 }
