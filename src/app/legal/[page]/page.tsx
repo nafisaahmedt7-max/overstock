@@ -11,20 +11,25 @@ type LegalContent = {
 const contactOptions = [
   {
     label: "EMAIL",
-    href: process.env.NEXT_PUBLIC_CONTACT_EMAIL
+    href: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim()
       ? `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL.trim()}`
-      : "",
-    value: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "Support email to be added",
+      : "mailto:operations.overstock@gmail.com",
+    value: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "operations.overstock@gmail.com",
   },
   {
     label: "FACEBOOK",
     href: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "",
-    value: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "Facebook profile link to be added",
+    value: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "Facebook profile coming soon",
   },
   {
     label: "INSTAGRAM",
-    href: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "",
-    value: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "Instagram profile link to be added",
+    href: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "https://www.instagram.com/overstock.bd/",
+    value: "@overstock.bd",
+  },
+  {
+    label: "ADDRESS",
+    href: "",
+    value: "24 Eolian Loop, Clayton, Sydney",
   },
 ];
 
