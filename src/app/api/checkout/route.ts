@@ -113,21 +113,10 @@ export async function POST(request: Request) {
   }
 
   let subtotalUsdCents = 0;
-  const orderLines: Array<Record<string, unknown>> = [];
   for (const line of quantities.values()) {
     const product = bySlug.get(line.slug);
     if (!product) return jsonError("A product in your cart is no longer available.", 409);
-    const unitPriceCents = Math.round(Number(product.price) * 100);
-    subtotalUsdCents += unitPriceCents * line.quantity;
-    orderLines.push({
-      product_id: product.id,
-      ownership: "own_stock",
-      product_name: product.name,
-      sku: product.sku,
-      quantity: line.quantity,
-      unit_price: unitPriceCents / 100,
-      selected_size: line.size,
-    });
+    subtotalUsdCents += Math.round(Number(product.price) * 100) * line.quantity;
   }
   if (subtotalUsdCents <= 0 || subtotalUsdCents > 500000) {
     return jsonError("The order total is outside the allowed range.", 400);
@@ -143,66 +132,79 @@ export async function POST(request: Request) {
     ? (body.buyerCurrency as string)
     : "USD";
   const usdToBuyer = rates[buyerCurrency] || 1;
-  const amountAud = Math.round((subtotalUsdCents / 100) * rates.AUD * 100);
-  const subtotalUsd = subtotalUsdCents / 100;
   const siteUrl = new URL(request.url).origin;
 
-  const { data: order, error: orderError } = await sb
-    .from("orders")
-    .insert({
+  const checkoutItems = Array.from(quantities.values()).map((line) => {
+    const product = bySlug.get(line.slug);
+    if (!product) throw new Error("Product changed during checkout.");
+    return {
+      product_id: product.id,
+      quantity: line.quantity,
+      selected_size: line.size,
+      selected_color: product.color || null,
+    };
+  });
+  const { data: orderData, error: orderError } = await sb.rpc("create_checkout_order", {
+    payload: {
       customer_name: name,
       customer_email: email,
       customer_phone: phone,
       delivery_address: address,
-      subtotal: subtotalUsd,
-      delivery_fee: 0,
-      status: "new",
-      payment_status: "unpaid",
-      sales_channel: "website",
       buyer_currency: buyerCurrency,
       fx_rate_usd_to_buyer: usdToBuyer,
       fx_rate_usd_to_aud: rates.AUD,
-      payment_amount_aud: amountAud / 100,
-    })
-    .select("id,order_number")
-    .single();
-  if (orderError || !order) return jsonError("We could not create your order. Please try again.", 500);
-
-  const { error: itemError } = await sb
-    .from("order_items")
-    .insert(Array.from(quantities.values()).map((line, index) => ({
-      ...orderLines[index],
-      order_id: order.id,
-    })));
-  if (itemError) {
-    await sb.from("orders").update({ status: "cancelled" }).eq("id", order.id);
-    return jsonError("We could not save your order items. Please try again.", 500);
+      items: checkoutItems,
+    },
+  });
+  if (orderError || !orderData) {
+    const message = orderError?.message || "";
+    if (/STOCK_UNAVAILABLE|PRODUCT_UNAVAILABLE|SIZE_UNAVAILABLE|SIZE_REQUIRED/i.test(message)) {
+      return jsonError("Stock changed while you were checking out. Update your cart and try again.", 409);
+    }
+    console.error("[checkout] order reservation failed", { code: orderError?.code });
+    return jsonError("We could not create your order. Please try again.", 500);
   }
-
+  const order = orderData as {
+    id: string;
+    order_number: number;
+    subtotal: number;
+    payment_amount_aud: number;
+  };
+  const subtotalUsd = Number(order.subtotal);
+  const amountAud = Math.round(Number(order.payment_amount_aud) * 100);
   const squareBase = environment === "production"
     ? "https://connect.squareup.com"
     : "https://connect.squareupsandbox.com";
-  const squareResponse = await fetch(squareBase + "/v2/online-checkout/payment-links", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Content-Type": "application/json",
-      "Square-Version": "2026-09-16",
-    },
-    body: JSON.stringify({
-      idempotency_key: crypto.randomUUID(),
-      quick_pay: {
-        name: "OVERSTOCK Order " + order.order_number,
-        price_money: { amount: amountAud, currency: "AUD" },
-        location_id: locationId,
+  let squareResponse: Response;
+  try {
+    squareResponse = await fetch(squareBase + "/v2/online-checkout/payment-links", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "Content-Type": "application/json",
+        "Square-Version": "2026-09-16",
       },
-      checkout_options: {
-        redirect_url: siteUrl + "/checkout/return?order=" + encodeURIComponent(String(order.order_number)),
-      },
-      pre_populated_data: { buyer_email: email },
-      payment_note: "OVERSTOCK order " + order.order_number,
-    }),
-  });
+      body: JSON.stringify({
+        idempotency_key: crypto.randomUUID(),
+        quick_pay: {
+          name: "OVERSTOCK Order " + order.order_number,
+          price_money: { amount: amountAud, currency: "AUD" },
+          location_id: locationId,
+        },
+        checkout_options: {
+          redirect_url: siteUrl + "/checkout/return?order=" + encodeURIComponent(String(order.order_number)),
+        },
+        pre_populated_data: { buyer_email: email },
+        payment_note: "OVERSTOCK order " + order.order_number,
+      }),
+    });
+  } catch {
+    await sb.rpc("cancel_unpaid_checkout_reservation", {
+      target_order_id: order.id,
+      cancel_reason: "Square checkout request failed before a payment link was created.",
+    });
+    return jsonError("Square could not start checkout. Your stock hold was released; please try again.", 502);
+  }
 
   const squareResult = (await squareResponse.json()) as {
     errors?: Array<{ detail?: string }>;
@@ -210,9 +212,10 @@ export async function POST(request: Request) {
   };
   const link = squareResult.payment_link;
   if (!squareResponse.ok || !link?.id || !link.order_id || !link.url) {
-    await sb.from("orders").update({
-      internal_notes: "Square checkout creation failed. Retry after configuration review.",
-    }).eq("id", order.id);
+    await sb.rpc("cancel_unpaid_checkout_reservation", {
+      target_order_id: order.id,
+      cancel_reason: "Square checkout creation failed before the customer could pay.",
+    });
     return jsonError(squareResult.errors?.[0]?.detail || "Square could not start checkout.", 502);
   }
   const { error: updateError } = await sb.from("orders").update({
