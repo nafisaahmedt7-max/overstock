@@ -41,10 +41,12 @@ function safeSocialUrl(value: string | undefined, domain: "instagram.com" | "fac
 }
 
 function socialIconLink(href: string | null, label: string, icon: string) {
-  const content = '<span style="display:inline-block;padding:6px;color:#050505;line-height:0">' + icon + '</span>';
+  const content =
+    '<span style="display:block;height:24px;font-family:Arial,Helvetica,sans-serif;font-size:21px;line-height:24px;color:#050505">' + icon + '</span>' +
+    '<span style="display:block;padding-top:3px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:12px;color:#050505">' + label + '</span>';
   return href
-    ? '<a href="' + href + '" aria-label="' + label + '" style="display:inline-block;color:#050505;text-decoration:none">' + content + '</a>'
-    : '<span aria-label="' + label + '" style="display:inline-block;color:#050505">' + content + '</span>';
+    ? '<a href="' + href + '" aria-label="' + label + '" style="display:block;color:#050505;text-decoration:none">' + content + '</a>'
+    : '<span aria-label="' + label + '" style="display:block;color:#050505">' + content + '</span>';
 }
 
 function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactEmail: string) {
@@ -61,9 +63,10 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
   const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
     ? escapeHtml(contactEmail)
     : null;
-  const instagramIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.7" cy="6.5" r=".8" fill="#050505" stroke="none"/></svg>';
-  const facebookIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#050505"><path d="M13.4 21v-8h2.8l.4-3h-3.2V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.4-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.2v3h2.8v8z"/></svg>';
-  const emailIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m4 7 8 6 8-6"/></svg>';
+  // Use text glyphs instead of inline SVG: Gmail strips SVG from email bodies.
+  const instagramIcon = "◎";
+  const facebookIcon = "<strong>f</strong>";
+  const emailIcon = "✉";
   const socialLinks =
     '<tr><td align="center" style="padding:16px 20px 18px;border-top:1px solid #050505;text-align:center">' +
     '<table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0"><tr>' +
