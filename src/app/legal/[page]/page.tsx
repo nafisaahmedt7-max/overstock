@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 type LegalSection = { heading: string; paragraphs: string[] };
-const registeredBusinessName = "**[INSERT REGISTERED LEGAL BUSINESS NAME]**";
 const brandTerms = ["OVERSTOCK", "operations.overstock@gmail.com"];
 const legalTerms = [
   "Competition and Consumer Act 2010 (Cth)",
@@ -123,7 +122,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "1. Business identity and contact",
         paragraphs: [
-          `These terms are between you and OVERSTOCK, the online retail business operated under the registered legal name ${registeredBusinessName}. OVERSTOCK operates from **24 Eolian Loop, Clayton, Sydney, Australia**. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to this business.`,
+          `These terms are between you and OVERSTOCK, the business operating this website. OVERSTOCK operates from **24 Eolian Loop, Clayton, Sydney, Australia**. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to OVERSTOCK.`,
           "For questions, complaints, or notices about an order or these terms, contact operations.overstock@gmail.com. Include your order number where relevant."
         ],
       },
