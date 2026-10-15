@@ -24,7 +24,7 @@ export function ProductPlaceholder({
           src={imageUrl}
           alt={name}
           fill
-          sizes="(max-width: 800px) 50vw, 33vw"
+          sizes="(max-width: 800px) 78vw, 24vw"
           style={{ objectFit: "contain", padding: "8%" }}
           onError={() => setFailedUrl(imageUrl)}
         />
