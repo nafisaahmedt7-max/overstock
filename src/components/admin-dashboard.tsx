@@ -538,7 +538,11 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!error) await load();
   }
   async function approveCancellation(orderId: string) {
-    if (!window.confirm("Confirm cancellation of this order? This is the final admin approval.")) return;
+    const order = orders.find((item) => item.id === orderId);
+    const confirmation = order?.payment_status === "paid"
+      ? "Cancel this order in OVERSTOCK? This does not refund the customer in Square. Issue the refund separately in Square."
+      : "Confirm cancellation of this order? This is the final admin approval.";
+    if (!window.confirm(confirmation)) return;
     const { error } = await supabase.rpc("resolve_cancellation_request", {
       target_order_id: orderId,
       approve_cancellation: true,
@@ -1017,7 +1021,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 return <details className="order-card order-receipt-details" key={o.id}>
                   <summary>
                     <span><small>ORDER</small><b>#{o.order_number}</b></span>
-                    <label className="order-summary-status"><small>CURRENT STATUS</small><select className="order-summary-status-select" value={o.journey_status} data-status={o.journey_status} aria-label={`Order ${o.order_number} status`} onClick={(event) => event.stopPropagation()} onChange={(e) => { const next = e.target.value as JourneyStatus; if (next !== "cancelled" || window.confirm("Cancel this order? Only admin can perform this action.")) void advanceOrder(o.id, next); }}>{JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}<option value="cancelled">CANCELLED</option></select></label>
+                    <label className="order-summary-status"><small>CURRENT STATUS</small><select className="order-summary-status-select" value={o.journey_status} data-status={o.journey_status} aria-label={`Order ${o.order_number} status`} onClick={(event) => event.stopPropagation()} onChange={(e) => { const next = e.target.value as JourneyStatus; const confirmation = o.payment_status === "paid" ? "Cancel this order in OVERSTOCK? This does not refund the customer in Square. Issue the refund separately in Square." : "Cancel this order? Only admin can perform this action."; if (next !== "cancelled" || window.confirm(confirmation)) void advanceOrder(o.id, next); }}>{JOURNEY.map(([value, label]) => <option key={value} value={value}>{label.toUpperCase()}</option>)}<option value="cancelled">CANCELLED</option></select></label>
                   </summary>
                   <div className="order-receipt-body">
                   <header>
