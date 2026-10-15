@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 type LegalSection = { heading: string; paragraphs: string[] };
+const registeredBusinessName = "[INSERT REGISTERED LEGAL BUSINESS NAME]";
 type LegalContent = {
   title: string;
   copy?: string[];
@@ -41,7 +42,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "1. Business identity and contact",
         paragraphs: [
-          "These terms are between you and [ENTER THE FULL REGISTERED LEGAL NAME OF THE BUSINESS], trading as OVERSTOCK. The business is a [ENTER BUSINESS STRUCTURE, FOR EXAMPLE SOLE TRADER OR AUSTRALIAN PROPRIETARY COMPANY], ABN [ENTER THE 11-DIGIT ABN] and, if applicable, ACN [ENTER THE 9-DIGIT ACN]. Its registered or principal business address is 24 Eolian Loop, Clayton, Sydney, [ENTER STATE OR TERRITORY AND POSTCODE], Australia. In these terms, “OVERSTOCK”, “we”, “us” and “our” mean that business.",
+          `These terms are between you and OVERSTOCK, the online retail business operated under the registered legal name ${registeredBusinessName}. OVERSTOCK operates from 24 Eolian Loop, Clayton, Sydney, Australia. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to this business.`,
           "For questions, complaints, or notices about an order or these terms, contact operations.overstock@gmail.com. Include your order number where relevant. Do not email passwords or full payment-card details."
         ],
       },
@@ -121,7 +122,7 @@ const pages: Record<string, LegalContent> = {
         paragraphs: [
           "Unless otherwise stated, original website text, layout, graphics, and OVERSTOCK-created photographs are owned by or licensed to OVERSTOCK and protected by applicable intellectual-property laws, including the Copyright Act 1968 (Cth) and U.S. copyright law in Title 17 of the United States Code. You may view and use this material for personal, non-commercial purposes connected with using the website. You must not reproduce, adapt, publish, distribute, or commercially exploit it without permission, except as permitted by law.",
           "Third-party product names, logos, photographs, and trade marks remain the property of their respective owners. Their use to identify a product does not transfer ownership or imply endorsement.",
-          "If you believe material on the website infringes your copyright, email operations.overstock@gmail.com with the page address, identification of the protected work, the material you believe is infringing, your contact details, and a statement explaining your ownership or authority. A notice requesting action under the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512) must meet that law's requirements and be sent to a designated agent where one has been registered. If OVERSTOCK has registered a designated agent, their details are: [ENTER THE REGISTERED DMCA AGENT'S NAME, POSTAL ADDRESS, PHONE NUMBER, AND EMAIL; OTHERWISE REMOVE THIS SENTENCE]."
+          "If you believe material on the website infringes your copyright, email operations.overstock@gmail.com with the page address, identification of the protected work, the material you believe is infringing, your contact details, and a statement explaining your ownership or authority. Copyright notices are handled under applicable law, including the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512) where it applies. OVERSTOCK does not represent that this email address is a registered DMCA designated agent."
         ],
       },
       {
@@ -153,7 +154,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "16. Governing law and dispute resolution",
         paragraphs: [
-          "These terms are governed by the laws of [ENTER THE AUSTRALIAN STATE OR TERRITORY IN WHICH THE BUSINESS OPERATES], Australia. Courts in that jurisdiction may hear disputes, subject to any right you have to bring a claim in another forum under mandatory consumer law. This clause does not deprive you of protections that apply where you live.",
+          "These terms are governed by the laws of New South Wales, Australia, subject to mandatory consumer-protection laws that apply where you live. Courts in New South Wales may hear disputes, but this clause does not prevent you from bringing a claim in another forum where the law gives you that right.",
           "If you have a concern, email operations.overstock@gmail.com and we will try to resolve it directly. Contacting us first is not a condition of exercising a legal right, making a complaint to a regulator, or starting a proceeding."
         ],
       },
@@ -168,79 +169,72 @@ const pages: Record<string, LegalContent> = {
   },
   privacy: {
     title: "PRIVACY POLICY",
-    updated: "Last updated October 15, 2026",
+    updated: "LAST UPDATED OCTOBER 15, 2026",
     sections: [
       {
-        heading: "1. Who we are",
+        heading: "1. About this policy",
         paragraphs: [
-          "This policy explains how [ENTER THE FULL REGISTERED LEGAL NAME OF THE BUSINESS], trading as OVERSTOCK, handles personal information through this website and in connection with customer orders. The business address is 24 Eolian Loop, Clayton, Sydney, [ENTER STATE OR TERRITORY AND POSTCODE], Australia. Contact: operations.overstock@gmail.com.",
-          "The Privacy Act 1988 (Cth) and Australian Privacy Principles apply to the extent the business is covered by them. U.S. state privacy laws apply where their scope and thresholds are met. This policy does not limit privacy rights that apply to you."
+          "This Privacy Policy explains how OVERSTOCK handles personal information when you visit the OVERSTOCK website, place an order, or contact customer support. OVERSTOCK operates from 24 Eolian Loop, Clayton, Sydney, Australia. For privacy questions, email operations.overstock@gmail.com.",
+          "The Privacy Act 1988 (Cth) and Australian Privacy Principles apply to the extent OVERSTOCK is covered by them. U.S. state privacy laws apply where their scope and requirements are met. This policy does not limit rights available to you under applicable law."
         ],
       },
       {
-        heading: "2. Information we collect",
+        heading: "2. Information OVERSTOCK handles",
         paragraphs: [
-          "Depending on how you use the website, we may collect contact and delivery details, order and transaction records, messages you send to customer support, and technical information such as device, browser, log, and website-use data. [CONFIRM THE CATEGORIES ACTUALLY COLLECTED AND REMOVE ANY THAT DO NOT APPLY; ADD ANY OTHER CATEGORIES].",
-          "Payment-card details entered in Square's hosted checkout are handled by Square. We receive information about the order and payment status needed to manage the transaction, but do not intentionally collect full payment-card details through this website."
+          "OVERSTOCK handles information you provide when placing an order or contacting us, such as your name, email address, delivery address, order details, and customer-service messages. Square processes payment-card information through its hosted checkout; OVERSTOCK receives order and payment-status information needed to manage your purchase.",
+          "When you access the website, basic technical information such as browser and device details, security logs, and website activity may be processed to operate, maintain, and protect the service."
         ],
       },
       {
-        heading: "3. How we use information",
+        heading: "3. How information is used",
         paragraphs: [
-          "We use personal information to process and administer orders, communicate with customers, arrange delivery, respond to questions and complaints, maintain business and transaction records, protect the website and prevent fraud, and meet legal obligations.",
-          "[ADD ANY OTHER PURPOSES, INCLUDING ANALYTICS, PERSONALISATION, OR MARKETING, IF USED. DO NOT INCLUDE PURPOSES THAT ARE NOT ACTUALLY USED]."
+          "OVERSTOCK uses personal information to accept and manage orders, arrange delivery, send order-related communications, provide customer support, maintain business records, protect the website, prevent fraud, and meet legal obligations.",
+          "OVERSTOCK sends marketing communications only where permitted by applicable law. You can opt out using the unsubscribe instructions in a marketing email. Essential order and service messages may still be sent."
         ],
       },
       {
         heading: "4. When information is shared",
         paragraphs: [
-          "We may disclose the information reasonably needed for an order to Square for payment processing, delivery carriers for fulfilment, and service providers that host, secure, or support the website. We may also disclose information where required or authorised by law, to protect legal rights, or as part of a business transfer permitted by law.",
-          "[LIST THE ACTUAL WEBSITE HOSTING, ANALYTICS, EMAIL, CUSTOMER-SUPPORT, AND OTHER SERVICE PROVIDERS THAT RECEIVE PERSONAL INFORMATION, AND REMOVE SERVICES NOT USED]. We do not state that personal information is sold or shared for targeted advertising unless that practice is confirmed and this policy is updated to describe it."
+          "OVERSTOCK shares information with Square to process payments, delivery carriers to fulfil orders, and service providers that host, store, secure, or support the website and customer communications. Information may also be disclosed where required by law or reasonably necessary to protect legal rights or prevent fraud.",
+          "Service providers may handle information under their own privacy terms. OVERSTOCK limits disclosure to information reasonably needed for the relevant service."
         ],
       },
       {
-        heading: "5. Overseas handling",
+        heading: "5. International handling",
         paragraphs: [
-          "OVERSTOCK is based in Australia and sells to customers in the United States. Information may be stored or processed in Australia, the United States, or other countries where our service providers operate. [CONFIRM THE COUNTRIES IN WHICH THE BUSINESS AND ITS PROVIDERS STORE OR ACCESS PERSONAL INFORMATION]. Where required by law, we take steps to protect information disclosed to overseas recipients."
+          "OVERSTOCK is based in Australia and sells to customers in the United States. Personal information may be processed in Australia, the United States, or other locations where OVERSTOCK's service providers operate. Where required by law, OVERSTOCK takes reasonable steps to protect personal information disclosed to overseas recipients."
         ],
       },
       {
-        heading: "6. Cookies and similar technology",
+        heading: "6. Cookies and website technologies",
         paragraphs: [
-          "[CONFIRM WHETHER THE WEBSITE USES COOKIES, PIXELS, ANALYTICS, OR ADVERTISING TECHNOLOGY. IF USED, IDENTIFY EACH TOOL, WHAT IT COLLECTS, ITS PURPOSE, AND HOW A VISITOR CAN MANAGE OPTIONAL TRACKING]. Your browser may allow you to block or delete cookies, although some website functions may not work as intended."
+          "The website may use cookies or similar technologies that are necessary for site operation, security, or remembering preferences. Browser settings can be used to manage or block cookies, although some website functions may then be unavailable. If optional analytics or advertising technologies are used, OVERSTOCK will provide any notice or choice required by applicable law."
         ],
       },
       {
         heading: "7. Retention and security",
         paragraphs: [
-          "We retain personal information for as long as reasonably needed for the purposes described in this policy, including order administration, recordkeeping, dispute resolution, and legal compliance. [INSERT THE ACTUAL RETENTION PERIODS OR CRITERIA FOR ORDER, SUPPORT, AND TECHNICAL RECORDS].",
-          "We use reasonable safeguards designed to protect information against loss, misuse, unauthorised access, modification, or disclosure. No online system can be guaranteed completely secure."
+          "OVERSTOCK retains personal information for as long as reasonably needed to fulfil the purposes described in this policy, manage orders and disputes, keep required business records, and comply with law. Information that is no longer needed will be securely deleted or de-identified where reasonably practicable.",
+          "OVERSTOCK uses reasonable administrative and technical safeguards to protect personal information against loss, misuse, unauthorised access, alteration, or disclosure. No online service can guarantee absolute security."
         ],
       },
       {
-        heading: "8. Your choices and privacy rights",
+        heading: "8. Your privacy choices and rights",
         paragraphs: [
-          "You may contact us to request access to or correction of personal information we hold about you. We may need to verify your identity and may be permitted or required by law to refuse or limit a request. Where an applicable U.S. state privacy law provides additional rights, such as deletion, portability, or opting out of certain processing, you may exercise those rights using the contact details below.",
-          "You may unsubscribe from marketing emails using the unsubscribe option in the message. We may continue to send non-marketing messages needed to manage an order or respond to you."
+          "You may email operations.overstock@gmail.com to request access to or correction of personal information OVERSTOCK holds about you. OVERSTOCK may need to verify your identity and may refuse or limit a request where the law permits or requires it.",
+          "Depending on where you live and the laws that apply, you may have additional rights concerning deletion, portability, or certain uses of your information. Contact OVERSTOCK to make a request. You may also complain to a privacy regulator with authority over your circumstances."
         ],
       },
       {
         heading: "9. Children",
         paragraphs: [
-          "The website is not directed to children under 13, and we do not knowingly request personal information from children under 13. If you believe a child has provided personal information, contact us so we can assess and address the request in accordance with applicable law. [CONFIRM THE INTENDED AGE RANGE AND ACTUAL CHILD-DATA PRACTICES BEFORE PUBLICATION]."
+          "The OVERSTOCK website is not directed to children under 13. OVERSTOCK does not knowingly request personal information from children under 13. A parent or guardian who believes a child has provided information may contact operations.overstock@gmail.com."
         ],
       },
       {
-        heading: "10. Complaints and contact",
+        heading: "10. Changes",
         paragraphs: [
-          "For a privacy question, access or correction request, or complaint, email operations.overstock@gmail.com. Tell us what happened and what outcome you are seeking. We will review and respond within a reasonable period and within any timeframe required by law.",
-          "If the Australian Privacy Act applies and you are not satisfied with our response, you may be able to complain to the Office of the Australian Information Commissioner. U.S. residents may also contact the privacy regulator or attorney general in their state where available."
-        ],
-      },
-      {
-        heading: "11. Updates",
-        paragraphs: [
-          "We may update this policy to reflect changes in our information practices or legal obligations. The current version will be posted on this page with its update date. Material changes will be communicated where required by law."
+          "OVERSTOCK may update this Privacy Policy to reflect changes to the website, information practices, or legal requirements. The current version and its effective date will appear on this page. Material changes will be communicated where required by law."
         ],
       },
     ],
