@@ -22,7 +22,7 @@ type Row = {
   audience: string | null;
   color: string | null;
   image_url: string | null;
-  size_chart_url: string | null;
+  size_chart_url?: string | null;
   sizes: string[];
   description: string | null;
   brand: string | null;
@@ -48,7 +48,7 @@ function map(row: Row): Product {
     status: row.status,
     imageTone: "#d0d0cc",
     imageUrl: row.image_url,
-    sizeChartUrl: row.size_chart_url,
+    sizeChartUrl: row.size_chart_url ?? null,
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
     description:
       row.description || "Independent product supplied through OVERSTOCK.",
