@@ -11,6 +11,7 @@ export type Product = {
   status: "active" | "sold_out";
   imageTone: string;
   imageUrl: string | null;
+  sizeChartUrl: string | null;
   sizes: string[];
   description: string;
 };
@@ -21,6 +22,7 @@ type Row = {
   audience: string | null;
   color: string | null;
   image_url: string | null;
+  size_chart_url: string | null;
   sizes: string[];
   description: string | null;
   brand: string | null;
@@ -46,6 +48,7 @@ function map(row: Row): Product {
     status: row.status,
     imageTone: "#d0d0cc",
     imageUrl: row.image_url,
+    sizeChartUrl: row.size_chart_url,
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
     description:
       row.description || "Independent product supplied through OVERSTOCK.",
@@ -56,7 +59,7 @@ export async function getProducts() {
   const { data } = await sb
     .from("products")
     .select(
-      "slug,name,price,audience,category,color,condition,status,image_url,sizes,description,brand",
+      "slug,name,price,audience,category,color,condition,status,image_url,size_chart_url,sizes,description,brand",
     )
     .in("status", ["active", "sold_out"])
     .order("created_at", { ascending: false });
