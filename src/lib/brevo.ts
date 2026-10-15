@@ -62,7 +62,7 @@ function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactE
   const safeShipping = escapeHtml(origin + "/legal/shipping");
   const instagramUrl = safeSocialUrl(process.env.OVERSTOCK_INSTAGRAM_URL, "instagram.com");
   const facebookUrl = safeSocialUrl(process.env.OVERSTOCK_FACEBOOK_URL, "facebook.com");
-  const safeContactEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(contactEmail)
+  const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
     ? escapeHtml(contactEmail)
     : null;
   const instagramIcon = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.7" cy="6.5" r=".8" fill="#050505" stroke="none"/></svg>';
