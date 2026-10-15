@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type CurrencyQuote = {
   country: string;
@@ -13,13 +13,13 @@ const CurrencyContext = createContext<{
   locale: string;
 }>({ quote: null, locale: "en-US" });
 
-const subscribeToLocale = () => () => {};
-const getBrowserLocale = () => navigator.language || "en-US";
-const getServerLocale = () => "en-US";
-
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [quote, setQuote] = useState<CurrencyQuote | null>(null);
-  const locale = useSyncExternalStore(subscribeToLocale, getBrowserLocale, getServerLocale);
+  const [quote, setQuote] = useState<CurrencyQuote | null>({
+    country: "US",
+    currency: "USD",
+    rate: 1,
+    audRate: null,
+  });
 
   useEffect(() => {
     let active = true;
@@ -37,7 +37,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <CurrencyContext.Provider value={{ quote, locale }}>
+    <CurrencyContext.Provider value={{ quote, locale: "en-US" }}>
       {children}
     </CurrencyContext.Provider>
   );
