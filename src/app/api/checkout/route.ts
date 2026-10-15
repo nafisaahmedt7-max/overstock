@@ -8,7 +8,19 @@ type CartLine = { slug: string; size: string; quantity: number };
 type CheckoutBody = {
   items: CartLine[];
   buyerCurrency?: string;
-  customer: { name: string; email: string; phone: string; address: string };
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: {
+      street: string;
+      unit?: string;
+      city: string;
+      region: string;
+      postalCode: string;
+      country: string;
+    };
+  };
 };
 
 function jsonError(message: string, status: number) {
@@ -55,14 +67,54 @@ export async function POST(request: Request) {
     return jsonError("Checkout details are invalid.", 400);
   }
 
-  const name = body.customer?.name?.trim();
-  const email = body.customer?.email?.trim().toLowerCase();
-  const phone = body.customer?.phone?.trim();
-  const address = body.customer?.address?.trim();
-  const items = Array.isArray(body.items) ? body.items : [];
-  if (!name || !email || !phone || !address || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return jsonError("Enter your name, email, phone, and delivery address.", 400);
+  const rawCustomer = body.customer;
+  if (!rawCustomer || typeof rawCustomer !== "object") {
+    return jsonError("Enter your contact and delivery details.", 400);
   }
+  const name = typeof rawCustomer.name === "string" ? rawCustomer.name.trim() : "";
+  const email = typeof rawCustomer.email === "string" ? rawCustomer.email.trim().toLowerCase() : "";
+  const phone = typeof rawCustomer.phone === "string" ? rawCustomer.phone.trim() : "";
+  const rawAddress = rawCustomer.address;
+  if (!rawAddress || typeof rawAddress !== "object") {
+    return jsonError("Enter your delivery address.", 400);
+  }
+  const addressParts = {
+    street: typeof rawAddress.street === "string" ? rawAddress.street.trim() : "",
+    unit: typeof rawAddress.unit === "string" ? rawAddress.unit.trim() : "",
+    city: typeof rawAddress.city === "string" ? rawAddress.city.trim() : "",
+    region: typeof rawAddress.region === "string" ? rawAddress.region.trim() : "",
+    postalCode: typeof rawAddress.postalCode === "string" ? rawAddress.postalCode.trim() : "",
+    country: typeof rawAddress.country === "string" ? rawAddress.country.trim().toUpperCase() : "",
+  };
+  const items = Array.isArray(body.items) ? body.items : [];
+  if (name.length < 2 || name.length > 100 || !/^[\p{L}\p{M} .’'-]+$/u.test(name)) {
+    return jsonError("Enter a valid full name.", 400);
+  }
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    return jsonError("Enter a valid email address.", 400);
+  }
+  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+    return jsonError("Enter a valid phone number with its country code.", 400);
+  }
+  if (
+    addressParts.street.length < 3 || addressParts.street.length > 120 ||
+    addressParts.unit.length > 60 ||
+    addressParts.city.length < 2 || addressParts.city.length > 80 ||
+    addressParts.region.length < 2 || addressParts.region.length > 80 ||
+    addressParts.postalCode.length < 2 || addressParts.postalCode.length > 20 ||
+    !/^[\p{L}\p{N} -]+$/u.test(addressParts.postalCode) ||
+    !/^[A-Z]{2}$/.test(addressParts.country)
+  ) {
+    return jsonError("Enter a complete and valid delivery address.", 400);
+  }
+  const address = [
+    addressParts.street,
+    addressParts.unit,
+    addressParts.city,
+    addressParts.region,
+    addressParts.postalCode,
+    addressParts.country,
+  ].filter(Boolean).join(", ");
   if (!items.length || items.length > 20) return jsonError("Your cart is invalid.", 400);
 
   const quantities = new Map<string, { slug: string; size: string; quantity: number }>();
