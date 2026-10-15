@@ -9,17 +9,27 @@ const legalTerms = [
   "Australian Consumer Law",
   "Australian Privacy Principles",
   "Privacy Act 1988 (Cth)",
+  "Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule",
   "Federal Trade Commission Mail, Internet, or Telephone Order Merchandise Rule",
+  "FTC Mail, Internet, or Telephone Order Merchandise Rule",
   "Mail, Internet, or Telephone Order Merchandise Rule",
   "16 C.F.R. Part 435",
+  "16 C.F.R.",
   "Federal Trade Commission Act",
+  "Section 5 of the Federal Trade Commission Act",
   "Federal Trade Commission",
+  "FTC",
   "Office of the Australian Information Commissioner",
   "Australian Competition and Consumer Commission",
+  "15 U.S.C. §§ 7001–7031",
+  "15 U.S.C. §§ 7701–7713",
   "15 U.S.C. § 45",
+  "15 U.S.C.",
   "Copyright Act 1968 (Cth)",
   "Digital Millennium Copyright Act",
   "17 U.S.C. § 512",
+  "17 U.S.C.",
+  "Title 17 of the United States Code",
   "Electronic Transactions Act 1999 (Cth)",
   "Electronic Signatures in Global and National Commerce Act",
   "Australian Spam Act 2003 (Cth)",
@@ -29,10 +39,16 @@ const legalTerms = [
 ];
 const emphasizedTerms = [...brandTerms, ...legalTerms].sort((a, b) => b.length - a.length);
 
-function renderPlain(text: string, keyBase: string) {
+function renderPlain(text: string, keyBase: string, boldUnmatched = false) {
   const nodes: ReactNode[] = [];
   let rest = text;
   let index = 0;
+  const appendPlain = (value: string) => {
+    if (!value) return;
+    if (boldUnmatched) nodes.push(<strong key={`${keyBase}-plain-${index++}`}>{value}</strong>);
+    else nodes.push(value);
+  };
+
   while (rest.length > 0) {
     let nextTerm = "";
     let nextPosition = rest.length;
@@ -44,11 +60,11 @@ function renderPlain(text: string, keyBase: string) {
       }
     }
     if (!nextTerm) {
-      nodes.push(rest);
+      appendPlain(rest);
       break;
     }
-    if (nextPosition > 0) nodes.push(rest.slice(0, nextPosition));
-    const key = `${keyBase}-${index++}`;
+    appendPlain(rest.slice(0, nextPosition));
+    const key = `${keyBase}-term-${index++}`;
     nodes.push(
       brandTerms.includes(nextTerm) ? (
         <strong key={key}>{nextTerm}</strong>
@@ -63,9 +79,7 @@ function renderPlain(text: string, keyBase: string) {
 
 function renderFormatted(text: string) {
   return text.split("**").flatMap((part, index) =>
-    index % 2 === 1
-      ? [<strong key={`marked-${index}`}>{part}</strong>]
-      : renderPlain(part, `plain-${index}`)
+    renderPlain(part, `formatted-${index}`, index % 2 === 1)
   );
 }
 
@@ -109,8 +123,8 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "1. Business identity and contact",
         paragraphs: [
-          `These terms are between you and OVERSTOCK, the online retail business operated under the registered legal name ${registeredBusinessName}. OVERSTOCK operates from 24 Eolian Loop, Clayton, Sydney, Australia. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to this business.`,
-          "For questions, complaints, or notices about an order or these terms, contact operations.overstock@gmail.com. Include your order number where relevant. Do not email passwords or full payment-card details."
+          `These terms are between you and OVERSTOCK, the online retail business operated under the registered legal name ${registeredBusinessName}. OVERSTOCK operates from **24 Eolian Loop, Clayton, Sydney, Australia**. In these terms, “OVERSTOCK”, “we”, “us” and “our” refer to this business.`,
+          "For questions, complaints, or notices about an order or these terms, contact operations.overstock@gmail.com. Include your order number where relevant."
         ],
       },
       {
@@ -138,7 +152,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "5. Prices, currency, and payment",
         paragraphs: [
-          "The website may display prices in U.S. dollars (USD). Square's hosted checkout shows the amount charged in Australian dollars (AUD). Review and authorise the amount shown at checkout. Your bank or card issuer may apply its own exchange rate or transaction fees.",
+          "The website may display prices in **U.S. dollars (USD)**. Square's hosted checkout shows the amount charged in **Australian dollars (AUD)**. Review and authorise the amount shown at checkout. Your bank or card issuer may apply its own exchange rate or transaction fees.",
           "Payments are processed through Square. Information entered into Square's hosted checkout is handled under Square's applicable terms and privacy information. You must be authorised to use the payment method submitted.",
           "If a material pricing or listing error is identified before dispatch, we may contact you to confirm the corrected details or cancel the affected order. If we cancel a paid order, we will refund the amount paid to the original payment method, subject to any remedy required by law."
         ],
@@ -146,7 +160,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "6. Dispatch and delivery",
         paragraphs: [
-          "Our typical dispatch timeframe is 3–4 weeks after we accept your order. Dispatch means handing the parcel to the delivery carrier; it is not the delivery date. Transit time follows dispatch and varies by destination and carrier.",
+          "Our typical dispatch timeframe is **3–4 weeks** after we accept your order. Dispatch means handing the parcel to the delivery carrier; it is not the delivery date. Transit time follows dispatch and varies by destination and carrier.",
           "You are responsible for entering a complete and accurate delivery address. Contact us promptly if it needs correcting. We cannot guarantee an address change after dispatch processing has begun.",
           "We will make a reasonable basis assessment of the dispatch timeframe represented when you order. For qualifying U.S. orders, the Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule, 16 C.F.R. Part 435, requires shipment within the represented timeframe or, if none is stated, generally within 30 days. If we cannot meet the applicable timeframe, we will provide the delay notice, revised timeframe, and cancellation and refund option required by that Rule.",
           "If an order is delayed, lost, or damaged in transit, contact us at operations.overstock@gmail.com. We will respond in accordance with applicable law. Nothing in these terms limits rights relating to delivery that cannot lawfully be limited."
@@ -311,7 +325,7 @@ const pages: Record<string, LegalContent> = {
     title: "SHIPPING",
     updated: "LAST UPDATED OCTOBER 15, 2026",
     copy: [
-      "**OVERSTOCK dispatches orders in approximately 3–4 weeks after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
+      "**OVERSTOCK dispatches orders in approximately **3–4 weeks** after acceptance.** Dispatch means the parcel has been handed to the delivery carrier. Delivery follows dispatch and varies by destination and carrier.",
       "Please check your delivery details carefully at checkout. If you need to correct an address, email operations.overstock@gmail.com as soon as possible. An address change cannot be guaranteed once dispatch processing has begun.",
       "If OVERSTOCK cannot dispatch within the timeframe stated for your order, we will notify you and provide the revised timing and options required by law. For eligible U.S. orders, the **FTC Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435)** requires the option to agree to a delay or cancel for a prompt refund when the promised timeframe cannot be met.",
       "For an order that is delayed, lost, or arrives damaged, contact OVERSTOCK at operations.overstock@gmail.com and include your order number. Your rights under the **Australian Consumer Law** and applicable U.S. consumer-protection laws are not affected."
@@ -330,7 +344,7 @@ const pages: Record<string, LegalContent> = {
   contact: {
     title: "CONTACT",
     copy: [
-      "For questions or to report accessibility issues, please contact our support team via the channels below. For an order issue, include your order number and photos if the item arrived damaged. Never send passwords or full payment-card details.",
+      "For questions or to report accessibility issues, please contact our support team via the channels below. For an order issue, include your order number and photos if the item arrived damaged.",
     ],
   },
 };
@@ -343,17 +357,6 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
   return (
     <main className="legal-page">
       <p className="eyebrow">OVERSTOCK / HELP</p>
-      {page === "shipping" && (
-        <svg className="legal-page-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 5h18v14H3zM3 10h18M7 5v14m5-14v14m5-14v14" />
-        </svg>
-      )}
-      {page === "refunds" && (
-        <svg className="legal-page-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M15.5 8.5h-4a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-4m3.5-10v11" />
-        </svg>
-      )}
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
       {content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
@@ -368,10 +371,10 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
                   target={option.label === "EMAIL" ? undefined : "_blank"}
                   rel={option.label === "EMAIL" ? undefined : "noreferrer"}
                 >
-                  {option.label === "EMAIL" ? <strong>{option.value}</strong> : option.value}
+                  <strong>{option.value}</strong>
                 </a>
               ) : (
-                <span>{option.value}</span>
+                <span><strong>{option.value}</strong></span>
               )}
             </div>
           ))}
