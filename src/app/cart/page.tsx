@@ -7,9 +7,9 @@ import { LocalPrice } from "@/components/local-price";
 import { useCurrency } from "@/components/currency-provider";
 
 const countries = [
+  { name: "United States", iso: "US", dial: "+1" },
   { name: "Australia", iso: "AU", dial: "+61" },
   { name: "New Zealand", iso: "NZ", dial: "+64" },
-  { name: "United States", iso: "US", dial: "+1" },
   { name: "Canada", iso: "CA", dial: "+1" },
   { name: "United Kingdom", iso: "GB", dial: "+44" },
   { name: "Ireland", iso: "IE", dial: "+353" },
@@ -79,9 +79,9 @@ export default function CartPage() {
     name: "",
     email: "",
     phone: "",
-    address: { street: "", unit: "", city: "", region: "", postalCode: "", country: "Australia" },
+    address: { street: "", unit: "", city: "", region: "", postalCode: "", country: "United States" },
   });
-  const [phoneCountryIso, setPhoneCountryIso] = useState("AU");
+  const [phoneCountryIso, setPhoneCountryIso] = useState("US");
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -178,20 +178,17 @@ export default function CartPage() {
           </div>
           <aside>
             <div><span>SUBTOTAL</span><strong><LocalPrice amountUsd={total} /></strong></div>
-            <p className="checkout-price-note">Estimated in {quote?.currency || "your local currency"} · Charged in AUD · Shipping and tax not included</p>
+            <p className="checkout-price-note">Shipping and taxes are not included.</p>
             <form className="checkout-form checkout-form-professional" onSubmit={checkout} noValidate>
-              <div className="checkout-section-heading">
-                <span className="checkout-step">01</span>
-                <div><h2>Contact details</h2><p>Order receipt sent by email</p></div>
-              </div>
+              <div className="checkout-section-heading"><h2>Contact details</h2></div>
               <label className="checkout-field">
                 <span>Full name <b>*</b></span>
-                <input autoComplete="name" required maxLength={100} value={customer.name} {...inputProps("name")} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} />
+                <input autoComplete="name" required maxLength={100} placeholder="Jane Smith" value={customer.name} {...inputProps("name")} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} />
                 {fieldError("name")}
               </label>
               <label className="checkout-field">
                 <span>Email address <b>*</b></span>
-                <input type="email" autoComplete="email" inputMode="email" required maxLength={254} value={customer.email} {...inputProps("email")} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
+                <input type="email" autoComplete="email" inputMode="email" required maxLength={254} placeholder="name@example.com" value={customer.email} {...inputProps("email")} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
                 {fieldError("email")}
               </label>
               <label className="checkout-field">
@@ -203,39 +200,35 @@ export default function CartPage() {
                   }}>
                     {countries.map((country) => <option key={country.iso} value={country.iso}>{country.iso} {country.dial}</option>)}
                   </select>
-                  <input type="tel" autoComplete="tel-national" inputMode="tel" required maxLength={24} placeholder="Your number" value={customer.phone} {...inputProps("phone")} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
+                  <input type="tel" autoComplete="tel-national" inputMode="tel" required maxLength={24} placeholder="(415) 555-0130" value={customer.phone} {...inputProps("phone")} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
                 </div>
-                <small className="checkout-field-hint">Country code {selectedPhoneCountry.dial} will be added automatically.</small>
                 {fieldError("phone")}
               </label>
-              <div className="checkout-section-heading checkout-address-heading">
-                <span className="checkout-step">02</span>
-                <div><h2>Delivery address</h2><p>Where should we send your order?</p></div>
-              </div>
+              <div className="checkout-section-heading checkout-address-heading"><h2>Delivery address</h2></div>
               <label className="checkout-field">
                 <span>Street address <b>*</b></span>
-                <input autoComplete="address-line1" required maxLength={120} placeholder="House number and street name" value={customer.address.street} {...inputProps("street")} onChange={(e) => setAddress("street", e.target.value)} />
+                <input autoComplete="address-line1" required maxLength={120} placeholder="123 Main Street" value={customer.address.street} {...inputProps("street")} onChange={(e) => setAddress("street", e.target.value)} />
                 {fieldError("street")}
               </label>
               <label className="checkout-field">
-                <span>Apartment, suite, etc. <small>Optional</small></span>
-                <input autoComplete="address-line2" maxLength={60} value={customer.address.unit} {...inputProps("unit")} onChange={(e) => setAddress("unit", e.target.value)} />
+                <span>Apartment or suite <small>Optional</small></span>
+                <input autoComplete="address-line2" maxLength={60} placeholder="Apt 4B" value={customer.address.unit} {...inputProps("unit")} onChange={(e) => setAddress("unit", e.target.value)} />
                 {fieldError("unit")}
               </label>
               <label className="checkout-field">
-                <span>City or suburb <b>*</b></span>
-                <input autoComplete="address-level2" required maxLength={80} value={customer.address.city} {...inputProps("city")} onChange={(e) => setAddress("city", e.target.value)} />
+                <span>City <b>*</b></span>
+                <input autoComplete="address-level2" required maxLength={80} placeholder="San Francisco" value={customer.address.city} {...inputProps("city")} onChange={(e) => setAddress("city", e.target.value)} />
                 {fieldError("city")}
               </label>
               <div className="checkout-field-row">
                 <label className="checkout-field">
-                  <span>State / province / region <b>*</b></span>
-                  <input autoComplete="address-level1" required maxLength={80} value={customer.address.region} {...inputProps("region")} onChange={(e) => setAddress("region", e.target.value)} />
+                  <span>State <b>*</b></span>
+                  <input autoComplete="address-level1" required maxLength={80} placeholder="California" value={customer.address.region} {...inputProps("region")} onChange={(e) => setAddress("region", e.target.value)} />
                   {fieldError("region")}
                 </label>
                 <label className="checkout-field">
-                  <span>Postal / ZIP code <b>*</b></span>
-                  <input autoComplete="postal-code" required maxLength={20} value={customer.address.postalCode} {...inputProps("postalCode")} onChange={(e) => setAddress("postalCode", e.target.value)} />
+                  <span>ZIP code <b>*</b></span>
+                  <input autoComplete="postal-code" required maxLength={20} placeholder="94103" value={customer.address.postalCode} {...inputProps("postalCode")} onChange={(e) => setAddress("postalCode", e.target.value)} />
                   {fieldError("postalCode")}
                 </label>
               </div>
