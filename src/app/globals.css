@@ -2082,5 +2082,5 @@ input[type="number"]::-webkit-outer-spin-button {
 
 
 /* Legal page paragraph alignment and Terms headings */
-.legal-page-contact>p:not(.eyebrow),.legal-page-shipping .legal-section p,.legal-page-refunds .legal-section p{text-align:center}
+.legal-page-contact>p:not(.eyebrow):not(.legal-updated),.legal-page-shipping>p:not(.eyebrow):not(.legal-updated),.legal-page-refunds>p:not(.eyebrow):not(.legal-updated){text-align:center}
 .legal-page-terms .legal-section h2{font-weight:800}
