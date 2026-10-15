@@ -27,6 +27,7 @@ type Row = {
   category: string | null;
   condition: string | null;
   status: "active" | "sold_out";
+  stock_quantity: number;
 };
 function map(row: Row): Product {
   return {
@@ -43,7 +44,7 @@ function map(row: Row): Product {
     seller: row.brand || "OVERSTOCK",
     color: row.color || "UNSPECIFIED",
     condition: row.condition || "PRE-OWNED",
-    status: row.status,
+    status: row.stock_quantity > 0 ? "active" : "sold_out",
     imageTone: "#d0d0cc",
     imageUrl: row.image_url,
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
@@ -56,7 +57,7 @@ export async function getProducts() {
   const { data } = await sb
     .from("products")
     .select(
-      "slug,name,price,audience,category,color,condition,status,image_url,sizes,description,brand",
+      "slug,name,price,audience,category,color,condition,status,stock_quantity,image_url,sizes,description,brand",
     )
     .in("status", ["active", "sold_out"])
     .order("created_at", { ascending: false });
