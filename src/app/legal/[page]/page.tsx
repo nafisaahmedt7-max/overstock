@@ -3,15 +3,19 @@ import type { ReactNode } from "react";
 
 type LegalSection = { heading: string; paragraphs: string[] };
 const registeredBusinessName = "**[INSERT REGISTERED LEGAL BUSINESS NAME]**";
-const emphasizedTerms = [
-  "OVERSTOCK",
+const brandTerms = ["OVERSTOCK", "operations.overstock@gmail.com"];
+const legalTerms = [
   "Competition and Consumer Act 2010 (Cth)",
   "Australian Consumer Law",
   "Australian Privacy Principles",
   "Privacy Act 1988 (Cth)",
-  "FTC Mail, Internet, or Telephone Order Merchandise Rule",
+  "Federal Trade Commission Mail, Internet, or Telephone Order Merchandise Rule",
+  "Mail, Internet, or Telephone Order Merchandise Rule",
   "16 C.F.R. Part 435",
   "Federal Trade Commission Act",
+  "Federal Trade Commission",
+  "Office of the Australian Information Commissioner",
+  "Australian Competition and Consumer Commission",
   "15 U.S.C. § 45",
   "Copyright Act 1968 (Cth)",
   "Digital Millennium Copyright Act",
@@ -20,7 +24,10 @@ const emphasizedTerms = [
   "Electronic Signatures in Global and National Commerce Act",
   "Australian Spam Act 2003 (Cth)",
   "U.S. CAN-SPAM Act",
+  "California Consumer Privacy Act",
+  "California Privacy Rights Act",
 ];
+const emphasizedTerms = [...brandTerms, ...legalTerms].sort((a, b) => b.length - a.length);
 
 function renderPlain(text: string, keyBase: string) {
   const nodes: ReactNode[] = [];
@@ -41,7 +48,14 @@ function renderPlain(text: string, keyBase: string) {
       break;
     }
     if (nextPosition > 0) nodes.push(rest.slice(0, nextPosition));
-    nodes.push(<strong key={`${keyBase}-${index++}`}>{nextTerm}</strong>);
+    const key = `${keyBase}-${index++}`;
+    nodes.push(
+      brandTerms.includes(nextTerm) ? (
+        <strong key={key}>{nextTerm}</strong>
+      ) : (
+        <strong className="legal-law-highlight" key={key}>{nextTerm}</strong>
+      )
+    );
     rest = rest.slice(nextPosition + nextTerm.length);
   }
   return nodes;
@@ -174,6 +188,7 @@ const pages: Record<string, LegalContent> = {
         heading: "11. Copyright, trade marks, and infringement notices",
         paragraphs: [
           "Unless otherwise stated, original website text, layout, graphics, and OVERSTOCK-created photographs are owned by or licensed to OVERSTOCK and protected by applicable intellectual-property laws, including the Copyright Act 1968 (Cth) and U.S. copyright law in Title 17 of the United States Code. You may view and use this material for personal, non-commercial purposes connected with using the website. You must not reproduce, adapt, publish, distribute, or commercially exploit it without permission, except as permitted by law.",
+          "© 2026 OVERSTOCK. Rights in original OVERSTOCK content are reserved, subject to applicable law. Third-party material remains the property of its respective rights holders.",
           "Third-party product names, logos, photographs, and trade marks remain the property of their respective owners. Their use to identify a product does not transfer ownership or imply endorsement.",
           "If you believe material on the website infringes your copyright, email operations.overstock@gmail.com with the page address, identification of the protected work, the material you believe is infringing, your contact details, and a statement explaining your ownership or authority. Copyright notices are handled under applicable law, including the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512) where it applies. OVERSTOCK does not represent that this email address is a registered DMCA designated agent."
         ],
@@ -353,7 +368,7 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
                   target={option.label === "EMAIL" ? undefined : "_blank"}
                   rel={option.label === "EMAIL" ? undefined : "noreferrer"}
                 >
-                  {option.value}
+                  {option.label === "EMAIL" ? <strong>{option.value}</strong> : option.value}
                 </a>
               ) : (
                 <span>{option.value}</span>
