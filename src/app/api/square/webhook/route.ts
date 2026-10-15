@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await sendNextBrevoOrderConfirmation(sb);
+    await sendNextBrevoOrderConfirmation(sb, new URL(notificationUrl).origin);
   } catch (emailError) {
     console.error("[square-webhook] Brevo order email delivery failed", {
       eventType: event.type,
