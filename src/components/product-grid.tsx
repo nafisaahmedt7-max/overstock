@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/data/products";
+import { LocalPrice } from "./local-price";
 import { ProductPlaceholder } from "./product-placeholder";
 export function ProductGrid({ products }: { products: Product[] }) {
   const laneOrder = ["tops", "bottoms", "accessories", "other"];
@@ -31,7 +32,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                     <ProductPlaceholder name={product.name} tone={product.imageTone} imageUrl={product.imageUrl} index={rowIndex * 6 + index} />
                     <div className="product-meta">
                       <div><h2>{product.name}</h2><p>{product.condition}</p></div>
-                      <div className="product-price"><p>${product.price}</p>{product.status === "sold_out" && <b>SOLD OUT</b>}</div>
+                      <div className="product-price"><p><LocalPrice amountUsd={product.price} /></p>{product.status === "sold_out" && <b>SOLD OUT</b>}</div>
                     </div>
                   </Link>
                 </article>
