@@ -155,7 +155,14 @@ export function AdminDashboard({ email }: { email: string }) {
           "Could not load data",
       );
     setSellers(s.data ?? []);
-    setProducts(p.data ?? []);
+    setProducts((p.data ?? []).map((product) => ({
+      ...product,
+      status: product.status === "archived" || product.status === "draft"
+        ? product.status
+        : product.stock_quantity > 0
+          ? "active"
+          : "sold_out",
+    })));
     setOrders(o.data ?? []);
     setPartners(fp.data ?? []);
     setShipments(os.data ?? []);
