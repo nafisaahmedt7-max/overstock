@@ -86,7 +86,7 @@ export async function POST(request: Request) {
   const slugs = Array.from(new Set(Array.from(quantities.values(), (item) => item.slug)));
   const { data: products, error: productError } = await sb
     .from("products")
-    .select("id,slug,name,sku,price,status,stock_quantity,sizes")
+    .select("id,slug,name,sku,price,status,stock_quantity,sizes,color")
     .in("slug", slugs)
     .in("status", ["active", "sold_out"])
     .gt("stock_quantity", 0);
