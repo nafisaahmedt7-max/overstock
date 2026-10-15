@@ -1,12 +1,10 @@
 import { notFound } from "next/navigation";
 
 type LegalSection = { heading: string; paragraphs: string[] };
-const registeredBusinessName = "[INSERT REGISTERED LEGAL BUSINESS NAME]";
+const registeredBusinessName = "**[INSERT REGISTERED LEGAL BUSINESS NAME]**";
 function renderFormatted(text: string) {
-  return text.split(/(\\*\\*.*?\\*\\*)/g).map((part, index) =>
-    part.startsWith("**") && part.endsWith("**")
-      ? <strong key={index}>{part.slice(2, -2)}</strong>
-      : part
+  return text.split("**").map((part, index) =>
+    index % 2 === 1 ? <strong key={index}>{part}</strong> : part
   );
 }
 
