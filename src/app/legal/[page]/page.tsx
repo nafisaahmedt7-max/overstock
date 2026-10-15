@@ -38,7 +38,7 @@ const pages: Record<string, LegalContent> = {
       {
         heading: "Delivery",
         paragraphs: [
-          "Delivery options, destinations, and any delivery charges are shown during checkout or described on our Shipping page. Please provide a complete and accurate address. Delivery estimates are estimates and may change because of courier or other events outside our control.",
+          "Please review our Shipping page and the delivery information available before placing an order. Provide a complete and accurate address. Delivery estimates may change because of courier or other events outside our control.",
           "For shipping updates and tracking information, see our Shipping page and the updates sent with your order. This does not limit any rights you have under applicable consumer law.",
         ],
       },
@@ -46,7 +46,7 @@ const pages: Record<string, LegalContent> = {
         heading: "Cancellations, returns, and consumer rights",
         paragraphs: [
           "Our Refund Policy explains our change-of-mind policy and how to contact us about an order problem. A change-of-mind return is not available unless our Refund Policy or the product listing says otherwise.",
-          "Nothing in these terms excludes, restricts, or modifies a consumer guarantee or other right that cannot lawfully be excluded. If a product does not meet a consumer guarantee, you may be entitled to a remedy required by law.",
+          "Nothing in these terms excludes, restricts, or modifies a consumer guarantee or other right that cannot lawfully be excluded. Where the Australian Consumer Law applies, its consumer guarantees and remedies continue to apply. If a product does not meet a consumer guarantee, you may be entitled to a remedy required by law.",
         ],
       },
       {
