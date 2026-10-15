@@ -80,14 +80,14 @@ const pages: Record<string, LegalContent> = {
         paragraphs: [
           "Our typical dispatch timeframe is 3–4 weeks after we accept your order. Dispatch means handing the parcel to the delivery carrier; it is not the delivery date. Transit time follows dispatch and varies by destination and carrier.",
           "You are responsible for entering a complete and accurate delivery address. Contact us promptly if it needs correcting. We cannot guarantee an address change after dispatch processing has begun.",
-          "We will make a reasonable basis assessment of the dispatch timeframe represented when you order. For qualifying U.S. orders, the Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule, 16 C.F.R. Part 435, requires a seller to ship within the represented timeframe or, if none is stated, generally within 30 days. If we cannot meet the applicable timeframe, we will provide the delay notice, revised timeframe, and cancellation and refund option required by that Rule.",
+          "We will make a reasonable basis assessment of the dispatch timeframe represented when you order. For qualifying U.S. orders, the Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule, 16 C.F.R. Part 435, requires shipment within the represented timeframe or, if none is stated, generally within 30 days. If we cannot meet the applicable timeframe, we will provide the delay notice, revised timeframe, and cancellation and refund option required by that Rule.",
           "If an order is delayed, lost, or damaged in transit, contact us at operations.overstock@gmail.com. We will respond in accordance with applicable law. Nothing in these terms limits rights relating to delivery that cannot lawfully be limited."
         ],
       },
       {
         heading: "7. Change-of-mind cancellations and final sale",
         paragraphs: [
-          "All sales are final for change of mind. We do not offer change-of-mind returns or exchanges after an order has been dispatched.",
+          "All sales are final for change of mind. We do not offer change-of-mind refunds, returns, or exchanges after an order has been dispatched.",
           "Before dispatch, you may email operations.overstock@gmail.com to request cancellation. A cancellation is effective when we confirm it. If we confirm cancellation before dispatch, we will refund the amount paid to the original payment method.",
           "This policy does not exclude a cancellation, refund, replacement, repair, or other remedy required by law. In particular, it does not remove any rights that apply if we cannot dispatch within a legally required timeframe or do not provide a legally required delay notice and cancellation option."
         ],
