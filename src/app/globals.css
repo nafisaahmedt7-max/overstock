@@ -27,6 +27,11 @@ body {
 .site-footer{border-top:1px solid;padding:2.25rem 1rem;display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:end;font:600 .7rem/1.5 var(--font-mono),monospace}
 .footer-main-row{min-width:0}.footer-brand{display:grid;gap:.45rem}.footer-brand span{color:#555}.footer-desktop-nav{display:flex;flex-wrap:wrap;gap:1rem 2rem;justify-content:flex-end}.footer-mobile-menu{display:none}.site-footer a:hover{text-decoration:underline}
 .legal-page{max-width:58rem;min-height:65vh;padding:5rem 1rem}.legal-page h1{font-size:clamp(3rem,10vw,8rem);letter-spacing:-.07em;margin:1rem 0 3rem}.legal-page>p:not(.eyebrow){max-width:46rem;font-size:1rem;line-height:1.7;margin-top:1rem}
+.legal-updated{font:500 .67rem/1.5 var(--font-mono),monospace;text-transform:uppercase;letter-spacing:.04em;color:#555;margin:-2.25rem 0 3rem!important}
+.legal-section{max-width:46rem;margin-top:3rem;border-top:1px solid;padding-top:1rem}
+.legal-section h2{font:600 .75rem/1.4 var(--font-mono),monospace;text-transform:uppercase;letter-spacing:.04em;margin:0 0 .75rem}
+.legal-section p{font-size:1rem;line-height:1.7;margin-top:1rem}
+.legal-section p:first-of-type{margin-top:0}
 .portal-register-link{font:600 .7rem var(--font-mono),monospace;text-decoration:underline;text-underline-offset:.25rem}
 button,
 a {
