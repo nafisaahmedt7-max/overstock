@@ -355,7 +355,7 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
   if (!content) notFound();
 
   return (
-    <main className="legal-page">
+    <main className={`legal-page legal-page-${page}`}>
       <p className="eyebrow">OVERSTOCK / HELP</p>
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
