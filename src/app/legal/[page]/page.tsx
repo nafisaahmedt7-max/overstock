@@ -39,95 +39,109 @@ const pages: Record<string, LegalContent> = {
     updated: "Last updated October 15, 2026",
     sections: [
       {
-        heading: "About these terms",
+        heading: "1. Business details and contract",
         paragraphs: [
-          "These Terms and Conditions govern your use of the OVERSTOCK website and purchases made through it. The contracting business is [insert registered legal business name], trading as OVERSTOCK, ABN/ACN [insert]. Its business address is 24 Eolian Loop, Clayton, Sydney, [insert State or Territory and postcode], Australia.",
-          "By using the website or placing an order, you agree to these terms. If you place an order for another person or business, you confirm that you are authorised to do so. These terms apply alongside the Privacy, Shipping, and Refund pages published on our website.",
+          "OVERSTOCK is a trading name of [ENTER THE FULL REGISTERED LEGAL NAME OF THE BUSINESS], ABN [ENTER THE 11-DIGIT ABN] / ACN [ENTER THE 9-DIGIT ACN IF THE BUSINESS IS AN AUSTRALIAN COMPANY]. The business address is 24 Eolian Loop, Clayton, Sydney, [ENTER STATE OR TERRITORY AND POSTCODE], Australia. In these terms, “OVERSTOCK”, “we”, “us”, and “our” refer to that business.",
+          "These Terms and Conditions govern use of the OVERSTOCK website and purchases made through it. The product listing, checkout details, order confirmation, and policies linked on the website form part of the purchase terms. If a purchase-specific term conflicts with these general terms, the purchase-specific term applies to that order, subject always to mandatory consumer law.",
+          "Before ordering, please read the product listing and these terms. Submitting an order is your offer to purchase. We accept it when payment is authorised and we send an order confirmation. An automated order confirmation acknowledging receipt does not by itself confirm acceptance unless it says the order is accepted.",
         ],
       },
       {
-        heading: "Products and listings",
+        heading: "2. Products and listings",
         paragraphs: [
-          "We aim to provide accurate product descriptions, condition details, measurements, and photographs. Please read the individual listing before ordering. Screen settings may affect how colours appear. Any known fault, wear, or other material condition disclosed in the listing forms part of the product description.",
-          "Many products are limited or one of one. Availability may change, and placing an item in your cart does not mean an order has been accepted. If an item is unavailable or a listing contains a material error, we will contact you to correct the issue or cancel the affected order. If we cancel after payment, we will refund the amount paid for that order, subject to any remedy required by law.",
+          "We aim to describe each item accurately, including its condition, material features, measurements, and any known fault or wear. A fault or condition clearly disclosed before purchase is part of the listing. Please review all listing details before ordering. Colours may appear differently on different screens.",
+          "Many items are limited or one of one. Product availability can change. An item in your cart is not an accepted order. If an item is unavailable or a material listing error is found, we will contact you to correct the issue or cancel the affected order. If a paid order is cancelled by us, we will refund the amount paid for that order unless a different remedy is required by law.",
+          "Descriptions and photographs are provided to identify and describe the listed item. They do not imply that OVERSTOCK is affiliated with or endorsed by a brand or rights holder unless we expressly say so.",
         ],
       },
       {
-        heading: "Orders and payment",
+        heading: "3. Prices, currency, and payment",
         paragraphs: [
-          "Submitting an order is an offer to buy the listed products. We accept an order when payment has been authorised and we send an order confirmation. Please check the confirmation and contact us promptly if you believe it contains an error.",
-          "The website may display prices in U.S. dollars (USD). Square's hosted checkout displays the amount charged in Australian dollars (AUD). Review the amount shown by Square before authorising payment. Your bank or card issuer may apply its own exchange rate or transaction fees.",
-          "Payments are processed through Square. Payment information entered on Square's hosted checkout is handled under Square's applicable terms and privacy information. We may decline or cancel an order where permitted by law, including where payment is not authorised, an item is unavailable, or a material listing or pricing error has occurred. If we cancel a paid order, we will arrange a refund to the original payment method unless the law requires another remedy.",
+          "The website may display prices in U.S. dollars (USD). The Square hosted checkout displays the amount charged in Australian dollars (AUD). Review the final amount shown by Square before authorising payment. Your bank or card issuer may apply its own exchange rate or transaction fees.",
+          "Payments are processed through Square. Payment information entered through Square's hosted checkout is handled under Square's applicable terms and privacy information. You must be authorised to use the payment method submitted.",
+          "If a material pricing or listing error is discovered before dispatch, we may contact you to confirm the correct details or cancel the affected order. If we cancel a paid order, we will refund the amount paid to the original payment method, subject to any remedy required by law.",
         ],
       },
       {
-        heading: "Dispatch and delivery",
+        heading: "4. Dispatch and delivery",
         paragraphs: [
-          "Our current dispatch timeframe is typically 3–4 weeks after your order is accepted. Dispatch means handing the parcel to the delivery carrier; it is not the delivery date. Carrier transit time follows dispatch and can vary by destination and carrier.",
-          "Please provide a complete delivery address and check it carefully before submitting your order. Contact us as soon as possible if you need to correct an address. We cannot guarantee a change after an order has entered dispatch.",
-          "If we cannot dispatch within the timeframe stated for your order, we will contact you with the revised information and the options required by applicable law. For U.S. orders, the Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule requires shipment within the stated timeframe or, if none is stated, generally within 30 days. When a delay occurs, the Rule requires an option to consent to the delay or cancel for a prompt refund.",
-          "We remain responsible for addressing an order that is lost, delayed, or damaged in transit in accordance with applicable consumer law. Nothing in this section limits your legal rights.",
+          "Our current dispatch timeframe is typically 3–4 weeks after we accept your order. Dispatch means handing the parcel to the delivery carrier; it is not the delivery date. Carrier transit time follows dispatch and varies by destination and carrier.",
+          "You must provide a complete and accurate delivery address. Contact us promptly if you need to correct it. We cannot guarantee that an address change can be made after dispatch processing has begun.",
+          "If we cannot dispatch by the timeframe stated for your order, we will give you the revised information and the options required by law. For U.S. orders, the Federal Trade Commission's Mail, Internet, or Telephone Order Merchandise Rule (16 C.F.R. Part 435) generally requires shipment within the stated time or within 30 days if no time was stated. Where a delay occurs, the Rule requires a notice offering the customer the option to agree to the delay or cancel for a prompt refund.",
+          "We remain responsible for responding to an order that is lost, delayed, or damaged in transit in accordance with applicable consumer law. Nothing in these terms limits your rights relating to delivery.",
         ],
       },
       {
-        heading: "Final sale and cancellations",
+        heading: "5. Final sale, cancellations, and refunds",
         paragraphs: [
           "All sales are final for change of mind. Because many OVERSTOCK items are low-cost, limited, or one of one, we do not offer change-of-mind returns or exchanges after dispatch.",
-          "You may email us at operations.overstock@gmail.com to request cancellation before your order is dispatched. A cancellation is effective only when we confirm it. If the order is cancelled before dispatch, we will refund the amount paid to the original payment method. This policy does not restrict a cancellation or refund right provided by consumer law, including a right that applies when an order cannot be shipped on time.",
+          "You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation takes effect when we confirm it. If we confirm cancellation before dispatch, we will refund the amount paid to the original payment method.",
+          "The change-of-mind policy does not prevent cancellation or a refund where required by law, including where we cannot dispatch within the time required by law or fail to provide a required delay notice and option.",
         ],
       },
       {
-        heading: "Incorrect, damaged, or faulty items",
+        heading: "6. Incorrect, damaged, or faulty items",
         paragraphs: [
-          "If an item is incorrect, arrives damaged, or has a fault not disclosed in its listing, email operations.overstock@gmail.com promptly. Include your order number, a short description, and clear photographs where relevant. We will review the issue and work with you to resolve it.",
-          "For a confirmed damage issue, we will offer a voucher as a resolution where permitted by law. You do not have to accept a voucher where applicable law gives you a different remedy or choice. A voucher will not replace any repair, replacement, refund, or other remedy required by law. An identical replacement may not be available for a one-of-one item, but this does not limit your legal rights.",
-          "A remedy may not be available where the issue was caused by misuse, accidental damage after delivery, or a condition clearly disclosed before purchase, subject to any rights that cannot lawfully be excluded.",
+          "If an item is incorrect, arrives damaged, or has a fault that was not disclosed in its listing, email operations.overstock@gmail.com promptly. Include your order number, a brief description, and photographs where relevant. We may ask reasonable questions or inspect the item to assess the issue.",
+          "For confirmed damage, we will offer a voucher as a resolution where permitted by law. You are not required to accept a voucher where applicable law gives you a different remedy or choice. A voucher does not replace a repair, replacement, refund, cancellation, or other remedy required by law. An identical replacement may not be available for a one-of-one item; this does not reduce your legal rights.",
+          "A remedy may not be available for damage caused after delivery by misuse or accident, or for a condition clearly disclosed before purchase, subject to any rights that cannot lawfully be excluded.",
         ],
       },
       {
-        heading: "Consumer guarantees and other legal rights",
+        heading: "7. Consumer protection and online sales laws",
         paragraphs: [
-          "Australian consumers receive the protections of the Australian Consumer Law in Schedule 2 to the Competition and Consumer Act 2010 (Cth). Those protections cannot be excluded. Depending on the circumstances, a consumer may be entitled to a repair, replacement, refund, cancellation, or compensation. For a major product failure, the consumer may choose a refund or replacement.",
-          "U.S. consumers retain rights under applicable federal and state consumer protection laws. The shipping-delay rights described in these terms apply in addition to any other non-waivable rights available to you.",
-          "Nothing in these terms excludes, restricts, or modifies any consumer guarantee, statutory right, or remedy that cannot lawfully be excluded, restricted, or modified. If these terms differ from a mandatory legal protection, the mandatory protection prevails.",
+          "For Australian consumers, the Australian Consumer Law in Schedule 2 to the Competition and Consumer Act 2010 (Cth) provides consumer guarantees that cannot be excluded. Depending on the issue, remedies may include repair, replacement, refund, cancellation, or compensation. For a major failure of goods, a consumer may choose a refund or replacement.",
+          "Australian law also prohibits misleading or deceptive conduct and regulates unfair terms in standard-form consumer contracts. These terms are to be read consistently with those protections and do not authorise misleading product descriptions or unfair reliance on a term.",
+          "For U.S. consumers, applicable federal and state consumer-protection laws continue to apply. Section 5 of the U.S. Federal Trade Commission Act (15 U.S.C. § 45) prohibits unfair or deceptive acts or practices in or affecting commerce. The FTC shipping rule described above applies to qualifying online merchandise orders.",
+          "Nothing in these terms excludes, restricts, or modifies a consumer guarantee, right, remedy, or liability that cannot lawfully be excluded, restricted, or modified. If a term conflicts with mandatory consumer law, the law prevails to the extent of that conflict.",
         ],
       },
       {
-        heading: "Website use and intellectual property",
+        heading: "8. Electronic orders and communications",
         paragraphs: [
-          "You may use the website for lawful personal browsing and purchasing. You must not interfere with its operation, attempt unauthorised access, introduce malicious code, misuse another person's information, or use the website for fraud or another unlawful purpose.",
-          "The website's design, text, graphics, photographs, and other content are owned by or licensed to OVERSTOCK and are protected by applicable intellectual property laws. You may not reproduce or commercially use that content without permission, except as allowed by law.",
+          "You agree that orders, confirmations, and service notices may be created and sent electronically to the email address you provide. Keep your order confirmation and these terms for your records. This clause does not replace any consent or disclosure required by law.",
+          "Electronic transactions are recognised under the Australian Electronic Transactions Act 1999 (Cth) and, where applicable, the U.S. Electronic Signatures in Global and National Commerce Act (15 U.S.C. §§ 7001–7031) and state electronic-transactions laws. Any electronic agreement remains subject to the legal requirements that apply to it.",
+          "We may send emails needed to confirm, process, or support an order. If you separately subscribe to marketing messages, you may unsubscribe using the link in the message. Marketing messages will be sent in accordance with applicable laws, including the Australian Spam Act 2003 and the U.S. CAN-SPAM Act where they apply.",
         ],
       },
       {
-        heading: "Third-party services and privacy",
+        heading: "9. Website use, copyright, and trade marks",
         paragraphs: [
-          "Checkout and payment processing are provided through Square, and delivery may be performed by independent carriers. Third-party services are subject to their own terms and privacy practices. This does not reduce OVERSTOCK's obligations to you under these terms or applicable law.",
-          "Our collection and use of personal information is described in the Privacy page. Please review it before placing an order.",
+          "You may use the website for lawful personal browsing and purchasing. You must not attempt unauthorised access, disrupt the website, introduce malicious code, scrape it in a way that harms its operation, misuse another person's information, or use the website for fraud or another unlawful purpose.",
+          "Original OVERSTOCK website text, design, and photographs are protected by applicable copyright laws, including the Copyright Act 1968 (Cth) and, where applicable, U.S. copyright law in Title 17 of the United States Code. You may not copy, publish, adapt, or commercially use that material without permission, except where the law allows.",
+          "Product names, logos, and trade marks shown to identify items belong to their respective rights holders. Their display does not mean that a rights holder sponsors, approves, or is affiliated with OVERSTOCK.",
+          "To report a copyright concern, email operations.overstock@gmail.com with the webpage address, identification of the work, and an explanation of your rights or authority. A notice seeking action under the U.S. Digital Millennium Copyright Act must satisfy 17 U.S.C. § 512(c)(3) and be sent to our designated agent: [IF YOU DESIGNATE AND REGISTER A DMCA AGENT, ENTER THE AGENT'S NAME, POSTAL ADDRESS, PHONE NUMBER, AND EMAIL HERE].",
         ],
       },
       {
-        heading: "Liability",
+        heading: "10. Privacy and third-party services",
         paragraphs: [
-          "Nothing in these terms excludes or limits a right, guarantee, remedy, or liability that cannot lawfully be excluded or limited. Subject to that protection and to the extent permitted by law, we are not responsible for loss caused by unlawful use of the website or events outside our reasonable control.",
+          "Our Privacy page describes how we handle personal information. Where applicable, that handling is subject to the Privacy Act 1988 (Cth), the Australian Privacy Principles, and privacy laws that apply in relevant U.S. states. The Privacy page must be read consistently with any privacy rights that apply to you.",
+          "Square provides hosted checkout and payment processing. Delivery may be performed by carriers. Those providers may have separate terms and privacy notices. Their involvement does not remove OVERSTOCK's obligations to you under these terms or applicable law.",
         ],
       },
       {
-        heading: "Governing law and disputes",
+        heading: "11. Liability",
         paragraphs: [
-          "These terms are governed by the laws of [insert Australian State or Territory], subject to any mandatory consumer protection laws that apply where you live. A governing-law term does not remove rights that cannot lawfully be excluded. Before starting a formal dispute, you may contact us by email so we can try to resolve the issue. This does not prevent you from contacting a regulator, using a statutory dispute process, or bringing a claim in a forum available to you by law.",
+          "Nothing in these terms excludes or limits a right, guarantee, remedy, or liability that cannot lawfully be excluded or limited. Subject to that protection and to the maximum extent permitted by law, we are not liable for loss caused by your unlawful use of the website or an event outside our reasonable control.",
         ],
       },
       {
-        heading: "Changes and general terms",
+        heading: "12. Governing law and disputes",
         paragraphs: [
-          "We may update these terms from time to time. The terms in effect when you place an order apply to that order, subject to mandatory legal rights. If a provision is found unenforceable, it will be applied to the extent permitted by law or severed, and the remaining provisions will continue to apply.",
+          "These terms are governed by the laws of [ENTER THE AUSTRALIAN STATE OR TERRITORY WHERE THE BUSINESS IS REGISTERED], subject to any mandatory consumer-protection laws that apply where you live. This clause does not prevent you from bringing a claim in a forum available to you by law. You may email us first so we can try to resolve a concern, but contacting us is not a condition of exercising a legal right or contacting a regulator.",
         ],
       },
       {
-        heading: "Contact",
+        heading: "13. Changes and severability",
         paragraphs: [
-          "For questions about these terms or an order, email operations.overstock@gmail.com. Our address is 24 Eolian Loop, Clayton, Sydney, [insert State or Territory and postcode], Australia. Include your order number when relevant. Do not send passwords or full payment-card details.",
+          "We may revise these terms by publishing an updated version on the website. The version in effect when an order is accepted applies to that order, subject to mandatory legal rights. If a court or tribunal finds a term unenforceable, it will be read down or severed to the minimum extent necessary. The remaining terms continue to apply.",
+        ],
+      },
+      {
+        heading: "14. Contact",
+        paragraphs: [
+          "Email operations.overstock@gmail.com about an order or these terms. Our business address is 24 Eolian Loop, Clayton, Sydney, [ENTER STATE OR TERRITORY AND POSTCODE], Australia. Include your order number when relevant and do not send passwords or full payment-card details.",
         ],
       },
     ],
@@ -152,10 +166,10 @@ const pages: Record<string, LegalContent> = {
   refunds: {
     title: "REFUND POLICY",
     copy: [
-      "All sales are final for change of mind. You may email operations.overstock@gmail.com to request cancellation before your order is dispatched. The cancellation takes effect when we confirm it. If we confirm the order can be cancelled before dispatch, we will refund the amount paid to the original payment method.",
-      "After dispatch, we do not accept change-of-mind cancellations, returns, or exchanges. This does not restrict a refund, cancellation, replacement, repair, or other remedy required by law.",
-      "If an item is incorrect, arrives damaged, or has a fault that was not disclosed before purchase, email us promptly at operations.overstock@gmail.com. Include your order number, a short description, and clear photos where relevant. For a confirmed damage issue, we will offer a voucher where permitted by law. You do not have to accept a voucher if applicable law gives you a different remedy or choice.",
-      "Australian Consumer Law guarantees cannot be excluded. For U.S. customers, applicable federal and state consumer protections continue to apply, including rights relating to shipping delays. Nothing in this policy limits rights or remedies that applicable law does not allow us to exclude.",
+      "All sales are final for change of mind. You may email operations.overstock@gmail.com to request cancellation before dispatch. Cancellation takes effect when we confirm it. If we confirm the order can be cancelled before dispatch, we will refund the amount paid to the original payment method.",
+      "After dispatch, we do not accept change-of-mind cancellations, returns, or exchanges. This does not restrict a cancellation, refund, replacement, repair, or other remedy required by law, including a remedy for an order that cannot be dispatched within the period required by law.",
+      "If an item is incorrect, arrives damaged, or has a fault that was not disclosed before purchase, email us promptly at operations.overstock@gmail.com. Include your order number, a brief description, and photos where relevant. For confirmed damage, we will offer a voucher where permitted by law. You are not required to accept a voucher if applicable law gives you a different remedy or choice.",
+      "Australian Consumer Law guarantees cannot be excluded. U.S. customers retain rights under applicable federal and state consumer-protection laws. Nothing in this policy limits rights or remedies that applicable law does not allow us to exclude.",
     ],
   },
   contact: {
