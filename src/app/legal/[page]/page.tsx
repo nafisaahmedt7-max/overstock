@@ -330,7 +330,7 @@ const pages: Record<string, LegalContent> = {
   contact: {
     title: "CONTACT",
     copy: [
-      "Choose email, Facebook, or Instagram below to contact OVERSTOCK. For an order issue, include your order number and photos if the item arrived damaged. Never send passwords or full payment-card details.",
+      "For questions or to report accessibility issues, please contact our support team via the channels below. For an order issue, include your order number and photos if the item arrived damaged. Never send passwords or full payment-card details.",
     ],
   },
 };
