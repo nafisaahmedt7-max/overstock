@@ -50,23 +50,25 @@ function socialIconLink(href: string | null, label: string, iconUrl: string) {
 }
 
 function buildEmailContent(order: QueuedOrderEmail, siteOrigin: string, contactEmail: string) {
-  const origin = new URL(siteOrigin).origin;
+  const publicOrigin = new URL(
+    process.env.OVERSTOCK_PUBLIC_URL || "https://overstock-two.vercel.app",
+  ).origin;
   const safeName = escapeHtml(order.customer_name);
   const safeAddress = escapeHtml(order.delivery_address || "—");
-  const safeOrigin = escapeHtml(origin);
-  const safeTerms = escapeHtml(origin + "/legal/terms");
-  const safePrivacy = escapeHtml(origin + "/legal/privacy");
-  const safeShipping = escapeHtml(origin + "/legal/shipping");
-  const safeContactUrl = escapeHtml(origin + "/legal/contact");
+  const safeOrigin = escapeHtml(publicOrigin);
+  const safeTerms = escapeHtml(publicOrigin + "/legal/terms");
+  const safePrivacy = escapeHtml(publicOrigin + "/legal/privacy");
+  const safeShipping = escapeHtml(publicOrigin + "/legal/shipping");
+  const safeContactUrl = escapeHtml(publicOrigin + "/legal/contact");
   const instagramUrl = safeSocialUrl(process.env.OVERSTOCK_INSTAGRAM_URL, "instagram.com");
   const facebookUrl = safeSocialUrl(process.env.OVERSTOCK_FACEBOOK_URL, "facebook.com");
   const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
     ? escapeHtml(contactEmail)
     : null;
   // Serve PNG logos: Gmail removes inline SVG from email bodies.
-  const instagramIcon = escapeHtml(origin + "/email/social/instagram.png");
-  const facebookIcon = escapeHtml(origin + "/email/social/facebook.png");
-  const emailIcon = escapeHtml(origin + "/email/social/email.png");
+  const instagramIcon = escapeHtml(publicOrigin + "/email/social/instagram.png");
+  const facebookIcon = escapeHtml(publicOrigin + "/email/social/facebook.png");
+  const emailIcon = escapeHtml(publicOrigin + "/email/social/email.png");
   const socialLinks =
     '<tr><td align="center" style="padding:16px 20px 18px;border-top:1px solid #050505;text-align:center">' +
     '<table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0"><tr>' +
