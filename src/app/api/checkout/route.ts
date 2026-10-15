@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     city: typeof rawAddress.city === "string" ? rawAddress.city.trim() : "",
     region: typeof rawAddress.region === "string" ? rawAddress.region.trim() : "",
     postalCode: typeof rawAddress.postalCode === "string" ? rawAddress.postalCode.trim() : "",
-    country: typeof rawAddress.country === "string" ? rawAddress.country.trim().toUpperCase() : "",
+    country: typeof rawAddress.country === "string" ? rawAddress.country.trim() : "",
   };
   const items = Array.isArray(body.items) ? body.items : [];
   if (name.length < 2 || name.length > 100 || !/^[\p{L}\p{M} .’'-]+$/u.test(name)) {
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     addressParts.region.length < 2 || addressParts.region.length > 80 ||
     addressParts.postalCode.length < 2 || addressParts.postalCode.length > 20 ||
     !/^[\p{L}\p{N} -]+$/u.test(addressParts.postalCode) ||
-    !/^[A-Z]{2}$/.test(addressParts.country)
+    !/^[\\p{L} .'-]{2,80}$/u.test(addressParts.country)
   ) {
     return jsonError("Enter a complete and valid delivery address.", 400);
   }
