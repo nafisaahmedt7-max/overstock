@@ -33,6 +33,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                     <ProductPlaceholder
                       name={product.name}
                       tone={product.imageTone}
+                      condition={product.condition}
                       imageUrl={product.imageUrl}
                       index={index}
                     />
