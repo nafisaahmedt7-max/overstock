@@ -2784,7 +2784,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Softer corners for product information and pill-shaped controls. */
 .product-card .product-meta {
   border-radius: 0;
-  background: #e3e3e1;
+  background: var(--paper);
 }
 
 .product-add-button,
@@ -2804,4 +2804,24 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Bring the product-page Add to Cart button closer to the size chart. */
 .purchase-panel .add-button {
   margin-top: 0.6rem;
+}
+
+
+/* Use the site background color for every Add to Cart pill hover transition. */
+.product-add-button,
+.quick-add-confirm,
+.purchase-panel .add-button {
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.product-add-button:not(:disabled):hover,
+.product-add-button:not(:disabled):focus-visible,
+.product-add-button:not(:disabled):active,
+.quick-add-confirm:not(:disabled):hover,
+.quick-add-confirm:not(:disabled):focus-visible,
+.quick-add-confirm:not(:disabled):active,
+.purchase-panel .add-button:not(:disabled):hover,
+.purchase-panel .add-button:not(:disabled):focus-visible,
+.purchase-panel .add-button:not(:disabled):active {
+  background: var(--paper);
+  color: var(--ink);
 }
