@@ -2771,3 +2771,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .admin-login form button:not([type="button"]) {
   border-radius: 999px;
 }
+
+
+/* Bring the product-page Add to Cart button closer to the size chart. */
+.purchase-panel .add-button {
+  margin-top: 0.6rem;
+}
