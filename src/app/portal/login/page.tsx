@@ -73,6 +73,15 @@ export default function PortalLogin() {
         setBusy(false);
         return;
       }
+      const accessResponse = await fetch("/api/portal/complete-registration", {
+        method: "POST",
+      });
+      if (!accessResponse.ok) {
+        const result = await accessResponse.json().catch(() => ({}));
+        setMessage(String(result.error || "Your password was saved, but portal access could not be activated. Contact OVERSTOCK."));
+        setBusy(false);
+        return;
+      }
       router.replace("/portal");
       router.refresh();
       return;
