@@ -168,28 +168,33 @@ export function AdminDashboard({ email }: { email: string }) {
 
   async function validateImage(file: File) {
     if (file.size > 10 * 1024 * 1024)
-      throw new Error("Image must be under 10 MB.");
-    if (
-      file.type !== "image/webp"
-    )
-      throw new Error("Use a WebP image only. Convert the file first, then upload it.");
+      throw new Error("Product image must be under 10 MB.");
+    if (file.type !== "image/webp")
+      throw new Error("Product images must be WebP. Convert the image and try again.");
+
+    const objectUrl = URL.createObjectURL(file);
     const dimensions = await new Promise<{ width: number; height: number }>(
       (resolve, reject) => {
         const img = new window.Image();
-        img.onload = () => resolve({ width: img.width, height: img.height });
-        img.onerror = () => reject(new Error("Image could not be read."));
-        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve({ width: img.width, height: img.height });
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Image could not be read."));
+        };
+        img.src = objectUrl;
       },
     );
-    const ratio = dimensions.width / dimensions.height;
-    if (Math.abs(ratio - 0.8) > 0.08)
-      throw new Error("Use a 4:5 image. Recommended size: 1600 × 2000 px.");
+    if (dimensions.width !== 1600 || dimensions.height !== 2000)
+      throw new Error("Product images must be exactly 1600 × 2000 px. Resize the image to this standard and try again.");
   }
   async function validateSizeChartImage(file: File) {
     if (file.size > 10 * 1024 * 1024)
       throw new Error("Size chart image must be under 10 MB.");
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
-      throw new Error("Use a PNG, JPEG, or WebP size chart image.");
+    if (file.type !== "image/webp")
+      throw new Error("Size chart images must be WebP. Convert the image and try again.");
   }
 
   async function uploadSizeChartImage(productId: string, file: File) {
@@ -222,7 +227,7 @@ export function AdminDashboard({ email }: { email: string }) {
       await validateImage(file);
       setImagePreview(URL.createObjectURL(file));
       setImageFileName(file.name);
-      setNotice("Image approved: 4:5 ratio and under 10 MB.");
+      setNotice("Product image approved: WebP, 1600 × 2000 px, under 10 MB.");
     } catch (error) {
       setImagePreview(null);
       setImageFileName("");
@@ -806,6 +811,16 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" placeholder="EXAMPLE: 700" required /></label>
               <label><span>CUSTOMER SELLING PRICE (USD)</span><input name="price" type="number" min="0" step="0.01" placeholder="EXAMPLE: 145.00" required /></label>
               <label><span>MINIMUM OVERSTOCK PROFIT (USD)</span><input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="EXAMPLE: 30.00" required /></label>
+              <aside className="image-upload-guidance" role="note">
+                <strong>IMAGE UPLOAD REQUIREMENTS</strong>
+                <ul>
+                  <li>All uploaded images must be WebP and under 10 MB.</li>
+                  <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
+                  <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
+                  <li>Size charts must also be WebP. Their dimensions may vary.</li>
+                  <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
+                </ul>
+              </aside>
               <label className="image-upload-field" htmlFor="product-image">
                 <span>PRODUCT IMAGE</span>
                 <input
@@ -826,17 +841,14 @@ export function AdminDashboard({ email }: { email: string }) {
                   id="product-size-chart-image"
                   name="size_chart_image"
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept="image/webp"
                 />
-                <span className="image-file-name">PNG, JPEG OR WEBP · MAX 10 MB</span>
+                <span className="image-file-name">WEBP · MAX 10 MB</span>
                 <b>CHOOSE FILE</b>
               </label>
               <button>ADD DRAFT</button>
               </form>
             </section>
-            <p className="form-help">
-              Product images must be 4:5 WebP files up to 10 MB. Size charts may be PNG, JPEG, or WebP up to 10 MB. Recommended product image: 1600 × 2000 px. Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> if you need to remove a background.
-            </p>
             {imagePreview && (
               <div className="image-preview">
                 <Image
@@ -904,14 +916,24 @@ export function AdminDashboard({ email }: { email: string }) {
                       required
                     />
                   </label>
+                  <aside className="image-upload-guidance" role="note">
+                    <strong>IMAGE UPLOAD REQUIREMENTS</strong>
+                    <ul>
+                      <li>All uploaded images must be WebP and under 10 MB.</li>
+                      <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
+                      <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
+                      <li>Size charts must also be WebP. Their dimensions may vary.</li>
+                      <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
+                    </ul>
+                  </aside>
                   <label className="image-upload-field edit-field-wide">
                     <span>REPLACE PRODUCT IMAGE (OPTIONAL)</span>
-                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" />
+                    <input name="image" type="file" accept="image/webp" />
                     <b>CHOOSE IMAGE</b>
                   </label>
                   <label className="image-upload-field edit-field-wide">
                     <span>SIZE CHART IMAGE (OPTIONAL)</span>
-                    <input name="size_chart_image" type="file" accept="image/png,image/jpeg,image/webp" />
+                    <input name="size_chart_image" type="file" accept="image/webp" />
                     <b>CHOOSE IMAGE</b>
                   </label>
                   {editing.size_chart_url && (
