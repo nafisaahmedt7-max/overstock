@@ -249,7 +249,7 @@ button {
   height: 6rem;
   min-height: 0;
   overflow: hidden;
-  padding: 0.2rem 0;
+  padding: 0.2rem 0 0.5rem;
   display: flex;
   flex-direction: column;
   font:
@@ -358,8 +358,8 @@ button {
   min-height: 2rem;
   padding: 0.4rem 0.7rem;
   border: 1px solid var(--ink);
-  background: #fff;
-  color: var(--ink);
+  background: var(--ink);
+  color: #fff;
   font: 600 0.66rem/1.15 var(--font-mono), monospace;
   letter-spacing: 0.025em;
   text-align: center;
@@ -368,9 +368,10 @@ button {
   transition: background-color 160ms ease, color 160ms ease;
 }
 .product-store-link:hover,
-.product-store-link:focus-visible {
-  background: var(--ink);
-  color: #fff;
+.product-store-link:focus-visible,
+.product-store-link:active {
+  background: #fff;
+  color: var(--ink);
 }
 .product-page {
   display: grid;
