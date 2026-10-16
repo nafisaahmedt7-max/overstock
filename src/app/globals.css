@@ -2313,3 +2313,53 @@ input[type="number"]::-webkit-outer-spin-button {
   resize: none;
   overflow: auto;
 }
+
+
+/* Prevent product onboarding controls from overflowing narrow grid columns. */
+.admin-form.product-form > * {
+  min-width: 0;
+}
+.admin-form.product-form > label:not(.image-upload-field) > input,
+.admin-form.product-form > label:not(.image-upload-field) > select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.admin-form.product-form > label:not(.image-upload-field) > select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-form.product-form .product-size-options {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.admin-form.product-form .product-size-options > div {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.admin-form.product-form .image-upload-field {
+  box-sizing: border-box;
+}
+.admin-form.product-form .image-upload-field > span:first-child,
+.admin-form.product-form .image-upload-field .image-file-name {
+  min-width: 0;
+}
+.admin-form.product-form .image-upload-field b {
+  white-space: nowrap;
+}
+@media (max-width: 1100px) {
+  .admin-form.product-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .admin-form.product-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-form.product-form .product-form-wide,
+  .admin-form.product-form .image-upload-field,
+  .admin-form.product-form > button {
+    grid-column: 1;
+  }
+}
