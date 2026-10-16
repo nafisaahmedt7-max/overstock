@@ -189,6 +189,12 @@ button {
   background: #fff;
   scroll-snap-align: start;
 }
+.product-card:last-child {
+  border-right: 0.5px solid var(--line);
+}
+.product-card:last-child .product-meta {
+  border-right: 0;
+}
 .product-image-link {
   display: block;
   min-width: 0;

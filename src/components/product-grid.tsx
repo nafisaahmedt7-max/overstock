@@ -53,9 +53,9 @@ export function ProductGrid({ products }: { products: Product[] }) {
                       <Link
                         className="product-store-link"
                         href={`/store/${product.sellerId ?? "overstock"}`}
-                        aria-label={`Visit ${product.seller} store`}
+                        aria-label={`Shop ${product.seller} store`}
                       >
-                        {product.seller.toUpperCase()}
+                        SHOP {product.seller.toUpperCase()}
                       </Link>
                     </div>
                   </div>

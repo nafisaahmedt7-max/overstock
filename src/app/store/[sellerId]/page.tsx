@@ -16,7 +16,6 @@ export default async function SellerStorePage({
     <main>
       <header className="catalog-heading">
         <div>
-          <p className="eyebrow">SELLER STORE</p>
           <h1>{store.name.toUpperCase()}</h1>
         </div>
         <p>{String(store.products.length).padStart(2, "0")} ITEMS</p>
