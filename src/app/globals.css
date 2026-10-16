@@ -182,7 +182,6 @@ button {
   border-top: 1px solid var(--line);
 }
 .product-card {
-  border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   min-width: 0;
   overflow: hidden;
@@ -212,6 +211,9 @@ button {
   background: #c8c8c4 !important;
   transition: filter 0.2s ease;
   color: #111;
+}
+.product-card .product-placeholder {
+  background: var(--paper) !important;
 }
 .product-placeholder span {
   position: absolute;
