@@ -81,7 +81,7 @@ type Order = {
   refund_amount: number;
   seller_refund_recovery_amount: number;
 };
-type Partner = { id: string; name: string; warehouse_address: string | null };
+type Partner = { id: string; name: string; warehouse_address: string | null; email: string | null };
 type Shipment = {
   id: string;
   order_id: string;
@@ -133,7 +133,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const [supabase] = useState(createClient);
   const router = useRouter();
   const load = useCallback(async () => {
-    const [s, p, o, fp, os, fin] = await Promise.all([
+    const [s, p, o, fp, os, fin, fi] = await Promise.all([
       supabase
         .from("sellers")
         .select("id,seller_code,display_name,email,commission_percent,status")
@@ -163,6 +163,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("order_items")
         .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total,product_name"),
+      supabase.from("fulfillment_invites").select("partner_id,email"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -174,7 +175,12 @@ export function AdminDashboard({ email }: { email: string }) {
     setSellers(s.data ?? []);
     setProducts(p.data ?? []);
     setOrders(o.data ?? []);
-    setPartners(fp.data ?? []);
+    setPartners(
+      (fp.data ?? []).map((partner) => ({
+        ...partner,
+        email: fi.data?.find((invite) => invite.partner_id === partner.id)?.email ?? null,
+      })),
+    );
     setShipments(os.data ?? []);
     setFinance(fin.data ?? []);
   }, [supabase]);
@@ -318,6 +324,20 @@ export function AdminDashboard({ email }: { email: string }) {
     form.reset();
     await load();
   }
+  async function resendMemberInvite(
+    role: "seller" | "fulfilment",
+    memberId: string,
+    memberEmail: string | null,
+    memberName: string,
+  ) {
+    if (!memberEmail) {
+      setNotice("This team member does not have a login email. Edit the member details first.");
+      return;
+    }
+    const error = await sendTeamInvite(role, memberId, memberEmail, memberName);
+    setNotice(error ? `Registration email failed: ${error}` : "Registration email sent.");
+  }
+
   async function saveSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editingSeller) return;
@@ -777,6 +797,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
+                  <button onClick={() => void resendMemberInvite("seller", s.id, s.email, s.display_name)}>SEND INVITE</button>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
@@ -1173,6 +1194,19 @@ export function AdminDashboard({ email }: { email: string }) {
                 <div className="fulfilment-form-action"><button>ADD TEAM MEMBER</button></div>
               </form>
             </section>
+            <DataTable
+              headings={["TEAM MEMBER", "LOGIN EMAIL", "ACCESS"]}
+              rows={partners.map((partner) => [
+                partner.name,
+                partner.email || "—",
+                <button
+                  key={`${partner.id}-invite`}
+                  onClick={() => void resendMemberInvite("fulfilment", partner.id, partner.email, partner.name)}
+                >
+                  SEND INVITE
+                </button>,
+              ])}
+            />
             <section className="assignment-queue">
               <header>
                 <p className="eyebrow">ADMIN ACTION</p>
