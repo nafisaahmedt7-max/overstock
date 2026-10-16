@@ -3,6 +3,12 @@ import Link from "next/link";
 import type { Product } from "@/data/products";
 
 export function ProductButtonStrip({ products }: { products: Product[] }) {
+  const hoodie = products.find((product) => product.name.toLowerCase().includes("black hoodie"));
+  const jeans = products.find((product) => product.name.toLowerCase().includes("jeans"));
+  const featured = hoodie && jeans
+    ? [hoodie, jeans, hoodie, jeans, hoodie, jeans]
+    : products.slice(0, 6);
+
   return (
     <section className="product-button-strip" aria-label="Browse all products">
       <style>{`
@@ -52,6 +58,7 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
         .product-button-strip .strip-title {
           font: 600 .7rem/1.4 var(--font-mono), monospace;
           text-transform: uppercase;
+          text-align: center;
           overflow-wrap: anywhere;
         }
         @media (max-width: 600px) {
@@ -59,11 +66,11 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           .product-button-strip a { flex-basis: 36vw; }
         }
       `}</style>
-      {products.map((product) => (
+      {featured.map((product, index) => (
         <Link
           href={`/product/${product.slug}`}
           aria-label={`View ${product.name}`}
-          key={product.slug}
+          key={`${product.slug}-${index}`}
         >
           {product.imageUrl ? (
             <span className="strip-image">
