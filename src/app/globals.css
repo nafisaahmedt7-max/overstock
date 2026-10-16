@@ -169,7 +169,7 @@ button {
   scroll-snap-type: inline mandatory;
   scrollbar-width: thin;
   column-gap: 0.75rem;
-  padding: 0 1rem 0.75rem;
+  padding: 0.35rem 1rem 0.75rem;
   scroll-padding-inline: 1rem;
 }
 .product-lane > header {
@@ -190,6 +190,7 @@ button {
   min-width: 0;
   overflow: hidden;
   background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
   scroll-snap-align: start;
 }
 .product-image-link {
