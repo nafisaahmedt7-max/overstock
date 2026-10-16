@@ -256,7 +256,7 @@ button {
     500 0.78rem var(--font-mono),
     monospace;
   background: #fff;
-  border: 0.75px solid var(--ink);
+  border: 2px solid var(--ink);
 }
 .product-meta-main {
   width: 100%;
