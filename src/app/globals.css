@@ -168,6 +168,9 @@ button {
   overscroll-behavior-inline: contain;
   scroll-snap-type: inline mandatory;
   scrollbar-width: thin;
+  column-gap: 0.75rem;
+  padding: 0 1rem 0.75rem;
+  scroll-padding-inline: 1rem;
 }
 .product-lane > header {
   min-height: 3.5rem;
@@ -188,12 +191,6 @@ button {
   overflow: hidden;
   background: #fff;
   scroll-snap-align: start;
-}
-.product-card:last-child {
-  border-right: 0.5px solid var(--line);
-}
-.product-card:last-child .product-meta {
-  border-right: 0;
 }
 .product-image-link {
   display: block;
@@ -260,12 +257,6 @@ button {
     monospace;
   background: #fff;
   border-top: 0.5px solid var(--ink);
-  border-right: 0.5px solid var(--ink);
-  border-bottom: 0;
-  border-left: 0;
-}
-.product-card:first-child .product-meta {
-  border-left: 0.5px solid var(--ink);
 }
 .product-meta-main {
   width: 100%;
