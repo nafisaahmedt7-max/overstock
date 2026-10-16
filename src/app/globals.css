@@ -1531,23 +1531,55 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .store-toast {
   position: fixed;
-  right: 1rem;
+  left: 50%;
+  right: auto;
   bottom: 1rem;
   z-index: 50;
+  width: min(34rem, calc(100vw - 2rem));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
   background: var(--ink);
   color: var(--paper);
   padding: 1rem 1.25rem;
   font:
     600 0.75rem var(--font-mono),
     monospace;
-  transform: translateY(150%);
+  text-decoration: none;
+  transform: translate(-50%, 150%);
   opacity: 0;
-  transition: 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
   pointer-events: none;
 }
+.store-toast > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.store-toast > strong {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 0.15rem;
+  white-space: nowrap;
+}
 .store-toast.show {
-  transform: translateY(0);
+  transform: translate(-50%, 0);
   opacity: 1;
+  pointer-events: auto;
+}
+.store-toast.show:hover,
+.store-toast.show:focus-visible {
+  background: #252525;
+}
+@media (max-width: 480px) {
+  .store-toast {
+    width: calc(100vw - 1.5rem);
+    bottom: 0.75rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.68rem;
+  }
 }
 .size-grid {
   grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
