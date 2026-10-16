@@ -45,16 +45,6 @@ export default async function ProductPage({
             <dd>{product.condition}</dd>
           </div>
         </dl>
-        {product.sizeChartUrl && (
-          <a
-            className="size-chart-link"
-            href={product.sizeChartUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            VIEW SIZE CHART ↗
-          </a>
-        )}
         <AddToCart product={product} />
       </section>
     </main>
