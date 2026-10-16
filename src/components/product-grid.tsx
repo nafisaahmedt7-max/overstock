@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/data/products";
 import { ProductPlaceholder } from "./product-placeholder";
+
 export function ProductGrid({ products }: { products: Product[] }) {
   const laneOrder = ["tops", "bottoms", "accessories", "other"];
   const lanes = laneOrder
@@ -13,23 +14,50 @@ export function ProductGrid({ products }: { products: Product[] }) {
       ),
     }))
     .filter((lane) => lane.products.length > 0);
+
   return (
     <div className="product-catalog-lanes">
       {lanes.map((lane) => (
         <section className="product-lane" aria-labelledby={`lane-${lane.type}`} key={lane.type}>
-          <header><h2 id={`lane-${lane.type}`}>{lane.type.toUpperCase()}</h2><span>{lane.products.length} ITEMS</span></header>
+          <header>
+            <h2 id={`lane-${lane.type}`}>{lane.type.toUpperCase()}</h2>
+            <span>{lane.products.length} ITEMS</span>
+          </header>
           <div className="product-grid" aria-label={`${lane.type} products`} tabIndex={0}>
-            {lane.products.map((product, index) => (
-              <article className="product-card" data-sold-out={product.status === "sold_out" || undefined} key={product.slug}>
-                <Link href={`/product/${product.slug}`} aria-label={`View ${product.name}`}>
-                  <ProductPlaceholder name={product.name} tone={product.imageTone} imageUrl={product.imageUrl} index={index} />
+            {lane.products.map((product, index) => {
+              const productHref = `/product/${product.slug}`;
+              return (
+                <article className="product-card" data-sold-out={product.status === "sold_out" || undefined} key={product.slug}>
+                  <Link className="product-image-link" href={productHref} aria-label={`View ${product.name}`}>
+                    <ProductPlaceholder
+                      name={product.name}
+                      tone={product.imageTone}
+                      imageUrl={product.imageUrl}
+                      index={index}
+                    />
+                  </Link>
                   <div className="product-meta">
-                    <div><h2>{product.name}</h2><p>{product.condition}</p></div>
-                    <div className="product-price"><p>${product.price}</p>{product.status === "sold_out" && <b>SOLD OUT</b>}</div>
+                    <div className="product-meta-details">
+                      <Link className="product-title-link" href={productHref}>
+                        <h2>{product.name}</h2>
+                      </Link>
+                      <p>{product.condition}</p>
+                    </div>
+                    <Link
+                      className="product-store-button"
+                      href={`/store/${product.sellerId ?? "overstock"}`}
+                      aria-label={`Visit ${product.seller} store`}
+                    >
+                      {product.seller.toUpperCase()}
+                    </Link>
+                    <div className="product-price">
+                      <p>${product.price}</p>
+                      {product.status === "sold_out" && <b>SOLD OUT</b>}
+                    </div>
                   </div>
-                </Link>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
       ))}
