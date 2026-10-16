@@ -317,14 +317,9 @@ export function AdminDashboard({ email }: { email: string }) {
       seller = String(f.get("seller")),
       name = String(f.get("name")),
       sku = String(f.get("sku")).toUpperCase(),
-      sizes = String(f.get("sizes") || "")
-        .split(",")
-        .map((x) => x.trim().toUpperCase())
-        .filter(Boolean);
-    if (sizes.includes("X")) {
-      setNotice(
-        "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
-      );
+      sizes = f.getAll("sizes").map((size) => String(size).toUpperCase());
+    if (!sizes.length) {
+      setNotice("Select at least one available size from XS to XL.");
       return;
     }
     const image = f.get("image");
@@ -791,7 +786,17 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>AUDIENCE</span><select name="audience" required><option value="">SELECT AUDIENCE</option><option value="men">MEN</option><option value="women">WOMEN</option><option value="unisex">UNISEX</option></select></label>
               <label><span>APPAREL TYPE</span><select name="category" required><option value="">SELECT TYPE</option><option value="tops">TOPS</option><option value="bottoms">BOTTOMS</option><option value="accessories">ACCESSORIES</option></select></label>
               <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
-              <label><span>AVAILABLE SIZES</span><input name="sizes" placeholder="EXAMPLE: S, M, L, XL" required /></label>
+              <fieldset className="product-size-options">
+                <legend>AVAILABLE SIZES</legend>
+                <div role="group" aria-label="Select available sizes">
+                  {["XS", "S", "M", "L", "XL"].map((size) => (
+                    <label key={size}>
+                      <input type="checkbox" name="sizes" value={size} />
+                      <span>{size}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
               <div className="product-pricing-heading"><span>PRODUCT PRICING</span></div>
               <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
