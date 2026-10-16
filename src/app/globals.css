@@ -342,34 +342,31 @@ button {
 .product-store-row {
   position: relative;
   width: 80%;
-  height: 2rem;
-  flex: 0 0 2rem;
-  margin: 0.45rem auto 0;
+  height: 2.8rem;
+  flex: 0 0 2.8rem;
+  margin: 0.3rem auto 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: center;
+  gap: 0.08rem;
 }
 .product-store-link {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
+  position: relative;
   align-self: center;
   max-width: 100%;
-  overflow: hidden;
-  padding: 0.08rem 0;
+  padding: 0.05rem 0.25rem;
   background: transparent;
-  color: #555;
-  font: 500 0.6rem/1.15 var(--font-mono), monospace;
-  text-align: right;
+  color: var(--ink);
+  font: 500 0.64rem/1.15 var(--font-mono), monospace;
+  text-align: center;
   text-decoration: underline;
   text-underline-offset: 0.15rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .product-store-link:hover,
 .product-store-link:focus-visible {
-  color: var(--ink);
-  text-underline-offset: 0.25rem;
+  text-underline-offset: 0.23rem;
 }
 .product-add-button {
   width: 100%;
