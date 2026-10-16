@@ -20,7 +20,9 @@ export function ProductPlaceholder({
 
   return (
     <div className="product-placeholder" style={{ backgroundColor: tone }}>
-      <span>{String((index ?? 0) + 1).padStart(2, "0")}</span>
+      {typeof index === "number" && (
+        <span>{String(index + 1).padStart(2, "0")}</span>
+      )}
       {condition && <span className="product-condition-badge">{condition}</span>}
       {imageUrl && !imageFailed ? (
         <Image
