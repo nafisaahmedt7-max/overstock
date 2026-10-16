@@ -44,8 +44,8 @@ function map(row: Row, sellerName?: string | null): Product {
           ? "unisex"
           : "men",
     apparelType: row.category || "other",
-    seller: sellerName || row.brand || "OVERSTOCK",
-    sellerId: row.seller_id,
+    seller: sellerName || "OVERSTOCK",
+    sellerId: sellerName ? row.seller_id : null,
     color: row.color || "UNSPECIFIED",
     condition: row.condition || "PRE-OWNED",
     status: row.status,
