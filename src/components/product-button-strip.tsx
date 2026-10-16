@@ -41,6 +41,8 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           aspect-ratio: 4 / 5;
           background: #f1f1ef;
           overflow: hidden;
+          box-shadow: 0 2px 9px rgba(0, 0, 0, .10);
+          transition: box-shadow 180ms ease;
         }
         .product-button-strip img {
           object-fit: contain;
@@ -54,6 +56,12 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           width: 100%;
           aspect-ratio: 4 / 5;
           background: #f1f1ef;
+          box-shadow: 0 2px 9px rgba(0, 0, 0, .10);
+          transition: box-shadow 180ms ease;
+        }
+        .product-button-strip a:hover .strip-image,
+        .product-button-strip a:hover .strip-image-empty {
+          box-shadow: 0 5px 15px rgba(0, 0, 0, .16);
         }
         .product-button-strip .strip-title {
           font: 600 .7rem/1.4 var(--font-mono), monospace;
