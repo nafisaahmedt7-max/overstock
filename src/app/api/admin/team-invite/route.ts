@@ -92,26 +92,37 @@ export async function POST(request: Request) {
   const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
-  const { data: inviteLink, error: inviteLinkError } =
-    await adminClient.auth.admin.generateLink({
-      type: "invite",
-      email,
-      options: {
-        redirectTo: registrationUrl.toString(),
-        data: { portal_role: role, display_name: name },
-      },
-    });
-  const actionLink = inviteLink?.properties?.action_link;
-  if (inviteLinkError || !actionLink)
+  const inviteResult = await adminClient.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: {
+      redirectTo: registrationUrl.toString(),
+      data: { portal_role: role, display_name: name },
+    },
+  });
+
+  // An existing Auth account cannot receive another "invite" link. Send a
+  // secure sign-in link instead; registration completion will attach the
+  // account to the newly added seller or fulfilment record.
+  const useExistingAccountLink = inviteResult.error?.code === "email_exists";
+  const linkResult = useExistingAccountLink
+    ? await adminClient.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: { redirectTo: registrationUrl.toString() },
+      })
+    : inviteResult;
+  const actionLink = linkResult.data?.properties?.action_link;
+  if (linkResult.error || !actionLink)
     return NextResponse.json({
-      error: "A secure invite could not be created. This email may already have a portal account.",
+      error: "A secure registration link could not be created. Please verify this email address and try again.",
     }, { status: 502 });
 
   const safeName = escapeHtml(name || "there");
   const safeEmail = escapeHtml(email);
   const safeUrl = escapeHtml(actionLink);
   const roleLabel = role === "seller" ? "seller" : "fulfilment team member";
-  const subject = "Confirm your OVERSTOCK portal invitation";
+  const subject = useExistingAccountLink ? "Confirm your OVERSTOCK portal access" : "Confirm your OVERSTOCK portal invitation";
   const textContent = [
     `Hello ${name || "there"},`,
     "",
