@@ -45,7 +45,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                         </Link>
                       </div>
                       <div className="product-price">
-                        <p>${product.price}</p>
+                        <p>${product.price.toFixed(2)}</p>
                         {product.status === "sold_out" && <b>SOLD OUT</b>}
                       </div>
                     </div>
