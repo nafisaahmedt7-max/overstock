@@ -2297,3 +2297,19 @@ input[type="number"]::-webkit-outer-spin-button {
     max-height: calc(100vh - var(--header) - 8.5rem);
   }
 }
+
+
+/* Use the same field width and control height across product onboarding. */
+.admin-form.product-form .product-form-wide {
+  grid-column: span 1;
+  width: 100%;
+}
+.admin-form.product-form .product-form-wide textarea {
+  width: 100%;
+  height: 3.5rem;
+  min-height: 3.5rem;
+  max-height: 3.5rem;
+  grid-column: auto;
+  resize: none;
+  overflow: auto;
+}
