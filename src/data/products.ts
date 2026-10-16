@@ -48,7 +48,9 @@ function map(row: Row): Product {
     status: row.status,
     imageTone: "#d0d0cc",
     imageUrl: row.image_url,
-    sizeChartUrl: row.size_chart_url ?? null,
+    sizeChartUrl:
+      row.size_chart_url ??
+      (process.env.VERCEL_ENV === "preview" ? "/demo-size-chart.svg" : null),
     sizes: row.sizes.length ? row.sizes : ["ONE SIZE"],
     description:
       row.description || "Independent product supplied through OVERSTOCK.",
