@@ -265,10 +265,11 @@ button {
   padding: 0.3rem 0.85rem 0.1rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
+  align-content: center;
   align-items: stretch;
   column-gap: 0.65rem;
-  row-gap: 0.05rem;
+  row-gap: 0.08rem;
 }
 .product-condition {
   grid-column: 1 / -1;
@@ -291,9 +292,11 @@ button {
   min-width: 0;
 }
 .product-meta h2 {
-  font-size: 0.88rem;
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 0.98rem;
   font-weight: 700;
-  line-height: 1.15;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -315,9 +318,11 @@ button {
   grid-row: 2;
   min-width: 4rem;
   align-self: end;
-  font-size: 1.12rem;
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1.18rem;
   font-weight: 700;
-  line-height: 1.05;
+  letter-spacing: -0.025em;
+  line-height: 1;
   display: grid;
   justify-items: end;
   align-content: end;
