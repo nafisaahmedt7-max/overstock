@@ -319,8 +319,8 @@ button {
   min-width: 4rem;
   align-self: end;
   font-family: var(--font-sans), Arial, sans-serif;
-  font-size: 1.18rem;
-  font-weight: 700;
+  font-size: 1.32rem;
+  font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1;
   display: grid;
