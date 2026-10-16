@@ -2812,6 +2812,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .product-add-button,
 .quick-add-confirm,
 .purchase-panel .add-button {
+  border: 1px solid var(--ink);
   transition: background-color 160ms ease, color 160ms ease;
 }
 .product-add-button:not(:disabled):hover,
@@ -2825,4 +2826,20 @@ input[type="number"]::-webkit-outer-spin-button {
 .purchase-panel .add-button:not(:disabled):active {
   background: var(--paper);
   color: var(--ink);
+}
+
+
+/* Size chart control inside the home-page quick-add dialog. */
+.quick-add-dialog .quick-add-size-chart {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 1px solid var(--ink);
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 0.06em;
 }
