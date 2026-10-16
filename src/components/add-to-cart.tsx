@@ -64,7 +64,7 @@ export function AddToCart({ product }: { product: Product }) {
                     aria-label="Close size chart"
                     autoFocus
                   >
-                    CLOSE
+                    ×
                   </button>
                 </header>
                 <Image
