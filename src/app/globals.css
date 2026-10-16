@@ -1535,7 +1535,8 @@ input[type="number"]::-webkit-outer-spin-button {
   right: auto;
   bottom: 1rem;
   z-index: 2000;
-  width: min(34rem, calc(100vw - 2rem));
+  width: max-content;
+  max-width: min(34rem, calc(100vw - 2rem));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1577,7 +1578,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 @media (max-width: 480px) {
   .store-toast {
-    width: calc(100vw - 1.5rem);
+    max-width: calc(100vw - 1.5rem);
     bottom: 0.75rem;
     padding: 0.85rem 1rem;
     font-size: 0.68rem;
@@ -2942,5 +2943,28 @@ input[type="number"]::-webkit-outer-spin-button {
 @media (prefers-reduced-motion: reduce) {
   .store-toast.show {
     animation: none;
+  }
+}
+
+
+/* Keep the home-page chart modal centered in the viewport, independent of the header. */
+.quick-add-size-chart-backdrop {
+  padding: 1rem;
+}
+.quick-add-size-chart-backdrop .size-chart-dialog {
+  max-height: calc(100vh - 2rem);
+}
+.quick-add-size-chart-backdrop .size-chart-dialog img {
+  max-height: calc(100vh - 8rem);
+}
+@media (max-width: 640px) {
+  .quick-add-size-chart-backdrop {
+    padding: 0.75rem;
+  }
+  .quick-add-size-chart-backdrop .size-chart-dialog {
+    max-height: calc(100vh - 1.5rem);
+  }
+  .quick-add-size-chart-backdrop .size-chart-dialog img {
+    max-height: calc(100vh - 7.5rem);
   }
 }
