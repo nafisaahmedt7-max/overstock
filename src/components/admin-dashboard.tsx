@@ -836,7 +836,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 <b>CHOOSE FILE</b>
               </label>
               <label className="image-upload-field" htmlFor="product-size-chart-image">
-                <span>SIZE CHART IMAGE (OPTIONAL)</span>
+                <span>SIZE CHART IMAGE</span>
                 <input
                   id="product-size-chart-image"
                   name="size_chart_image"
@@ -930,7 +930,7 @@ export function AdminDashboard({ email }: { email: string }) {
                     <span>PRODUCT IMAGE</span>
                     <input name="image" type="file" accept="image/webp" />
                     <span className="image-file-name">WEBP · MAX 2 MB</span>
-                    <b>CHOOSE IMAGE</b>
+                    <b>CHOOSE FILE</b>
                   </label>
                   <label className="image-upload-field edit-field-wide">
                     <span>SIZE CHART IMAGE</span>
