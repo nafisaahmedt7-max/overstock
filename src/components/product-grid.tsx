@@ -40,13 +40,6 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   <div className="product-meta">
                     <div className="product-meta-main">
                       <p className="product-condition">{product.condition}</p>
-                      <Link
-                        className="product-store-link"
-                        href={`/store/${product.sellerId ?? "overstock"}`}
-                        aria-label={`Shop ${product.seller} store`}
-                      >
-                        SHOP {product.seller.toUpperCase()}
-                      </Link>
                       <div className="product-meta-details">
                         <Link className="product-title-link" href={productHref}>
                           <h2>{product.name}</h2>
@@ -59,6 +52,13 @@ export function ProductGrid({ products }: { products: Product[] }) {
                     </div>
                     <div className="product-store-row">
                       <ProductCardActions product={product} />
+                      <Link
+                        className="product-store-link"
+                        href={`/store/${product.sellerId ?? "overstock"}`}
+                        aria-label={`Shop ${product.seller} store`}
+                      >
+                        SHOP {product.seller.toUpperCase()}
+                      </Link>
                     </div>
                   </div>
                 </article>
