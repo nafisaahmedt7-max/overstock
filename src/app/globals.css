@@ -2776,7 +2776,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Larger condition tag on the product detail image. */
 .product-page > .product-placeholder .product-condition-badge {
-  padding: 0.85rem 1.25rem;
+  padding: 0.45rem 1.5rem;
   font-size: 1rem;
   line-height: 1.1;
 }
@@ -2784,6 +2784,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Softer corners for product information and pill-shaped controls. */
 .product-card .product-meta {
   border-radius: 0;
+  background: #e3e3e1;
 }
 
 .product-add-button,
