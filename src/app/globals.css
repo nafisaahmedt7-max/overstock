@@ -257,17 +257,16 @@ button {
   background: #fff;
 }
 .product-meta-main {
-  width: 90%;
+  width: 100%;
   min-height: 0;
   flex: 1;
-  margin-inline: auto;
-  padding: 0.3rem 0.65rem;
+  padding: 0.3rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  border-left: 3px double var(--line);
-  border-right: 3px double var(--line);
+  border-top: 3px double var(--line);
+  border-bottom: 3px double var(--line);
 }
 .product-meta-details {
   min-width: 0;
