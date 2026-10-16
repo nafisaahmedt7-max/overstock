@@ -2843,3 +2843,23 @@ input[type="number"]::-webkit-outer-spin-button {
   text-decoration: none;
   letter-spacing: 0.06em;
 }
+
+
+/* Match home quick-add size choices to the product-page selector. */
+.quick-add-sizes {
+  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  gap: 0.45rem;
+}
+.quick-add-sizes button {
+  min-height: 3.5rem;
+  border: 1px solid var(--ink);
+  background: #e5e5e2;
+  color: var(--ink);
+  font-size: 0.875rem;
+}
+.quick-add-sizes button.selected {
+  background: var(--ink);
+  color: var(--paper);
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
