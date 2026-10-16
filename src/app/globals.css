@@ -169,7 +169,7 @@ button {
   scroll-snap-type: inline mandatory;
   scrollbar-width: thin;
   column-gap: 0.75rem;
-  padding: 0.35rem 1rem 0.75rem;
+  padding: 0 1rem 0.75rem;
   scroll-padding-inline: 1rem;
 }
 .product-lane > header {
@@ -190,8 +190,6 @@ button {
   min-width: 0;
   overflow: hidden;
   background: #fff;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
   scroll-snap-align: start;
 }
 .product-image-link {
@@ -258,8 +256,8 @@ button {
     500 0.78rem var(--font-mono),
     monospace;
   background: #fff;
-  border: 2px solid var(--ink);
-  border-radius: 0.4rem;
+  border: 1px solid var(--ink);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 .product-meta-main {
   width: 100%;
@@ -2762,7 +2760,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Softer corners for product information and pill-shaped controls. */
 .product-card .product-meta {
-  border-radius: 0.4rem;
+  border-radius: 0;
 }
 
 .product-add-button,
