@@ -2744,10 +2744,10 @@ input[type="number"]::-webkit-outer-spin-button {
   max-width: calc(100% - 4.5rem);
   padding: 0.38rem 0.6rem;
   overflow: hidden;
-  border: 1px solid rgba(5, 5, 5, 0.7);
+  border: 1px solid #050505;
   border-radius: 999px;
-  background: rgba(241, 241, 239, 0.94);
-  color: #111;
+  background: #050505;
+  color: #fff;
   font: 500 0.62rem/1 var(--font-mono), monospace;
   letter-spacing: 0.035em;
   text-overflow: ellipsis;
