@@ -91,7 +91,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           aria-atomic="true"
           aria-label={`${notice.name}, size ${notice.size}, added to cart. View cart.`}
         >
-          <span>{notice.name} / {notice.size} ADDED TO CART</span>
+          <span>ADDED TO CART</span>
           <strong>VIEW CART</strong>
         </Link>
       )}
