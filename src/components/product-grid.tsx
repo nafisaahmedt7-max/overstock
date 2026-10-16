@@ -39,7 +39,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   </Link>
                   <div className="product-meta">
                     <div className="product-meta-main">
-                      <p className="product-condition">{product.condition}</p>
+                      <p className="product-condition">{product.status === "sold_out" || product.stockQuantity <= 0 ? "SOLD OUT" : `${product.stockQuantity} LEFT`}</p>
                       <div className="product-meta-details">
                         <Link className="product-title-link" href={productHref}>
                           <h2>{product.name}</h2>
@@ -47,7 +47,6 @@ export function ProductGrid({ products }: { products: Product[] }) {
                       </div>
                       <div className="product-price">
                         <p>${product.price.toFixed(2)}</p>
-                        {product.status === "sold_out" && <b>SOLD OUT</b>}
                       </div>
                     </div>
                     <div className="product-store-row">
