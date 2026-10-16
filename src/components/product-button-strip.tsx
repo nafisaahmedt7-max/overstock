@@ -33,7 +33,7 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           display: block;
           width: 100%;
           aspect-ratio: 4 / 5;
-          background: #dededb;
+          background: #f1f1ef;
           overflow: hidden;
         }
         .product-button-strip img {
@@ -47,7 +47,7 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
         .product-button-strip .strip-image-empty {
           width: 100%;
           aspect-ratio: 4 / 5;
-          background: #dededb;
+          background: #f1f1ef;
         }
         .product-button-strip .strip-title {
           font: 600 .7rem/1.4 var(--font-mono), monospace;
