@@ -1,25 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import type { Product } from "@/data/products";
 import { useCart } from "./cart-provider";
 
-type ProductCardItem = Pick<Product, "slug" | "name" | "price" | "sizes" | "status">;
+type ProductCardItem = Pick<Product, "slug" | "name" | "price" | "sizes" | "status" | "sizeChartUrl">;
 
 export function ProductCardActions({ product }: { product: ProductCardItem }) {
   const [open, setOpen] = useState(false);
   const [size, setSize] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [chartOpen, setChartOpen] = useState(false);
   const { add } = useCart();
 
   useEffect(() => {
-    if (!open) return;
+    if (!open && !chartOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+      if (chartOpen) setChartOpen(false);
+      else setOpen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [open]);
+  }, [open, chartOpen]);
 
   useEffect(() => {
     if (!added) return;
@@ -48,6 +52,7 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
         aria-haspopup="dialog"
         onClick={() => {
           setSize(product.sizes[0] ?? null);
+          setChartOpen(false);
           setOpen(true);
         }}
       >
@@ -73,7 +78,10 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
               </div>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setChartOpen(false);
+                  setOpen(false);
+                }}
                 aria-label="Close size selector"
               >
                 ×
@@ -92,6 +100,15 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
                 </button>
               ))}
             </div>
+            {product.sizeChartUrl && (
+              <button
+                className="size-chart-link quick-add-size-chart"
+                type="button"
+                onClick={() => setChartOpen(true)}
+              >
+                SIZE CHART
+              </button>
+            )}
             <button
               className="quick-add-confirm"
               type="button"
@@ -100,6 +117,39 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
             >
               ADD TO CART
             </button>
+          </section>
+        </div>
+      )}
+      {chartOpen && product.sizeChartUrl && (
+        <div
+          className="size-chart-backdrop"
+          role="presentation"
+          onClick={() => setChartOpen(false)}
+        >
+          <section
+            className="size-chart-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${product.name} size chart`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header>
+              <h2>SIZE CHART</h2>
+              <button
+                type="button"
+                onClick={() => setChartOpen(false)}
+                aria-label="Close size chart"
+              >
+                ×
+              </button>
+            </header>
+            <Image
+              src={product.sizeChartUrl}
+              alt={`${product.name} size chart`}
+              width={1200}
+              height={900}
+              unoptimized
+            />
           </section>
         </div>
       )}
