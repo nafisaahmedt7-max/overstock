@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import type { Product } from "@/data/products";
 import { useCart } from "./cart-provider";
 export function AddToCart({ product }: { product: Product }) {
@@ -98,23 +97,7 @@ export function AddToCart({ product }: { product: Product }) {
       >
         {product.status === "sold_out" ? "CURRENTLY OUT OF STOCK" : added ? "ADDED TO CART" : "ADD TO CART"}
       </button>
-      <Link
-        href="/cart"
-        className={`store-toast ${added ? "show" : ""}`}
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        aria-hidden={!added}
-        aria-label={added ? `${product.name}, size ${size}, added to cart. View cart.` : undefined}
-        tabIndex={added ? 0 : -1}
-      >
-        {added && (
-          <>
-            <span>{product.name} / {size} ADDED TO CART</span>
-            <strong>VIEW CART</strong>
-          </>
-        )}
-      </Link>
+
     </div>
   );
 }
