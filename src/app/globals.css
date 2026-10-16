@@ -419,7 +419,7 @@ button {
 .quick-add-dialog {
   width: min(26rem, 100%);
   display: grid;
-  gap: 1rem;
+  row-gap: 0.75rem;
   padding: 1.25rem;
   border: 1px solid var(--ink);
   background: var(--paper);
