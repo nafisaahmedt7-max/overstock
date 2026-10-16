@@ -37,22 +37,26 @@ export function ProductGrid({ products }: { products: Product[] }) {
                     />
                   </Link>
                   <div className="product-meta">
-                    <div className="product-meta-details">
-                      <Link className="product-title-link" href={productHref}>
-                        <h2>{product.name}</h2>
-                      </Link>
-                      <p>{product.condition}</p>
+                    <div className="product-meta-main">
+                      <div className="product-meta-details">
+                        <Link className="product-title-link" href={productHref}>
+                          <h2>{product.name}</h2>
+                        </Link>
+                        <p>{product.condition}</p>
+                      </div>
+                      <div className="product-price">
+                        <p>${product.price}</p>
+                        {product.status === "sold_out" && <b>SOLD OUT</b>}
+                      </div>
                     </div>
-                    <Link
-                      className="product-store-button"
-                      href={`/store/${product.sellerId ?? "overstock"}`}
-                      aria-label={`Visit ${product.seller} store`}
-                    >
-                      {product.seller.toUpperCase()}
-                    </Link>
-                    <div className="product-price">
-                      <p>${product.price}</p>
-                      {product.status === "sold_out" && <b>SOLD OUT</b>}
+                    <div className="product-store-row">
+                      <Link
+                        className="product-store-link"
+                        href={`/store/${product.sellerId ?? "overstock"}`}
+                        aria-label={`Visit ${product.seller} store`}
+                      >
+                        {product.seller.toUpperCase()}
+                      </Link>
                     </div>
                   </div>
                 </article>
