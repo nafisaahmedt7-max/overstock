@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import {
   createContext,
   useContext,
@@ -25,6 +26,8 @@ const CartContext = createContext<Value | null>(null);
 const STORAGE_KEY = "overstock-cart-v1";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [notice, setNotice] = useState<{ name: string; size: string } | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restored = useRef(false);
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -45,7 +48,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       items,
       count: items.reduce((sum, item) => sum + item.quantity, 0),
-      add: (next) =>
+      add: (next) => {
         setItems((current) => {
           const match = current.find(
             (item) => item.slug === next.slug && item.size === next.size,
@@ -57,7 +60,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   : item,
               )
             : [...current, { ...next, quantity: 1 }];
-        }),
+        });
+        setNotice({ name: next.name, size: next.size });
+        if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current);
+        noticeTimer.current = window.setTimeout(() => setNotice(null), 2400);
+      },
       remove: (slug, size) =>
         setItems((current) =>
           current.filter((item) => item.slug !== slug || item.size !== size),
@@ -66,7 +73,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }),
     [items],
   );
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  useEffect(
+    () => () => {
+      if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current);
+    },
+    [],
+  );
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      {notice && (
+        <Link
+          href="/cart"
+          className="store-toast show"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={`${notice.name}, size ${notice.size}, added to cart. View cart.`}
+        >
+          <span>{notice.name} / {notice.size} ADDED TO CART</span>
+          <strong>VIEW CART</strong>
+        </Link>
+      )}
+    </CartContext.Provider>
+  );
 }
 export function useCart() {
   const value = useContext(CartContext);
