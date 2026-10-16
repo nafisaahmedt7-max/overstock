@@ -2842,6 +2842,11 @@ input[type="number"]::-webkit-outer-spin-button {
   text-align: center;
   text-decoration: none;
   letter-spacing: 0.06em;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.quick-add-dialog .quick-add-size-chart:hover,
+.quick-add-dialog .quick-add-size-chart:focus-visible {
+  background: #e4e4e0;
 }
 
 
