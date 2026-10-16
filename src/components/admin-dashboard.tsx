@@ -816,7 +816,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 <ul>
                   <li>All uploaded images must be WebP and 2 MB or less.</li>
                   <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
-                  <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
+                  <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.iloveimg.com/remove-background" target="_blank" rel="noopener noreferrer">iLoveIMG Background Remover</a> before uploading.</li>
                   <li>Size charts must also be WebP. Their dimensions may vary.</li>
                   <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
                 </ul>
@@ -831,7 +831,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   onChange={(e) => void chooseImage(e.target.files?.[0])}
                 />
                 <span className="image-file-name">
-                  {imageFileName || "NO IMAGE SELECTED"}
+                  {imageFileName || "WEBP · MAX 2 MB"}
                 </span>
                 <b>CHOOSE FILE</b>
               </label>
@@ -921,19 +921,21 @@ export function AdminDashboard({ email }: { email: string }) {
                     <ul>
                       <li>All uploaded images must be WebP and 2 MB or less.</li>
                       <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
-                      <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
+                      <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.iloveimg.com/remove-background" target="_blank" rel="noopener noreferrer">iLoveIMG Background Remover</a> before uploading.</li>
                       <li>Size charts must also be WebP. Their dimensions may vary.</li>
                       <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
                     </ul>
                   </aside>
                   <label className="image-upload-field edit-field-wide">
-                    <span>REPLACE PRODUCT IMAGE (OPTIONAL)</span>
+                    <span>PRODUCT IMAGE</span>
                     <input name="image" type="file" accept="image/webp" />
+                    <span className="image-file-name">WEBP · MAX 2 MB</span>
                     <b>CHOOSE IMAGE</b>
                   </label>
                   <label className="image-upload-field edit-field-wide">
-                    <span>SIZE CHART IMAGE (OPTIONAL)</span>
+                    <span>SIZE CHART IMAGE</span>
                     <input name="size_chart_image" type="file" accept="image/webp" />
+                    <span className="image-file-name">WEBP · MAX 2 MB</span>
                     <b>CHOOSE IMAGE</b>
                   </label>
                   {editing.size_chart_url && (
