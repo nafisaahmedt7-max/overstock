@@ -2774,6 +2774,13 @@ input[type="number"]::-webkit-outer-spin-button {
   white-space: nowrap;
 }
 
+/* Larger condition tag on the product detail image. */
+.product-page > .product-placeholder .product-condition-badge {
+  padding: 0.85rem 1.25rem;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
 /* Softer corners for product information and pill-shaped controls. */
 .product-card .product-meta {
   border-radius: 0;
