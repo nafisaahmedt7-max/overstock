@@ -28,8 +28,16 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
     if (!open && !chartOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (chartOpen) closeChart();
-      else setOpen(false);
+      if (chartOpen) {
+        if (chartClosing) return;
+        setChartClosing(true);
+        window.setTimeout(() => {
+          setChartOpen(false);
+          setChartClosing(false);
+        }, 180);
+      } else {
+        setOpen(false);
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
