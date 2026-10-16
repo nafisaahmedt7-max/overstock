@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Product } from "@/data/products";
 import { useCart } from "./cart-provider";
 
@@ -175,13 +176,23 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
           </section>
         </div>
       )}
-      <div
+      <Link
+        href="/cart"
         className={`store-toast ${added ? "show" : ""}`}
         role="status"
         aria-live="polite"
+        aria-atomic="true"
+        aria-hidden={!added}
+        aria-label={added ? `${product.name}, size ${size}, added to cart. View cart.` : undefined}
+        tabIndex={added ? 0 : -1}
       >
-        {added ? `${product.name} / ${size} ADDED TO CART` : ""}
-      </div>
+        {added && (
+          <>
+            <span>{product.name} / {size} ADDED TO CART</span>
+            <strong>VIEW CART</strong>
+          </>
+        )}
+      </Link>
     </>
   );
 }
