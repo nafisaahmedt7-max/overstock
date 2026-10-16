@@ -94,6 +94,25 @@ type Shipment = {
 };
 type Tab = "overview" | "sellers" | "products" | "orders" | "fulfilment";
 
+async function sendTeamInvite(
+  role: "seller" | "fulfilment",
+  memberId: string,
+  email: string,
+  name: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch("/api/admin/team-invite", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role, memberId, email, name }),
+    });
+    const result = await response.json();
+    return response.ok ? null : String(result.error || "The registration email could not be sent.");
+  } catch {
+    return "The registration email could not be sent. Please try again.";
+  }
+}
+
 export function AdminDashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<Tab>("overview"),
     [sellers, setSellers] = useState<Seller[]>([]),
@@ -237,47 +256,67 @@ export function AdminDashboard({ email }: { email: string }) {
 
   async function addSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const { error } = await supabase.from("sellers").insert({
-      seller_code: String(f.get("code")).toUpperCase(),
-      display_name: String(f.get("name")),
-      email: String(f.get("email")).toLowerCase(),
-      commission_percent: Number(f.get("commission")),
-    });
-    setNotice(
-      error?.message ||
-        "Seller added. They can now use the partner login with this email.",
-    );
-    if (!error) {
-      e.currentTarget.reset();
-      await load();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const name = String(f.get("name")).trim();
+    const email = String(f.get("email")).trim().toLowerCase();
+    const { data: seller, error } = await supabase
+      .from("sellers")
+      .insert({
+        seller_code: String(f.get("code")).toUpperCase(),
+        display_name: name,
+        email,
+        commission_percent: Number(f.get("commission")),
+      })
+      .select("id")
+      .single();
+    if (error || !seller) {
+      setNotice(error?.message || "Could not add seller.");
+      return;
     }
+    const inviteError = await sendTeamInvite("seller", seller.id, email, name);
+    setNotice(
+      inviteError
+        ? `Seller added, but the registration email failed: ${inviteError}`
+        : "Seller added and registration email sent.",
+    );
+    form.reset();
+    await load();
   }
   async function addPartner(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const f = new FormData(form);
+    const name = String(f.get("name")).trim();
+    const email = String(f.get("email")).trim().toLowerCase();
     const { data: partner, error } = await supabase
       .from("fulfillment_partners")
       .insert({
-        name: String(f.get("name")).trim(),
+        name,
         warehouse_address: String(f.get("address")).trim(),
       })
       .select("id")
       .single();
     if (error || !partner) {
-      setNotice(error?.message || "Could not add team member.");
+      setNotice(error?.message || "Could not add fulfilment team member.");
       return;
     }
     const invite = await supabase.from("fulfillment_invites").insert({
-      email: String(f.get("email")).trim().toLowerCase(),
+      email,
       partner_id: partner.id,
     });
-    setNotice(invite.error?.message || "Fulfilment team member added. No orders were assigned automatically.");
-    if (!invite.error) {
-      form.reset();
-      await load();
+    if (invite.error) {
+      setNotice(invite.error.message);
+      return;
     }
+    const inviteError = await sendTeamInvite("fulfilment", partner.id, email, name);
+    setNotice(
+      inviteError
+        ? `Fulfilment team member added, but the registration email failed: ${inviteError}`
+        : "Fulfilment team member added and registration email sent. No orders were assigned automatically.",
+    );
+    form.reset();
+    await load();
   }
   async function saveSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
