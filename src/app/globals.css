@@ -223,6 +223,9 @@ button {
   top: 1rem;
   left: 1rem;
   z-index: 2;
+  display: flex;
+  min-height: 1.72rem;
+  align-items: center;
   font:
     500 0.7rem var(--font-mono),
     monospace;
@@ -481,7 +484,8 @@ button {
 .product-page > .product-placeholder {
   aspect-ratio: auto;
   min-height: calc(100vh - var(--header));
-  border-right: 1px solid var(--line);
+  border-right: 0;
+  background: var(--paper) !important;
 }
 .product-info {
   padding: var(--space-3) var(--space-2);
