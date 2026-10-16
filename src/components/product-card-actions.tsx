@@ -144,7 +144,7 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
       )}
       {chartOpen && product.sizeChartUrl && (
         <div
-          className={`size-chart-backdrop ${chartClosing ? "closing" : ""}`}
+          className={`size-chart-backdrop quick-add-size-chart-backdrop ${chartClosing ? "closing" : ""}`}
           role="presentation"
           onClick={closeChart}
         >
