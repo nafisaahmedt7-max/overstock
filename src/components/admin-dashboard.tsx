@@ -167,8 +167,8 @@ export function AdminDashboard({ email }: { email: string }) {
   }, [load]);
 
   async function validateImage(file: File) {
-    if (file.size > 10 * 1024 * 1024)
-      throw new Error("Product image must be under 10 MB.");
+    if (file.size > 2 * 1024 * 1024)
+      throw new Error("Product image must be 2 MB or less.");
     if (file.type !== "image/webp")
       throw new Error("Product images must be WebP. Convert the image and try again.");
 
@@ -191,8 +191,8 @@ export function AdminDashboard({ email }: { email: string }) {
       throw new Error("Product images must be exactly 1600 × 2000 px. Resize the image to this standard and try again.");
   }
   async function validateSizeChartImage(file: File) {
-    if (file.size > 10 * 1024 * 1024)
-      throw new Error("Size chart image must be under 10 MB.");
+    if (file.size > 2 * 1024 * 1024)
+      throw new Error("Size chart image must be 2 MB or less.");
     if (file.type !== "image/webp")
       throw new Error("Size chart images must be WebP. Convert the image and try again.");
   }
@@ -227,7 +227,7 @@ export function AdminDashboard({ email }: { email: string }) {
       await validateImage(file);
       setImagePreview(URL.createObjectURL(file));
       setImageFileName(file.name);
-      setNotice("Product image approved: WebP, 1600 × 2000 px, under 10 MB.");
+      setNotice("Product image approved: WebP, 1600 × 2000 px, 2 MB or less.");
     } catch (error) {
       setImagePreview(null);
       setImageFileName("");
@@ -814,7 +814,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <aside className="image-upload-guidance" role="note">
                 <strong>IMAGE UPLOAD REQUIREMENTS</strong>
                 <ul>
-                  <li>All uploaded images must be WebP and under 10 MB.</li>
+                  <li>All uploaded images must be WebP and 2 MB or less.</li>
                   <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
                   <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
                   <li>Size charts must also be WebP. Their dimensions may vary.</li>
@@ -843,7 +843,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   type="file"
                   accept="image/webp"
                 />
-                <span className="image-file-name">WEBP · MAX 10 MB</span>
+                <span className="image-file-name">WEBP · MAX 2 MB</span>
                 <b>CHOOSE FILE</b>
               </label>
               <button>ADD DRAFT</button>
@@ -919,7 +919,7 @@ export function AdminDashboard({ email }: { email: string }) {
                   <aside className="image-upload-guidance" role="note">
                     <strong>IMAGE UPLOAD REQUIREMENTS</strong>
                     <ul>
-                      <li>All uploaded images must be WebP and under 10 MB.</li>
+                      <li>All uploaded images must be WebP and 2 MB or less.</li>
                       <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
                       <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">remove.bg</a> before uploading.</li>
                       <li>Size charts must also be WebP. Their dimensions may vary.</li>
