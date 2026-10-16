@@ -2762,6 +2762,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .product-add-button,
+.add-button,
 .size-chart-link,
 .current-size-chart,
 .quick-add-sizes button,
