@@ -350,17 +350,26 @@ button {
 }
 .product-store-link {
   position: relative;
-  padding: 0.25rem 0.5rem;
-  background: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 2rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--ink);
+  background: #fff;
   color: var(--ink);
-  font: 500 0.78rem/1.2 var(--font-mono), monospace;
+  font: 600 0.66rem/1.15 var(--font-mono), monospace;
+  letter-spacing: 0.025em;
   text-align: center;
-  text-decoration: underline;
-  text-underline-offset: 0.15rem;
+  text-decoration: none;
   overflow-wrap: anywhere;
+  transition: background-color 160ms ease, color 160ms ease;
 }
-.product-store-link:hover {
-  text-underline-offset: 0.25rem;
+.product-store-link:hover,
+.product-store-link:focus-visible {
+  background: var(--ink);
+  color: #fff;
 }
 .product-page {
   display: grid;
