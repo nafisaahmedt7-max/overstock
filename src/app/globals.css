@@ -274,7 +274,7 @@ button {
 .product-condition {
   grid-column: 1;
   grid-row: 1;
-  align-self: start;
+  align-self: center;
   margin: 0;
   color: #555;
   font-size: 0.68rem;
@@ -318,7 +318,8 @@ button {
   grid-column: 2;
   grid-row: 1;
   min-width: 4rem;
-  align-self: start;
+  align-self: center;
+  color: #555;
   font-family: var(--font-mono), monospace;
   font-size: 0.92rem;
   font-weight: 400;
@@ -332,7 +333,7 @@ button {
 }
 .product-price p {
   margin: 0;
-  color: var(--ink);
+  color: inherit;
   font-size: inherit;
   line-height: inherit;
   letter-spacing: normal;
