@@ -250,7 +250,6 @@ button {
   padding: 0.35rem 0;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--line);
   font:
     500 0.78rem var(--font-mono),
     monospace;
@@ -265,8 +264,6 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  border-top: 3px double var(--line);
-  border-bottom: 3px double var(--line);
 }
 .product-meta-details {
   min-width: 0;
@@ -314,12 +311,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.product-store-row::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  border-top: 1px solid var(--line);
 }
 .product-store-link {
   position: relative;
