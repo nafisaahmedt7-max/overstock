@@ -5,11 +5,13 @@ import Image from "next/image";
 export function ProductPlaceholder({
   name,
   tone,
+  condition,
   imageUrl,
   index,
 }: {
   name: string;
   tone: string;
+  condition?: string;
   imageUrl?: string | null;
   index?: number;
 }) {
@@ -19,6 +21,7 @@ export function ProductPlaceholder({
   return (
     <div className="product-placeholder" style={{ backgroundColor: tone }}>
       <span>{String((index ?? 0) + 1).padStart(2, "0")}</span>
+      {condition && <span className="product-condition-badge">{condition}</span>}
       {imageUrl && !imageFailed ? (
         <Image
           src={imageUrl}
