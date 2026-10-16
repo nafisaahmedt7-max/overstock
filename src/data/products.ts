@@ -3,6 +3,7 @@ export type Product = {
   slug: string;
   name: string;
   price: number;
+  stockQuantity: number;
   category: "men" | "women" | "unisex";
   apparelType: string;
   seller: string;
@@ -20,6 +21,7 @@ type Row = {
   slug: string;
   name: string;
   price: number;
+  stock_quantity: number;
   audience: string | null;
   color: string | null;
   image_url: string | null;
@@ -37,6 +39,7 @@ function map(row: Row, sellerName?: string | null): Product {
     slug: row.slug,
     name: row.name,
     price: Number(row.price),
+    stockQuantity: Number(row.stock_quantity ?? 0),
     category:
       row.audience === "women"
         ? "women"
@@ -58,7 +61,7 @@ function map(row: Row, sellerName?: string | null): Product {
   };
 }
 const productColumns =
-  "slug,name,price,audience,category,color,condition,status,image_url,size_chart_url,sizes,description,brand,seller_id";
+  "slug,name,price,stock_quantity,audience,category,color,condition,status,image_url,size_chart_url,sizes,description,brand,seller_id";
 
 async function loadProducts(
   sb: Awaited<ReturnType<typeof createClient>>,
