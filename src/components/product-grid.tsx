@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/data/products";
 import { ProductPlaceholder } from "./product-placeholder";
+import { ProductCardActions } from "./product-card-actions";
 
 export function ProductGrid({ products }: { products: Product[] }) {
   const laneOrder = ["tops", "bottoms", "accessories", "other"];
@@ -50,6 +51,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                       </div>
                     </div>
                     <div className="product-store-row">
+                      <ProductCardActions product={product} />
                       <Link
                         className="product-store-link"
                         href={`/store/${product.sellerId ?? "overstock"}`}
