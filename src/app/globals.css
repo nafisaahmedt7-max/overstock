@@ -342,10 +342,10 @@ button {
 }
 .product-store-row {
   position: relative;
-  width: 80%;
+  width: auto;
   height: 3.4rem;
   flex: 0 0 3.4rem;
-  margin: 0.3rem auto 0;
+  margin: 0.3rem 0.85rem 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
