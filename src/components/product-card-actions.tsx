@@ -103,12 +103,12 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
           </section>
         </div>
       )}
-        <div
+      <div
         className={`store-toast ${added ? "show" : ""}`}
         role="status"
         aria-live="polite"
       >
-        {product.name} / {size} ADDED TO CART
+        {added ? `${product.name} / ${size} ADDED TO CART` : ""}
       </div>
     </>
   );
