@@ -318,10 +318,10 @@ button {
   grid-row: 2;
   min-width: 4rem;
   align-self: end;
-  font-family: var(--font-sans), Arial, sans-serif;
+  font-family: var(--font-mono), monospace;
   font-size: 1.32rem;
   font-weight: 400;
-  letter-spacing: -0.025em;
+  letter-spacing: normal;
   line-height: 1;
   display: grid;
   justify-items: end;
