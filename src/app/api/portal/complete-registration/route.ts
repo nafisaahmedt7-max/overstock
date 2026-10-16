@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     .from("sellers")
     .select("id,email")
     .eq("status", "active")
-    .ilike("email", email)
+    .eq("email", email)
     .maybeSingle();
   if (sellerError)
     return NextResponse.json({ error: "Could not verify your OVERSTOCK access." }, { status: 500 });
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const { data: fulfillmentInvite, error: inviteError } = await admin
     .from("fulfillment_invites")
     .select("partner_id,email")
-    .ilike("email", email)
+    .eq("email", email)
     .maybeSingle();
   if (inviteError)
     return NextResponse.json({ error: "Could not verify your OVERSTOCK access." }, { status: 500 });
