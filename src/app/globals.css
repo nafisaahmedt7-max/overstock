@@ -1534,7 +1534,7 @@ input[type="number"]::-webkit-outer-spin-button {
   left: 50%;
   right: auto;
   bottom: 1rem;
-  z-index: 50;
+  z-index: 2000;
   width: min(34rem, calc(100vw - 2rem));
   display: flex;
   align-items: center;
@@ -1568,6 +1568,8 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: translate(-50%, 0);
   opacity: 1;
   pointer-events: auto;
+  cursor: pointer;
+  animation: cart-toast-in 250ms ease-out both;
 }
 .store-toast.show:hover,
 .store-toast.show:focus-visible {
@@ -2928,6 +2930,17 @@ input[type="number"]::-webkit-outer-spin-button {
   .size-chart-dialog,
   .size-chart-backdrop.closing,
   .size-chart-backdrop.closing .size-chart-dialog {
+    animation: none;
+  }
+}
+
+
+@keyframes cart-toast-in {
+  from { opacity: 0; transform: translate(-50%, 150%); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .store-toast.show {
     animation: none;
   }
 }
