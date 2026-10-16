@@ -12,18 +12,28 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
   const [size, setSize] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
   const [chartOpen, setChartOpen] = useState(false);
+  const [chartClosing, setChartClosing] = useState(false);
   const { add } = useCart();
+
+  function closeChart() {
+    if (chartClosing) return;
+    setChartClosing(true);
+    window.setTimeout(() => {
+      setChartOpen(false);
+      setChartClosing(false);
+    }, 180);
+  }
 
   useEffect(() => {
     if (!open && !chartOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (chartOpen) setChartOpen(false);
+      if (chartOpen) closeChart();
       else setOpen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [open, chartOpen]);
+  }, [open, chartOpen, chartClosing]);
 
   useEffect(() => {
     if (!added) return;
@@ -53,6 +63,7 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
         onClick={() => {
           setSize(product.sizes[0] ?? null);
           setChartOpen(false);
+          setChartClosing(false);
           setOpen(true);
         }}
       >
@@ -104,7 +115,10 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
               <button
                 className="size-chart-link quick-add-size-chart"
                 type="button"
-                onClick={() => setChartOpen(true)}
+                onClick={() => {
+                  setChartClosing(false);
+                  setChartOpen(true);
+                }}
               >
                 SIZE CHART
               </button>
@@ -122,9 +136,9 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
       )}
       {chartOpen && product.sizeChartUrl && (
         <div
-          className="size-chart-backdrop"
+          className={`size-chart-backdrop ${chartClosing ? "closing" : ""}`}
           role="presentation"
-          onClick={() => setChartOpen(false)}
+          onClick={closeChart}
         >
           <section
             className="size-chart-dialog"
@@ -137,7 +151,7 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
               <h2>SIZE CHART</h2>
               <button
                 type="button"
-                onClick={() => setChartOpen(false)}
+                onClick={closeChart}
                 aria-label="Close size chart"
               >
                 ×
