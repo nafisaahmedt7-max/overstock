@@ -2749,6 +2749,7 @@ input[type="number"]::-webkit-outer-spin-button {
   border-radius: 999px;
   background: #050505;
   color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
   font: 500 0.72rem/1 var(--font-mono), monospace;
   letter-spacing: 0.035em;
   text-overflow: ellipsis;
@@ -2770,6 +2771,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .admin-shell form button:not([type="button"]),
 .admin-login form button:not([type="button"]) {
   border-radius: 999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 
 
