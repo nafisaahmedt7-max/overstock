@@ -1,7 +1,6 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-type InviteRole = "seller" | "fulfilment";
 
 function escapeHtml(value: string) {
   return value
@@ -80,28 +79,50 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
-  if (!apiKey || !senderEmail)
-    return NextResponse.json({ error: "The invitation email service is not configured." }, { status: 503 });
+  const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!apiKey || !senderEmail || !supabaseUrl || !serviceRoleKey)
+    return NextResponse.json({ error: "The invitation service is not configured." }, { status: 503 });
 
   const registrationUrl = new URL("/portal/login", request.url);
   registrationUrl.searchParams.set("mode", "register");
   registrationUrl.searchParams.set("email", email);
+
+  const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+  });
+  const { data: inviteLink, error: inviteLinkError } =
+    await adminClient.auth.admin.generateLink({
+      type: "invite",
+      email,
+      options: {
+        redirectTo: registrationUrl.toString(),
+        data: { portal_role: role, display_name: name },
+      },
+    });
+  const actionLink = inviteLink?.properties?.action_link;
+  if (inviteLinkError || !actionLink)
+    return NextResponse.json({
+      error: "A secure invite could not be created. This email may already have a portal account.",
+    }, { status: 502 });
+
   const safeName = escapeHtml(name || "there");
   const safeEmail = escapeHtml(email);
-  const safeUrl = escapeHtml(registrationUrl.toString());
+  const safeUrl = escapeHtml(actionLink);
   const roleLabel = role === "seller" ? "seller" : "fulfilment team member";
-  const subject = "Confirm your OVERSTOCK portal access";
+  const subject = "Confirm your OVERSTOCK portal invitation";
   const textContent = [
     `Hello ${name || "there"},`,
     "",
     `OVERSTOCK has approved your access as a ${roleLabel}.`,
-    `Register using this exact email address: ${email}`,
-    `Create your portal account here: ${registrationUrl.toString()}`,
+    `Use this exact email address to register: ${email}`,
+    `Confirm your email and open account registration: ${actionLink}`,
     "",
-    "On the registration form, create a password and enter it again to confirm. After submitting, check your inbox for a separate email confirmation from OVERSTOCK's sign-in service.",
+    "The secure link confirms your invitation and opens the registration form. Create a password and enter it again to confirm. You can then sign in to the portal.",
     "Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.",
   ].join("\n");
-  const htmlContent = `<!doctype html><html><body style="margin:0;background:#f1f1ee;color:#111;font-family:Arial,sans-serif"><main style="max-width:600px;margin:32px auto;padding:32px;background:#fff;border:1px solid #111"><p style="font-size:12px;font-weight:bold;letter-spacing:2px">OVERSTOCK / PORTAL ACCESS</p><h1 style="font-size:24px">Confirm your portal access</h1><p>Hello ${safeName},</p><p>OVERSTOCK has approved your access as a ${roleLabel}. Register using this exact email address:</p><p style="padding:12px;background:#eee;font-weight:bold">${safeEmail}</p><p>Use the button below to open the registration form. Create a password and enter it again to confirm.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;padding:14px 20px;background:#111;color:#fff;text-decoration:none;font-weight:bold">REGISTER YOUR ACCOUNT</a></p><p>After registering, check your inbox for a separate email confirmation from OVERSTOCK's sign-in service. Your portal access is linked to the invited email address.</p><p>If you were not expecting this invitation, you can ignore this message.</p></main></body></html>`;
+  const htmlContent = `<!doctype html><html><body style="margin:0;background:#f1f1ee;color:#111;font-family:Arial,sans-serif"><main style="max-width:600px;margin:32px auto;padding:32px;background:#fff;border:1px solid #111"><p style="font-size:12px;font-weight:bold;letter-spacing:2px">OVERSTOCK / PORTAL ACCESS</p><h1 style="font-size:24px">Confirm your portal invitation</h1><p>Hello ${safeName},</p><p>OVERSTOCK has approved your access as a ${roleLabel}. Use this exact email address to register:</p><p style="padding:12px;background:#eee;font-weight:bold">${safeEmail}</p><p>The button below confirms your invitation and opens the account registration form. Create a password and enter it again to confirm.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;padding:14px 20px;background:#111;color:#fff;text-decoration:none;font-weight:bold">CONFIRM AND REGISTER</a></p><p>Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.</p></main></body></html>`;
 
   let response: Response;
   try {
@@ -113,10 +134,7 @@ export async function POST(request: Request) {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: {
-          name: process.env.BREVO_SENDER_NAME || "OVERSTOCK",
-          email: senderEmail,
-        },
+        sender: { name: senderName, email: senderEmail },
         to: [{ email, name: name || email }],
         subject,
         textContent,
