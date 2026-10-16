@@ -39,10 +39,10 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   <div className="product-meta">
                     <div className="product-meta-main">
                       <div className="product-meta-details">
+                        <p>{product.condition}</p>
                         <Link className="product-title-link" href={productHref}>
                           <h2>{product.name}</h2>
                         </Link>
-                        <p>{product.condition}</p>
                       </div>
                       <div className="product-price">
                         <p>${product.price}</p>
