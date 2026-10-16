@@ -14,17 +14,26 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
       <style>{`
         .product-button-strip {
           display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          padding: 1.5rem 1rem 2rem;
+          border-bottom: 1px solid #050505;
+        }
+        .product-button-row {
+          display: flex;
+          width: min(100%, 100rem);
+          margin-inline: auto;
           justify-content: center;
           gap: 1.25rem;
           overflow-x: auto;
           overscroll-behavior-inline: contain;
           scroll-snap-type: x mandatory;
-          padding: 1.5rem 1rem 2rem;
           scrollbar-width: thin;
-          border-bottom: 1px solid #050505;
+          padding: .2rem .25rem .65rem;
         }
-        .product-button-strip a {
+        .product-button-row a {
           flex: 0 0 clamp(8rem, 16vw, 13rem);
+          min-width: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -32,11 +41,11 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           scroll-snap-align: center;
           text-decoration: none;
         }
-        .product-button-strip a:focus-visible {
+        .product-button-row a:focus-visible {
           outline: 2px solid #050505;
           outline-offset: 4px;
         }
-        .product-button-strip .strip-image {
+        .product-button-row .strip-image {
           position: relative;
           display: block;
           width: 100%;
@@ -44,54 +53,58 @@ export function ProductButtonStrip({ products }: { products: Product[] }) {
           background: #f1f1ef;
           overflow: hidden;
         }
-        .product-button-strip img {
+        .product-button-row img {
           object-fit: contain;
           padding: 8%;
           transition: transform 180ms ease;
         }
-        .product-button-strip a:hover img {
+        .product-button-row a:hover img {
           transform: scale(1.035);
         }
-        .product-button-strip .strip-image-empty {
+        .product-button-row .strip-image-empty {
           width: 100%;
           aspect-ratio: 4 / 5;
           background: #f1f1ef;
         }
-        .product-button-strip .strip-title {
+        .product-button-row .strip-title {
           font: 600 .7rem/1.4 var(--font-mono), monospace;
           text-transform: uppercase;
           text-align: center;
           overflow-wrap: anywhere;
         }
         @media (max-width: 600px) {
-          .product-button-strip {
+          .product-button-strip { gap: .75rem; padding-inline: .75rem; }
+          .product-button-row {
             justify-content: flex-start;
             gap: .75rem;
-            padding-inline: .75rem;
           }
-          .product-button-strip a { flex-basis: 36vw; }
+          .product-button-row a { flex-basis: 36vw; }
         }
       `}</style>
-      {featured.map((product, index) => (
-        <Link
-          href={`/product/${product.slug}`}
-          aria-label={`View ${product.name}`}
-          key={`${product.slug}-${index}`}
-        >
-          {product.imageUrl ? (
-            <span className="strip-image">
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                fill
-                sizes="(max-width: 600px) 36vw, 16vw"
-              />
-            </span>
-          ) : (
-            <span className="strip-image-empty" aria-hidden="true" />
-          )}
-          <span className="strip-title">{product.name}</span>
-        </Link>
+      {[0, 1].map((rowIndex) => (
+        <div className="product-button-row" role="group" aria-label={`Featured products row ${rowIndex + 1}`} key={rowIndex}>
+          {featured.map((product, index) => (
+            <Link
+              href={`/product/${product.slug}`}
+              aria-label={`View ${product.name}`}
+              key={`${product.slug}-${rowIndex}-${index}`}
+            >
+              {product.imageUrl ? (
+                <span className="strip-image">
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 600px) 36vw, 16vw"
+                  />
+                </span>
+              ) : (
+                <span className="strip-image-empty" aria-hidden="true" />
+              )}
+              <span className="strip-title">{product.name}</span>
+            </Link>
+          ))}
+        </div>
       ))}
     </section>
   );
