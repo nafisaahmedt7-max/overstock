@@ -3346,3 +3346,11 @@ input[type="number"]::-webkit-outer-spin-button {
     min-height: 0;
   }
 }
+
+
+/* Reduce the maximum width of cart product tiles. */
+.cart-item,
+.cart-items-single .cart-item {
+  max-width: 32rem;
+  margin-inline: auto;
+}
