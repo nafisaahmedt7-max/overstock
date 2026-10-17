@@ -3556,3 +3556,24 @@ input[type="number"]::-webkit-outer-spin-button {
     padding-right: var(--space-2);
   }
 }
+
+
+/* Let long carts scroll while keeping the order summary compact. */
+@media (min-width: 801px) {
+  .cart-layout aside.cart-summary {
+    position: sticky;
+    top: calc(var(--header) + 1rem);
+    align-self: start;
+    height: max-content;
+    min-height: 0;
+    align-content: start;
+  }
+}
+@media (max-width: 800px) {
+  .cart-layout aside.cart-summary {
+    position: static;
+    align-self: stretch;
+    height: auto;
+    min-height: 0;
+  }
+}
