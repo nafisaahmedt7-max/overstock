@@ -2980,6 +2980,17 @@ input[type="number"]::-webkit-outer-spin-button {
   justify-self: start;
   align-self: center;
   padding: 0;
+  color: #333;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.045em;
   text-align: left;
   text-decoration: none;
+  transition: color 160ms ease, letter-spacing 160ms ease, transform 160ms ease;
+}
+.product-meta-main .product-store-link-meta:hover,
+.product-meta-main .product-store-link-meta:focus-visible {
+  color: var(--ink);
+  letter-spacing: 0.08em;
+  transform: translateX(0.15rem);
 }
