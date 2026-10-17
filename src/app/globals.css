@@ -3327,3 +3327,22 @@ input[type="number"]::-webkit-outer-spin-button {
     gap: 1rem;
   }
 }
+
+
+/* Use the cart heading divider once, then space the items label below it. */
+.cart-item-section {
+  margin-top: 0;
+  padding-top: 1.5rem;
+  border-top: 0;
+}
+/* Extend the divider beside the order summary through the cart section. */
+.cart-summary {
+  align-self: stretch;
+  min-height: 100%;
+  position: relative;
+}
+@media (max-width: 800px) {
+  .cart-summary {
+    min-height: 0;
+  }
+}
