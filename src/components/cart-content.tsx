@@ -31,7 +31,9 @@ export function CartContent({
         </section>
       ) : (
         <section className="cart-layout">
-          <div className={`cart-items${items.length === 1 ? " cart-items-single" : ""}`}>
+          <div className="cart-item-section">
+            <p className="eyebrow">OVERSTOCK / ITEMS</p>
+            <div className={`cart-items${items.length === 1 ? " cart-items-single" : ""}`}>
             {items.map((item) => {
               const imageUrl = item.imageUrl ?? productImages[item.slug];
               return (
@@ -75,6 +77,7 @@ export function CartContent({
                 </article>
               );
             })}
+            </div>
           </div>
           <aside className="cart-summary">
             <p className="eyebrow">ORDER SUMMARY</p>
