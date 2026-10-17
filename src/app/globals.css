@@ -2971,6 +2971,9 @@ input[type="number"]::-webkit-outer-spin-button {
 
 
 /* Place the seller link where stock used to be in the tile metadata. */
+.product-card .product-meta-main {
+  row-gap: 0.35rem;
+}
 .product-meta-main .product-store-link-meta {
   grid-column: 1;
   grid-row: 1;
@@ -2978,4 +2981,5 @@ input[type="number"]::-webkit-outer-spin-button {
   align-self: center;
   padding: 0;
   text-align: left;
+  text-decoration: none;
 }
