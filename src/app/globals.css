@@ -3577,3 +3577,9 @@ input[type="number"]::-webkit-outer-spin-button {
     min-height: 0;
   }
 }
+
+
+/* Separate the final cart row from the section's bottom rule. */
+.cart-items {
+  padding-bottom: 1.25rem;
+}
