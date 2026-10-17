@@ -3479,3 +3479,32 @@ input[type="number"]::-webkit-outer-spin-button {
     max-width: 36rem;
   }
 }
+
+
+/* Connect the order-summary divider to the cart heading rule. */
+.cart-layout {
+  position: relative;
+}
+.cart-layout::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 66.6667%;
+  width: 1px;
+  background: var(--line);
+  pointer-events: none;
+}
+.cart-layout aside,
+.cart-summary {
+  border-left: 0;
+}
+@media (max-width: 800px) {
+  .cart-layout::before {
+    display: none;
+  }
+  .cart-layout aside {
+    border-top: 1px solid var(--line);
+  }
+}
