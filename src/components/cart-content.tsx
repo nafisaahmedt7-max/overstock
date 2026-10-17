@@ -31,7 +31,7 @@ export function CartContent({
         </section>
       ) : (
         <section className="cart-layout">
-          <div className="cart-items">
+          <div className={`cart-items${items.length === 1 ? " cart-items-single" : ""}`}>
             {items.map((item) => {
               const imageUrl = item.imageUrl ?? productImages[item.slug];
               return (
