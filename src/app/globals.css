@@ -2968,3 +2968,14 @@ input[type="number"]::-webkit-outer-spin-button {
     max-height: calc(100vh - 7.5rem);
   }
 }
+
+
+/* Place the seller link where stock used to be in the tile metadata. */
+.product-meta-main .product-store-link-meta {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: center;
+  padding: 0;
+  text-align: left;
+}
