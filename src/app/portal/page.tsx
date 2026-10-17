@@ -32,8 +32,9 @@ export default async function Portal() {
       <section className="admin-panel">
         <h1>ACCESS PENDING</h1>
         <p>
-          Your email has not yet been connected to an OVERSTOCK seller or
-          internal fulfilment team. Contact OVERSTOCK on WhatsApp.
+          This email is not linked to an OVERSTOCK portal account. Register
+          with the email address in your invitation, or contact
+          operations.overstock@gmail.com for help.
         </p>
       </section>
     </main>

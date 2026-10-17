@@ -26,6 +26,7 @@ export default async function ProductPage({
       <ProductPlaceholder
         name={product.name}
         tone={product.imageTone}
+        condition={product.condition}
         imageUrl={product.imageUrl}
       />
       <section className="product-info">
@@ -41,8 +42,12 @@ export default async function ProductPage({
             <dd>{product.color}</dd>
           </div>
           <div>
-            <dt>CONDITION</dt>
-            <dd>{product.condition}</dd>
+            <dt>STOCK</dt>
+            <dd>
+              {product.status === "sold_out" || product.stockQuantity <= 0
+                ? "SOLD OUT"
+                : `${product.stockQuantity} LEFT`}
+            </dd>
           </div>
         </dl>
         <AddToCart product={product} />

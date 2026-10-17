@@ -26,6 +26,7 @@ type Product = {
   status: string;
   sizes: string[];
   image_url: string | null;
+  size_chart_url: string | null;
   description: string | null;
   audience: string | null;
   category: string | null;
@@ -80,7 +81,7 @@ type Order = {
   refund_amount: number;
   seller_refund_recovery_amount: number;
 };
-type Partner = { id: string; name: string; warehouse_address: string | null };
+type Partner = { id: string; name: string; warehouse_address: string | null; email: string | null };
 type Shipment = {
   id: string;
   order_id: string;
@@ -92,6 +93,25 @@ type Shipment = {
   tracking_number: string | null;
 };
 type Tab = "overview" | "sellers" | "products" | "orders" | "fulfilment";
+
+async function sendTeamInvite(
+  role: "seller" | "fulfilment",
+  memberId: string,
+  email: string,
+  name: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch("/api/admin/team-invite", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role, memberId, email, name }),
+    });
+    const result = await response.json();
+    return response.ok ? null : String(result.error || "The registration email could not be sent.");
+  } catch {
+    return "The registration email could not be sent. Please try again.";
+  }
+}
 
 export function AdminDashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<Tab>("overview"),
@@ -113,7 +133,7 @@ export function AdminDashboard({ email }: { email: string }) {
   const [supabase] = useState(createClient);
   const router = useRouter();
   const load = useCallback(async () => {
-    const [s, p, o, fp, os, fin] = await Promise.all([
+    const [s, p, o, fp, os, fin, fi] = await Promise.all([
       supabase
         .from("sellers")
         .select("id,seller_code,display_name,email,commission_percent,status")
@@ -121,7 +141,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("products")
         .select(
-          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target,minimum_overstock_profit",
+          "id,sku,name,ownership,seller_id,price,stock_quantity,status,sizes,image_url,size_chart_url,description,audience,category,brand,color,condition,cost_of_goods,inbound_delivery_fee,fulfillment_service_fee,gpo_fee_per_500g,weight_grams,overstock_profit_target,minimum_overstock_profit",
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -143,6 +163,7 @@ export function AdminDashboard({ email }: { email: string }) {
       supabase
         .from("order_items")
         .select("order_id,seller_id,ownership,gross_amount,platform_fee,seller_due,payout_status,fulfillment_fee,fulfillment_payment_status,item_cost,seller_profit_amount,inbound_delivery_fee,fulfillment_service_fee,gpo_fee,seller_payout_total,product_name"),
+      supabase.from("fulfillment_invites").select("partner_id,email"),
     ]);
     if (s.error || p.error || o.error)
       setNotice(
@@ -154,7 +175,12 @@ export function AdminDashboard({ email }: { email: string }) {
     setSellers(s.data ?? []);
     setProducts(p.data ?? []);
     setOrders(o.data ?? []);
-    setPartners(fp.data ?? []);
+    setPartners(
+      (fp.data ?? []).map((partner) => ({
+        ...partner,
+        email: fi.data?.find((invite) => invite.partner_id === partner.id)?.email ?? null,
+      })),
+    );
     setShipments(os.data ?? []);
     setFinance(fin.data ?? []);
   }, [supabase]);
@@ -166,24 +192,56 @@ export function AdminDashboard({ email }: { email: string }) {
   }, [load]);
 
   async function validateImage(file: File) {
-    if (file.size > 10 * 1024 * 1024)
-      throw new Error("Image must be under 10 MB.");
-    if (
-      file.type !== "image/webp"
-    )
-      throw new Error("Use a WebP image only. Convert the file first, then upload it.");
+    if (file.size > 2 * 1024 * 1024)
+      throw new Error("Product image must be 2 MB or less.");
+    if (file.type !== "image/webp")
+      throw new Error("Product images must be WebP. Convert the image and try again.");
+
+    const objectUrl = URL.createObjectURL(file);
     const dimensions = await new Promise<{ width: number; height: number }>(
       (resolve, reject) => {
         const img = new window.Image();
-        img.onload = () => resolve({ width: img.width, height: img.height });
-        img.onerror = () => reject(new Error("Image could not be read."));
-        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve({ width: img.width, height: img.height });
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Image could not be read."));
+        };
+        img.src = objectUrl;
       },
     );
-    const ratio = dimensions.width / dimensions.height;
-    if (Math.abs(ratio - 0.8) > 0.08)
-      throw new Error("Use a 4:5 image. Recommended size: 1600 × 2000 px.");
+    if (dimensions.width !== 1600 || dimensions.height !== 2000)
+      throw new Error("Product images must be exactly 1600 × 2000 px. Resize the image to this standard and try again.");
   }
+  async function validateSizeChartImage(file: File) {
+    if (file.size > 2 * 1024 * 1024)
+      throw new Error("Size chart image must be 2 MB or less.");
+    if (file.type !== "image/webp")
+      throw new Error("Size chart images must be WebP. Convert the image and try again.");
+  }
+
+  async function uploadSizeChartImage(productId: string, file: File) {
+    const extension = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
+    const path = `${productId}/size-chart-${crypto.randomUUID()}.${extension}`;
+    const upload = await supabase.storage
+      .from("product-images")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upload.error) return upload.error.message;
+
+    const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
+    const update = await supabase.rpc("admin_update_product_size_chart", {
+      target_product_id: productId,
+      target_size_chart_url: url,
+    });
+    if (update.error) {
+      await supabase.storage.from("product-images").remove([path]);
+      return update.error.message;
+    }
+    return null;
+  }
+
   async function chooseImage(file?: File) {
     if (!file) {
       setImagePreview(null);
@@ -194,7 +252,7 @@ export function AdminDashboard({ email }: { email: string }) {
       await validateImage(file);
       setImagePreview(URL.createObjectURL(file));
       setImageFileName(file.name);
-      setNotice("Image approved: 4:5 ratio and under 10 MB.");
+      setNotice("Product image approved: WebP, 1600 × 2000 px, 2 MB or less.");
     } catch (error) {
       setImagePreview(null);
       setImageFileName("");
@@ -204,48 +262,82 @@ export function AdminDashboard({ email }: { email: string }) {
 
   async function addSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const { error } = await supabase.from("sellers").insert({
-      seller_code: String(f.get("code")).toUpperCase(),
-      display_name: String(f.get("name")),
-      email: String(f.get("email")).toLowerCase(),
-      commission_percent: Number(f.get("commission")),
-    });
-    setNotice(
-      error?.message ||
-        "Seller added. They can now use the partner login with this email.",
-    );
-    if (!error) {
-      e.currentTarget.reset();
-      await load();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const name = String(f.get("name")).trim();
+    const email = String(f.get("email")).trim().toLowerCase();
+    const { data: seller, error } = await supabase
+      .from("sellers")
+      .insert({
+        seller_code: String(f.get("code")).toUpperCase(),
+        display_name: name,
+        email,
+        commission_percent: Number(f.get("commission")),
+      })
+      .select("id")
+      .single();
+    if (error || !seller) {
+      setNotice(error?.message || "Could not add seller.");
+      return;
     }
+    const inviteError = await sendTeamInvite("seller", seller.id, email, name);
+    setNotice(
+      inviteError
+        ? `Seller added, but the registration email failed: ${inviteError}`
+        : "Seller added and registration email sent.",
+    );
+    form.reset();
+    await load();
   }
   async function addPartner(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const f = new FormData(form);
+    const name = String(f.get("name")).trim();
+    const email = String(f.get("email")).trim().toLowerCase();
     const { data: partner, error } = await supabase
       .from("fulfillment_partners")
       .insert({
-        name: String(f.get("name")).trim(),
+        name,
         warehouse_address: String(f.get("address")).trim(),
       })
       .select("id")
       .single();
     if (error || !partner) {
-      setNotice(error?.message || "Could not add team member.");
+      setNotice(error?.message || "Could not add fulfilment team member.");
       return;
     }
     const invite = await supabase.from("fulfillment_invites").insert({
-      email: String(f.get("email")).trim().toLowerCase(),
+      email,
       partner_id: partner.id,
     });
-    setNotice(invite.error?.message || "Fulfilment team member added. No orders were assigned automatically.");
-    if (!invite.error) {
-      form.reset();
-      await load();
+    if (invite.error) {
+      setNotice(invite.error.message);
+      return;
     }
+    const inviteError = await sendTeamInvite("fulfilment", partner.id, email, name);
+    setNotice(
+      inviteError
+        ? `Fulfilment team member added, but the registration email failed: ${inviteError}`
+        : "Fulfilment team member added and registration email sent. No orders were assigned automatically.",
+    );
+    form.reset();
+    await load();
   }
+  async function resendMemberInvite(
+    role: "seller" | "fulfilment",
+    memberId: string,
+    memberEmail: string | null,
+    memberName: string,
+  ) {
+    if (!memberEmail) {
+      setNotice("This team member does not have a login email. Edit the member details first.");
+      return;
+    }
+    const error = await sendTeamInvite(role, memberId, memberEmail, memberName);
+    setNotice(error ? `Registration email failed: ${error}` : "Registration email sent.");
+  }
+
   async function saveSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editingSeller) return;
@@ -289,22 +381,26 @@ export function AdminDashboard({ email }: { email: string }) {
       seller = String(f.get("seller")),
       name = String(f.get("name")),
       sku = String(f.get("sku")).toUpperCase(),
-      sizes = String(f.get("sizes") || "")
-        .split(",")
-        .map((x) => x.trim().toUpperCase())
-        .filter(Boolean);
-    if (sizes.includes("X")) {
-      setNotice(
-        "X is not a valid size. Use XS, S, M, L, XL, a number, or ONE SIZE.",
-      );
+      sizes = f.getAll("sizes").map((size) => String(size).toUpperCase());
+    if (!sizes.length) {
+      setNotice("Select at least one available size from XS to XL.");
       return;
     }
     const image = f.get("image");
+    const sizeChartImage = f.get("size_chart_image");
     if (image instanceof File && image.size) {
       try {
         await validateImage(image);
       } catch (error) {
         setNotice(error instanceof Error ? error.message : "Invalid image.");
+        return;
+      }
+    }
+    if (sizeChartImage instanceof File && sizeChartImage.size) {
+      try {
+        await validateSizeChartImage(sizeChartImage);
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Invalid size chart image.");
         return;
       }
     }
@@ -343,18 +439,19 @@ export function AdminDashboard({ email }: { email: string }) {
       setNotice(error?.message || "Could not add product.");
       return;
     }
+    const uploadIssues: string[] = [];
     if (image instanceof File && image.size) {
-      const ext = image.name.split(".").pop()?.toLowerCase() || "jpg",
-        path = `${productId}/${crypto.randomUUID()}.${ext}`;
+      const ext = image.name.split(".").pop()?.toLowerCase() || "webp";
+      const path = `${productId}/${crypto.randomUUID()}.${ext}`;
       const upload = await supabase.storage
         .from("product-images")
         .upload(path, image, { upsert: false });
       if (upload.error) {
-        setNotice(`Product saved, image failed: ${upload.error.message}`);
+        uploadIssues.push(`Product image failed: ${upload.error.message}`);
       } else {
         const url = supabase.storage.from("product-images").getPublicUrl(path)
           .data.publicUrl;
-        await Promise.all([
+        const [imageRecord, imageUpdate] = await Promise.all([
           supabase.from("product_images").insert({
             product_id: productId,
             storage_path: path,
@@ -365,9 +462,19 @@ export function AdminDashboard({ email }: { email: string }) {
             target_image_url: url,
           }),
         ]);
-        setNotice("Product and image added as draft.");
+        if (imageRecord.error) uploadIssues.push(`Product image record failed: ${imageRecord.error.message}`);
+        if (imageUpdate.error) uploadIssues.push(`Product image link failed: ${imageUpdate.error.message}`);
       }
-    } else setNotice("Product added as draft.");
+    }
+    if (sizeChartImage instanceof File && sizeChartImage.size) {
+      const error = await uploadSizeChartImage(productId, sizeChartImage);
+      if (error) uploadIssues.push(`Size chart failed: ${error}`);
+    }
+    setNotice(
+      uploadIssues.length
+        ? `Product saved as draft. ${uploadIssues.join(" ")}`
+        : "Product and uploaded images added as draft.",
+    );
     form.reset();
     setImagePreview(null);
     setImageFileName("");
@@ -390,9 +497,18 @@ export function AdminDashboard({ email }: { email: string }) {
       return;
     }
     const replacementImage = f.get("image");
+    const replacementSizeChart = f.get("size_chart_image");
     if (replacementImage instanceof File && replacementImage.size) {
       try { await validateImage(replacementImage); }
       catch (error) { setNotice(error instanceof Error ? error.message : "Invalid image."); return; }
+    }
+    if (replacementSizeChart instanceof File && replacementSizeChart.size) {
+      try {
+        await validateSizeChartImage(replacementSizeChart);
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Invalid size chart image.");
+        return;
+      }
     }
     const { error } = await supabase.rpc("admin_update_product", {
       target_product_id: editing.id,
@@ -426,8 +542,14 @@ export function AdminDashboard({ email }: { email: string }) {
         const upload = await supabase.storage.from("product-images").upload(path, replacementImage);
         if (upload.error) { setNotice(`Product updated, image failed: ${upload.error.message}`); return; }
         const url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
-        await supabase.rpc("admin_update_product_image", { target_product_id: editing.id, target_image_url: url });
+        const update = await supabase.rpc("admin_update_product_image", { target_product_id: editing.id, target_image_url: url });
+        if (update.error) { setNotice(`Product updated, image link failed: ${update.error.message}`); return; }
       }
+      if (replacementSizeChart instanceof File && replacementSizeChart.size) {
+        const sizeChartError = await uploadSizeChartImage(editing.id, replacementSizeChart);
+        if (sizeChartError) { setNotice(`Product updated, size chart failed: ${sizeChartError}`); return; }
+      }
+      setNotice("Product updated.");
       setEditing(null);
       await load();
     }
@@ -472,16 +594,6 @@ export function AdminDashboard({ email }: { email: string }) {
     form.reset();
     setOrderProductId("");
     await load();
-  }
-  async function clearAllOrders() {
-    if (!orders.length) {
-      setNotice("There are no orders to remove.");
-      return;
-    }
-    if (!window.confirm("Remove every existing order and its order items? This cannot be undone.")) return;
-    const { error } = await supabase.from("orders").delete().in("id", orders.map((order) => order.id));
-    setNotice(error?.message || "All previous orders were removed. Create the two sample completed orders next.");
-    if (!error) await load();
   }
   async function deleteOrder(order: Order) {
     if (!window.confirm(`Delete order #${order.order_number}? This removes its order record permanently.`)) return;
@@ -579,17 +691,14 @@ export function AdminDashboard({ email }: { email: string }) {
   const gpoFees = activeFinance.reduce((n, x) => n + Number(x.gpo_fee || 0), 0);
   const fulfillmentCost = fulfillmentService + gpoFees;
   const sellerDue = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "due").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
-  const sellerPaid = activeFinance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const cashSellerPaid = finance.filter((x) => x.ownership === "seller" && x.payout_status === "paid").reduce((n, x) => n + Number(x.seller_payout_total || 0), 0);
   const fulfillmentDue = activeFinance.filter((x) => x.fulfillment_payment_status === "due").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
-  const fulfillmentPaid = activeFinance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const cashFulfillmentPaid = finance.filter((x) => x.fulfillment_payment_status === "paid").reduce((n, x) => n + Number(x.fulfillment_service_fee || 0) + Number(x.gpo_fee || 0), 0);
   const overstockProfit = totalSales - sellerCost - sellerShare - fulfillmentService - gpoFees;
   const cashIn = grossSales + completedSellerRecovery;
   const cashOut = cashSellerPaid + cashFulfillmentPaid + completedRefunds;
   const cashOnHand = cashIn - cashOut;
   const outstandingPayables = sellerDue + fulfillmentDue + refundLiability - pendingSellerRecovery;
-  const projectedCash = cashOnHand - outstandingPayables;
   return (
     <main className="admin-shell">
       <aside className={`admin-sidebar${mobileNavOpen ? " mobile-open" : ""}`}>
@@ -688,6 +797,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
+                  <button onClick={() => void resendMemberInvite("seller", s.id, s.email, s.display_name)}>SEND INVITE</button>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
@@ -741,7 +851,17 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>AUDIENCE</span><select name="audience" required><option value="">SELECT AUDIENCE</option><option value="men">MEN</option><option value="women">WOMEN</option><option value="unisex">UNISEX</option></select></label>
               <label><span>APPAREL TYPE</span><select name="category" required><option value="">SELECT TYPE</option><option value="tops">TOPS</option><option value="bottoms">BOTTOMS</option><option value="accessories">ACCESSORIES</option></select></label>
               <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
-              <label><span>AVAILABLE SIZES</span><input name="sizes" placeholder="EXAMPLE: S, M, L, XL" required /></label>
+              <fieldset className="product-size-options">
+                <legend>AVAILABLE SIZES</legend>
+                <div role="group" aria-label="Select available sizes">
+                  {["XS", "S", "M", "L", "XL"].map((size) => (
+                    <label key={size}>
+                      <input type="checkbox" name="sizes" value={size} />
+                      <span>{size}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
               <div className="product-pricing-heading"><span>PRODUCT PRICING</span></div>
               <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
@@ -751,6 +871,16 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" placeholder="EXAMPLE: 700" required /></label>
               <label><span>CUSTOMER SELLING PRICE (USD)</span><input name="price" type="number" min="0" step="0.01" placeholder="EXAMPLE: 145.00" required /></label>
               <label><span>MINIMUM OVERSTOCK PROFIT (USD)</span><input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="EXAMPLE: 30.00" required /></label>
+              <aside className="image-upload-guidance" role="note">
+                <strong>IMAGE UPLOAD REQUIREMENTS</strong>
+                <ul>
+                  <li>All uploaded images must be WebP and 2 MB or less.</li>
+                  <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
+                  <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.iloveimg.com/remove-background" target="_blank" rel="noopener noreferrer">iLoveIMG Background Remover</a> before uploading.</li>
+                  <li>Size charts must also be WebP. Their dimensions may vary.</li>
+                  <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
+                </ul>
+              </aside>
               <label className="image-upload-field" htmlFor="product-image">
                 <span>PRODUCT IMAGE</span>
                 <input
@@ -761,16 +891,24 @@ export function AdminDashboard({ email }: { email: string }) {
                   onChange={(e) => void chooseImage(e.target.files?.[0])}
                 />
                 <span className="image-file-name">
-                  {imageFileName || "NO IMAGE SELECTED"}
+                  {imageFileName || "WEBP · MAX 2 MB"}
                 </span>
+                <b>CHOOSE FILE</b>
+              </label>
+              <label className="image-upload-field" htmlFor="product-size-chart-image">
+                <span>SIZE CHART IMAGE</span>
+                <input
+                  id="product-size-chart-image"
+                  name="size_chart_image"
+                  type="file"
+                  accept="image/webp"
+                />
+                <span className="image-file-name">WEBP · MAX 2 MB</span>
                 <b>CHOOSE FILE</b>
               </label>
               <button>ADD DRAFT</button>
               </form>
             </section>
-            <p className="form-help">
-              Images must be 4:5 WebP files and no larger than 10 MB. Recommended: 1600 × 2000 px. Need to remove a background or convert? Use <a href="https://www.remove.bg/" target="_blank" rel="noreferrer">remove.bg</a> first.
-            </p>
             {imagePreview && (
               <div className="image-preview">
                 <Image
@@ -838,11 +976,33 @@ export function AdminDashboard({ email }: { email: string }) {
                       required
                     />
                   </label>
+                  <aside className="image-upload-guidance" role="note">
+                    <strong>IMAGE UPLOAD REQUIREMENTS</strong>
+                    <ul>
+                      <li>All uploaded images must be WebP and 2 MB or less.</li>
+                      <li>Product photos must be exactly 1600 × 2000 px. Other dimensions will be rejected.</li>
+                      <li>Product photos must have a clean, transparent background. If a seller sends an image with a background, remove it with <a href="https://www.iloveimg.com/remove-background" target="_blank" rel="noopener noreferrer">iLoveIMG Background Remover</a> before uploading.</li>
+                      <li>Size charts must also be WebP. Their dimensions may vary.</li>
+                      <li>Only upload images you have permission to use. Avoid watermarks and unrelated text.</li>
+                    </ul>
+                  </aside>
                   <label className="image-upload-field edit-field-wide">
-                    <span>REPLACE PRODUCT IMAGE (OPTIONAL)</span>
-                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/avif" />
+                    <span>PRODUCT IMAGE</span>
+                    <input name="image" type="file" accept="image/webp" />
+                    <span className="image-file-name">WEBP · MAX 2 MB</span>
+                    <b>CHOOSE FILE</b>
+                  </label>
+                  <label className="image-upload-field edit-field-wide">
+                    <span>SIZE CHART IMAGE</span>
+                    <input name="size_chart_image" type="file" accept="image/webp" />
+                    <span className="image-file-name">WEBP · MAX 2 MB</span>
                     <b>CHOOSE IMAGE</b>
                   </label>
+                  {editing.size_chart_url && (
+                    <a className="current-size-chart" href={editing.size_chart_url} target="_blank" rel="noopener noreferrer">
+                      VIEW CURRENT SIZE CHART ↗
+                    </a>
+                  )}
                   <div className="edit-grid">
                     <label className="edit-field">
                       <span>BRAND</span>
@@ -1034,6 +1194,19 @@ export function AdminDashboard({ email }: { email: string }) {
                 <div className="fulfilment-form-action"><button>ADD TEAM MEMBER</button></div>
               </form>
             </section>
+            <DataTable
+              headings={["TEAM MEMBER", "LOGIN EMAIL", "ACCESS"]}
+              rows={partners.map((partner) => [
+                partner.name,
+                partner.email || "—",
+                <button
+                  key={`${partner.id}-invite`}
+                  onClick={() => void resendMemberInvite("fulfilment", partner.id, partner.email, partner.name)}
+                >
+                  SEND INVITE
+                </button>,
+              ])}
+            />
             <section className="assignment-queue">
               <header>
                 <p className="eyebrow">ADMIN ACTION</p>
