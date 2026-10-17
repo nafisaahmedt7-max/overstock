@@ -3138,3 +3138,9 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 5.25rem;
   }
 }
+
+
+/* Keep cart content inset from the viewport edges. */
+.cart-items {
+  padding-inline: var(--space-2);
+}
