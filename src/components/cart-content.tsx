@@ -48,7 +48,7 @@ export function CartContent({
                         fill
                         sizes="(max-width: 600px) 4.5rem, 6.5rem"
                         unoptimized
-                        style={{ objectFit: "contain", padding: "8%" }}
+                        style={{ objectFit: "contain", padding: "1%" }}
                       />
                     ) : (
                       <span>OVERSTOCK</span>
