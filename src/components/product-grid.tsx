@@ -40,7 +40,13 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   </Link>
                   <div className="product-meta">
                     <div className="product-meta-main">
-                      <p className="product-condition">{product.status === "sold_out" || product.stockQuantity <= 0 ? "SOLD OUT" : `${product.stockQuantity} LEFT`}</p>
+                      <Link
+                        className="product-store-link product-store-link-meta"
+                        href={`/store/${product.sellerId ?? "overstock"}`}
+                        aria-label={`Shop ${product.seller} store`}
+                      >
+                        SHOP {product.seller.toUpperCase()}
+                      </Link>
                       <div className="product-meta-details">
                         <Link className="product-title-link" href={productHref}>
                           <h2>{product.name}</h2>
@@ -52,13 +58,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                     </div>
                     <div className="product-store-row">
                       <ProductCardActions product={product} />
-                      <Link
-                        className="product-store-link"
-                        href={`/store/${product.sellerId ?? "overstock"}`}
-                        aria-label={`Shop ${product.seller} store`}
-                      >
-                        SHOP {product.seller.toUpperCase()}
-                      </Link>
+                      <p className="product-condition">{product.status === "sold_out" || product.stockQuantity <= 0 ? "SOLD OUT" : `${product.stockQuantity} LEFT`}</p>
                     </div>
                   </div>
                 </article>
