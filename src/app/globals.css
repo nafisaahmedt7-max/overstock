@@ -3168,3 +3168,15 @@ input[type="number"]::-webkit-outer-spin-button {
     text-align: left;
   }
 }
+
+
+/* Center a single cart item within the item-list section. */
+.cart-items-single .cart-item {
+  justify-content: center;
+}
+@media (max-width: 600px) {
+  .cart-items-single .cart-item {
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+}
