@@ -3241,3 +3241,17 @@ input[type="number"]::-webkit-outer-spin-button {
     max-width: 32rem;
   }
 }
+
+
+/* Match cart tiles to the product name box treatment. */
+.cart-item,
+.cart-item + .cart-item {
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+.cart-item:hover {
+  border-color: var(--ink);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
