@@ -3255,3 +3255,34 @@ input[type="number"]::-webkit-outer-spin-button {
   border-color: var(--ink);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
 }
+
+
+/* Section overline and compact rectangular cart tiles. */
+.cart-item-section > .eyebrow {
+  margin: 0 0 0.85rem;
+  text-align: center;
+}
+.cart-items {
+  gap: 0.65rem;
+}
+.cart-item {
+  grid-template-columns: 7.5rem minmax(0, 1fr) max-content;
+  gap: 0.9rem;
+  padding: 0.75rem;
+}
+.cart-item-image {
+  width: 7.5rem;
+}
+.cart-item-info {
+  gap: 0.25rem;
+}
+@media (max-width: 600px) {
+  .cart-item {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0.65rem;
+  }
+  .cart-item-image {
+    width: 4.75rem;
+  }
+}
