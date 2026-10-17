@@ -90,6 +90,7 @@ export function AddToCart({ product }: { product: Product }) {
             name: product.name,
             price: product.price,
             size,
+            imageUrl: product.imageUrl,
           });
           setAdded(true);
           window.setTimeout(() => setAdded(false), 2400);
