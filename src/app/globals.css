@@ -3537,3 +3537,22 @@ input[type="number"]::-webkit-outer-spin-button {
 .cart-layout::before {
   bottom: 0;
 }
+
+
+/* Extend the existing last-item rule to meet the summary divider. */
+.cart-items {
+  padding-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+.cart-item:last-child {
+  border-bottom: 0;
+}
+.cart-layout::before {
+  bottom: 0;
+}
+@media (max-width: 800px) {
+  .cart-items {
+    border-bottom: 0;
+    padding-right: var(--space-2);
+  }
+}
