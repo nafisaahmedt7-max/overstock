@@ -3286,3 +3286,44 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 4.75rem;
   }
 }
+
+
+/* Narrower, more compact cart tiles with a clearly spaced section label. */
+.cart-item-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.cart-item-section > .eyebrow {
+  margin: 0 0 1.1rem;
+}
+.cart-item {
+  width: 100%;
+  max-width: 38rem;
+  margin-inline: auto;
+  grid-template-columns: 6.5rem minmax(0, 1fr) max-content;
+  gap: 0.75rem;
+  padding: 0.6rem;
+}
+.cart-item-image {
+  width: 6.5rem;
+}
+.cart-item-total {
+  gap: 0.55rem;
+}
+.cart-item-total p {
+  font-size: 0.88rem;
+}
+@media (max-width: 600px) {
+  .cart-item {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.6rem;
+    padding: 0.55rem;
+  }
+  .cart-item-image {
+    width: 4.5rem;
+  }
+  .cart-item-total {
+    gap: 1rem;
+  }
+}
