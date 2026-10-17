@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { Product } from "@/data/products";
 import { useCart } from "./cart-provider";
 
-type ProductCardItem = Pick<Product, "slug" | "name" | "price" | "sizes" | "status" | "sizeChartUrl">;
+type ProductCardItem = Pick<Product, "slug" | "name" | "price" | "sizes" | "status" | "sizeChartUrl" | "imageUrl">;
 
 export function ProductCardActions({ product }: { product: ProductCardItem }) {
   const [open, setOpen] = useState(false);
@@ -56,6 +56,7 @@ export function ProductCardActions({ product }: { product: ProductCardItem }) {
       name: product.name,
       price: product.price,
       size,
+      imageUrl: product.imageUrl,
     });
     setOpen(false);
     setAdded(true);
