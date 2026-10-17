@@ -2994,3 +2994,117 @@ input[type="number"]::-webkit-outer-spin-button {
   letter-spacing: 0.08em;
   transform: translateX(0.15rem);
 }
+
+
+/* Product-led cart rows with clear details and totals. */
+.cart-items {
+  border-top: 1px solid var(--line);
+}
+.cart-item {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 0;
+  padding: 1rem;
+}
+.cart-item-image {
+  position: relative;
+  display: block;
+  width: 6.5rem;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.cart-item-image > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 600 0.58rem var(--font-mono), monospace;
+  letter-spacing: 0.08em;
+}
+.cart-item-info {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 0.45rem;
+  text-align: left;
+}
+.cart-item-info > a {
+  min-width: 0;
+}
+.cart-item-info h2 {
+  overflow-wrap: anywhere;
+}
+.cart-item-info p {
+  color: #555;
+  font: 500 0.7rem/1.4 var(--font-mono), monospace;
+}
+.cart-item-total {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  text-align: right;
+}
+.cart-item-total p {
+  font: 500 0.85rem var(--font-mono), monospace;
+  white-space: nowrap;
+}
+.cart-item-total button {
+  margin: 0;
+  color: #555;
+  font: 600 0.65rem var(--font-mono), monospace;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+.cart-summary {
+  position: sticky;
+  top: calc(var(--header) + 1rem);
+  align-self: start;
+  display: grid;
+  gap: 1rem;
+}
+.cart-summary > .eyebrow {
+  margin: 0;
+}
+.cart-summary > div {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.cart-summary > p:not(.eyebrow) {
+  margin: 0;
+}
+.cart-summary > button:not(.text-button) {
+  min-height: 3.25rem;
+  margin: 0;
+}
+.cart-summary .text-button {
+  margin: 0.25rem auto 0;
+}
+@media (max-width: 600px) {
+  .cart-item {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.85rem 0.75rem;
+  }
+  .cart-item-image {
+    width: 4.5rem;
+  }
+  .cart-item-total {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .cart-item-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .cart-item-total p {
+    font-size: 0.78rem;
+  }
+}
