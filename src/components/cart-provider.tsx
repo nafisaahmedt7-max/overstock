@@ -14,6 +14,7 @@ export type CartItem = {
   price: number;
   size: string;
   quantity: number;
+  imageUrl?: string | null;
 };
 type Value = {
   items: CartItem[];
@@ -56,7 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return match
             ? current.map((item) =>
                 item === match
-                  ? { ...item, quantity: item.quantity + 1 }
+                  ? { ...item, quantity: item.quantity + 1, imageUrl: item.imageUrl ?? next.imageUrl }
                   : item,
               )
             : [...current, { ...next, quantity: 1 }];
