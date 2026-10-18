@@ -3820,3 +3820,9 @@ select {
   background: var(--paper);
   color: var(--ink);
 }
+
+
+/* Widen seller and fulfillment sign-out buttons. */
+.partner-header-actions > button {
+  min-width: 9rem;
+}
