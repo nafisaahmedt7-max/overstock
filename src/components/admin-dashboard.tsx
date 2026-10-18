@@ -558,9 +558,9 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!deleting) return;
     const { error } = await supabase
       .from("products")
-      .update({ status: "archived" })
+      .delete()
       .eq("id", deleting.id);
-    setNotice(error?.message || "Product archived. Its inventory and order history are preserved.");
+    setNotice(error?.message || "Product permanently deleted. Its order and inventory history are preserved.");
     if (!error) {
       setDeleting(null);
       await load();
@@ -951,7 +951,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 </span>,
                 <div className="table-actions" key={p.id}>
                   <button onClick={() => setEditing(p)}>EDIT</button>
-                  <button onClick={() => setDeleting(p)}>ARCHIVE</button>
+                  <button onClick={() => setDeleting(p)}>DELETE</button>
                 </div>,
               ])}
             />
@@ -1091,9 +1091,9 @@ export function AdminDashboard({ email }: { email: string }) {
             {deleting && (
               <div className="modal-backdrop">
                 <section className="confirm-panel">
-                  <h2>ARCHIVE {deleting.name}?</h2>
+                  <h2>PERMANENTLY DELETE {deleting.name}?</h2>
                   <p>
-                    This removes the product from the catalogue while preserving its inventory movements and order history.
+                    This permanently removes the product from the catalogue. Existing order lines and inventory movements keep the product name and SKU in their history. Open orders are not deleted.
                   </p>
                   <div>
                     <button onClick={() => setDeleting(null)}>CANCEL</button>
@@ -1101,7 +1101,7 @@ export function AdminDashboard({ email }: { email: string }) {
                       className="danger-button"
                       onClick={() => void removeProduct()}
                     >
-                      ARCHIVE PRODUCT
+                      PERMANENT DELETE
                     </button>
                   </div>
                 </section>
