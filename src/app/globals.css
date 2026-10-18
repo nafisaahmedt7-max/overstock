@@ -3644,7 +3644,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 
 /* Product editor close control mirrors the size-chart cross; footer actions stay pill-shaped. */
-.edit-panel:not(.seller-edit-panel) > header .edit-product-close {
+.edit-panel > header .edit-product-close {
   display: grid;
   width: 2.75rem;
   height: 2.75rem;
@@ -3658,24 +3658,24 @@ input[type="number"]::-webkit-outer-spin-button {
   font: 500 1.45rem/1 var(--font-mono), monospace;
   letter-spacing: 0;
 }
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:hover,
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:focus-visible,
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:active {
+.edit-panel .edit-actions .edit-pill-button:hover,
+.edit-panel .edit-actions .edit-pill-button:focus-visible,
+.edit-panel .edit-actions .edit-pill-button:active {
   border-color: var(--ink);
   background: var(--paper);
   color: var(--ink);
 }
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary) {
+.edit-panel .edit-actions .edit-pill-button:not(.admin-primary) {
   background: var(--paper);
   color: var(--ink);
 }
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):hover,
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):focus-visible,
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):active {
+.edit-panel .edit-actions .edit-pill-button:not(.admin-primary):hover,
+.edit-panel .edit-actions .edit-pill-button:not(.admin-primary):focus-visible,
+.edit-panel .edit-actions .edit-pill-button:not(.admin-primary):active {
   background: #e4e4e0;
   color: var(--ink);
 }
-.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button {
+.edit-panel .edit-actions .edit-pill-button {
   border: 1px solid var(--ink);
   border-radius: 999px;
   background: var(--ink);
