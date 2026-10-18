@@ -81,25 +81,25 @@ export async function POST(request: Request) {
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
   const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const missingConfig = [
     apiKey ? null : "BREVO_API_KEY",
     senderEmail ? null : "BREVO_SENDER_EMAIL",
     supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
-    serviceRoleKey ? null : "SUPABASE_SERVICE_ROLE_KEY",
+    serverKey ? null : "SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)",
   ].filter((name): name is string => name !== null);
   if (missingConfig.length)
     return NextResponse.json({ error: `Registration email is not configured. Missing: ${missingConfig.join(", ")}.` }, { status: 503 });
   const configuredApiKey = apiKey as string;
   const configuredSenderEmail = senderEmail as string;
   const configuredSupabaseUrl = supabaseUrl as string;
-  const configuredServiceRoleKey = serviceRoleKey as string;
+  const configuredServerKey = serverKey as string;
 
   const registrationUrl = new URL("/portal/login", request.url);
   registrationUrl.searchParams.set("mode", "register");
   registrationUrl.searchParams.set("email", email);
 
-  const adminClient = createSupabaseClient(configuredSupabaseUrl, configuredServiceRoleKey, {
+  const adminClient = createSupabaseClient(configuredSupabaseUrl, configuredServerKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
   const inviteResult = await adminClient.auth.admin.generateLink({
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       error: invalidAdminKey
-        ? `Supabase rejected the server-side API key. Update SUPABASE_SERVICE_ROLE_KEY with a valid key for this Supabase project, then retry.`
+        ? `Supabase rejected the server-side API key. Update SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY) with a valid key for this Supabase project, then retry.`
         : redirectRejected
           ? `Supabase Auth rejected this site's redirect address (${registrationUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
           : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
