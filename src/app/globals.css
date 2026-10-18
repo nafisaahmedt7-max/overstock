@@ -3740,3 +3740,11 @@ input[type="number"]::-webkit-outer-spin-button {
 select {
   border-radius: 0.5rem;
 }
+
+
+/* Override older square-corner rules on the admin and seller dropdowns. */
+.admin-shell .admin-form select,
+.seller-package-list select,
+.order-summary-status-select {
+  border-radius: 0.5rem;
+}
