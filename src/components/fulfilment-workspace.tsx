@@ -73,8 +73,6 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
         </details>;
       })}
     </div>
-  </main>;
-}
   <div className="partner-page-footer"><button type="button" onClick={() => void signOut()}>SIGN OUT</button></div>
   </main>;
 }
