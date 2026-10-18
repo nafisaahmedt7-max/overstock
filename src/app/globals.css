@@ -3734,3 +3734,9 @@ input[type="number"]::-webkit-outer-spin-button {
     0.32rem 0.32rem;
   background-repeat: no-repeat;
 }
+
+
+/* Keep every native dropdown consistent with the New Order controls. */
+select {
+  border-radius: 0.5rem;
+}
