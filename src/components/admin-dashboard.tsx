@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 17521)
+Total output lines: 1304
+
 "use client";
 
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
@@ -128,7 +131,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [editingSeller, setEditingSeller] = useState<Seller | null>(null),
     [deletingSeller, setDeletingSeller] = useState<Seller | null>(null),
     [editing, setEditing] = useState<Product | null>(null),
-    [deleting, setDeleting] = useState<Product | null>(null),
+    [archiving, setArchiving] = useState<Product | null>(null),
     [notice, setNotice] = useState("");
   const [supabase] = useState(createClient);
   const router = useRouter();
@@ -513,6 +516,7 @@ export function AdminDashboard({ email }: { email: string }) {
     const { error } = await supabase.rpc("admin_update_product", {
       target_product_id: editing.id,
       payload: {
+        sku: String(f.get("sku")),
         name: String(f.get("name")),
         description: String(f.get("description")),
         audience: String(f.get("audience")),
@@ -554,15 +558,14 @@ export function AdminDashboard({ email }: { email: string }) {
       await load();
     }
   }
-  async function removeProduct() {
-    if (!deleting) return;
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", deleting.id);
-    setNotice(error?.message || "Product permanently deleted. Its order and inventory history are preserved.");
+  async function archiveProduct() {
+    if (!archiving) return;
+    const { error } = await supabase.rpc("admin_archive_product", {
+      target_product_id: archiving.id,
+    });
+    setNotice(error?.message || "Product archived.");
     if (!error) {
-      setDeleting(null);
+      setArchiving(null);
       await load();
     }
   }
@@ -739,65 +742,7 @@ export function AdminDashboard({ email }: { email: string }) {
             <header><p className="eyebrow">FINANCIAL OVERVIEW</p><h2>SALES & PROFIT</h2><p>A clear view of customer sales, operating costs, and OVERSTOCK profit.</p></header>
             <section className="overview-money-section"><header><p className="eyebrow">SALES</p><h3>WHAT CUSTOMERS BOUGHT</h3><b className="section-total positive-total">{money(totalSales)}</b></header><div className="finance-ledger-grid"><article className="sales-ledger-total"><span>TOTAL SALES</span><b>{money(totalSales)}</b><small>Customer payments from active orders</small></article><article><span>SELLER PRODUCT SALES</span><b>{money(sellerSales)}</b><small>Sales of seller-owned products</small></article></div></section>
             <section className="overview-money-section"><header><p className="eyebrow">MONEY IN</p><h3>CASH RECEIVED</h3><b className="section-total positive-total">{money(cashIn)}</b></header><div className="finance-ledger-grid"><article className="cash-in"><span>CUSTOMER PAYMENTS</span><b>{money(grossSales)}</b><small>All cash received from customers</small></article><article className="cash-in"><span>SELLER REFUNDS RECEIVED</span><b>{money(completedSellerRecovery)}</b><small>Only refunds confirmed as received</small></article><article className="cash-balance"><span>CASH ON HAND</span><b>{money(cashOnHand)}</b><small>Cash received less payments already made</small></article></div></section>
-            <section className="overview-money-section"><header><p className="eyebrow">MONEY OUT</p><h3>ORDER COSTS & PAYMENTS</h3><b className="section-total negative-total">−{money(itemCost + sellerShare + inboundDelivery + fulfillmentService + gpoFees)}</b></header><div className="finance-ledger-grid"><article className="negative-ledger"><span>ITEM COST</span><b>−{money(itemCost)}</b><small>Cost of each product</small></article><article className="negative-ledger"><span>SELLER SHARE</span><b>−{money(sellerShare)}</b><small>Seller share of profit</small></article><article className="negative-ledger"><span>DELIVERY TO FULFILMENT</span><b>−{money(inboundDelivery)}</b><small>Seller-to-fulfilment delivery</small></article><article className="negative-ledger"><span>FULFILMENT SERVICES</span><b>−{money(fulfillmentService)}</b><small>Handling and service fees</small></article><article className="negative-ledger"><span>GPO SHIPPING</span><b>−{money(gpoFees)}</b><small>Weight-based courier charges</small></article><article className="cash-out"><span>PAYMENTS ALREADY MADE</span><b>−{money(cashOut)}</b><small>Seller, fulfilment, and completed refunds</small></article><article className="cash-pending"><span>OPEN PAYABLES</span><b>−{money(outstandingPayables)}</b><small>Unpaid seller, fulfilment, and net customer refund amounts</small></article><article><span>EXPECTED SELLER REFUNDS</span><b>{money(pendingSellerRecovery)}</b><small>Refund recovery not received yet</small></article></div></section>
-            <section className="overview-profit-result"><header><p className="eyebrow">PROFIT RECONCILIATION</p><h3>OVERSTOCK PROFIT</h3></header><div className="profit-reconciliation"><span>TOTAL SALES</span><b>{money(totalSales)}</b><span>LESS: SELLER COSTS</span><b>−{money(itemCost + sellerShare + inboundDelivery)}</b><span>LESS: FULFILMENT & GPO</span><b>−{money(fulfillmentService + gpoFees)}</b></div><footer><span>OVERSTOCK PROFIT</span><b>{money(overstockProfit)}</b></footer></section>
-            <div className="ledger-bar" aria-label="Profit allocation"><span className="ledger-bar-cost" style={{width: `${totalSales ? ((itemCost + inboundDelivery + sellerShare) / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-fulfillment" style={{width: `${totalSales ? (fulfillmentCost / totalSales) * 100 : 0}%`}} /><span className="ledger-bar-overstock" style={{width: `${totalSales ? (Math.max(overstockProfit, 0) / totalSales) * 100 : 0}%`}} /></div>
-            <div className="ledger-key"><span><i className="ledger-bar-cost" />Item cost, seller share & delivery</span><span><i className="ledger-bar-fulfillment" />Fulfilment & GPO</span><span><i className="ledger-bar-overstock" />OVERSTOCK profit</span></div>
-
-          </section>
-          <section className="refund-ledger"><header><p className="eyebrow">REFUND POSITION</p><h2>CUSTOMER REFUNDS</h2></header><div><article><span>CUSTOMER REFUND DUE</span><b>−{money(refundsDue)}</b></article><article><span>CUSTOMER REFUND IN TRANSIT</span><b>−{money(refundsSent)}</b></article><article><span>SELLER REFUND RECOVERY</span><b>{money(pendingSellerRecovery + completedSellerRecovery)}</b></article><article><span>REFUNDS COMPLETED</span><b>−{money(completedRefunds)}</b></article></div></section>
-        </>)}
-        {tab === "sellers" && (
-          <>
-            <details className="admin-help-dropdown">
-              <summary>SELLER STATUS EXPLANATIONS</summary>
-              <div>
-                <p><b>ACTIVE</b> — Seller can sign in and view their assigned orders.</p>
-                <p><b>INACTIVE</b> — Seller access is paused but their records remain saved.</p>
-                <p><b>ARCHIVED</b> — Seller is retained for order history and no longer used for new products.</p>
-                <p><b>SELLER SHARE</b> — The agreed percentage of each connected product sale paid to that seller. OVERSTOCK retains the remainder for platform and fulfilment fees.</p>
-                <p><b>PAYMENT DUE</b> — The seller share has been created and has not been paid yet.</p>
-                <p><b>PAID</b> — The seller share has been settled.</p>
-                <p><b>REFUND REQUESTED</b> — A paid seller order was cancelled and admin must recover that seller payment.</p>
-              </div>
-            </details>
-            <section className="order-entry-panel seller-entry-panel">
-              <header><div><p className="eyebrow">ADD A NEW SELLER</p><h2>SELLER DETAILS</h2></div></header>
-              <form className="admin-form seller-entry-form" onSubmit={addSeller}>
-              <label><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
-              <label><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" required /></label>
-              <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" required /></label>
-              <label className="percent-field">
-                <span>SELLER SHARE</span>
-                <span className="percent-input">
-                  <input
-                    name="commission"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    defaultValue="20"
-                    placeholder="20%"
-                    aria-label="Seller share of profit, 0 to 100 percent"
-                    required
-                  />
-                </span>
-              </label>
-              <button>ADD SELLER</button>
-              </form>
-            </section>
-            <DataTable
-              headings={["CODE", "SELLER", "EMAIL", "SELLER SHARE", "PAYMENT DUE", "PAID", "STATUS", "ACTIONS"]}
-              rows={sellers.map((s) => [
-                s.seller_code,
-                s.display_name,
-                s.email || "—",
-                `${s.commission_percent}%`,
-                money(finance.filter((line) => line.seller_id === s.id && line.payout_status !== "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
-                money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
-                <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
-                <span className="table-actions" key={`${s.id}-actions`}>
-                  <button onClick={() => void resendMemberInvite("seller", s.id, s.email, s.display_name)}>SEND INVITE</button>
+            <section className="overview-money-section"><header><p className="eyebrow">MONEY OUT</p><h3>ORDER COSTS & PAYMENTS</h3><b className="section-total negative-total">−{money(itemCost + sellerShare + inboundDelivery + fulfillmentService + gpoFees)}</b></header><div className="finance-ledger-grid"><article className="negative-ledger"><span>ITEM COST</span><b>−{money(itemCost)}</b><small>Cost of each product</small></article><article className="negative-ledger"><span>SELLER SHARE</span><b>−{money(sellerSh…1521 tokens truncated…play_name)}>SEND INVITE</button>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
@@ -951,7 +896,11 @@ export function AdminDashboard({ email }: { email: string }) {
                 </span>,
                 <div className="table-actions" key={p.id}>
                   <button onClick={() => setEditing(p)}>EDIT</button>
-                  <button onClick={() => setDeleting(p)}>DELETE</button>
+                  {p.status === "archived" ? (
+                    <button type="button" disabled>ARCHIVED</button>
+                  ) : (
+                    <button type="button" onClick={() => setArchiving(p)}>ARCHIVE</button>
+                  )}
                 </div>,
               ])}
             />
@@ -964,6 +913,16 @@ export function AdminDashboard({ email }: { email: string }) {
                       CLOSE
                     </button>
                   </header>
+                  <label className="edit-field edit-field-wide">
+                    <span>SKU</span>
+                    <input
+                      name="sku"
+                      defaultValue={editing.sku}
+                      pattern="[A-Za-z0-9-]{3,24}"
+                      title="Use 3 to 24 letters, numbers, or hyphens."
+                      required
+                    />
+                  </label>
                   <label className="edit-field edit-field-wide">
                     <span>PRODUCT NAME</span>
                     <input name="name" defaultValue={editing.name} required />
@@ -1088,20 +1047,21 @@ export function AdminDashboard({ email }: { email: string }) {
                 </form>
               </div>
             )}
-            {deleting && (
+            {archiving && (
               <div className="modal-backdrop">
                 <section className="confirm-panel">
-                  <h2>PERMANENTLY DELETE {deleting.name}?</h2>
+                  <h2>ARCHIVE {archiving.name}?</h2>
                   <p>
-                    This permanently removes the product from the catalogue. Existing order lines and inventory movements keep the product name and SKU in their history. Open orders are not deleted.
+                    This product will be hidden from the shop. Its record and
+                    inventory history will remain available in the admin.
                   </p>
                   <div>
-                    <button onClick={() => setDeleting(null)}>CANCEL</button>
+                    <button onClick={() => setArchiving(null)}>CANCEL</button>
                     <button
-                      className="danger-button"
-                      onClick={() => void removeProduct()}
+                      className="admin-primary"
+                      onClick={() => void archiveProduct()}
                     >
-                      PERMANENT DELETE
+                      ARCHIVE PRODUCT
                     </button>
                   </div>
                 </section>
