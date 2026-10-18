@@ -3770,7 +3770,7 @@ select {
 
 /* Darken the available-size box and match Add to Cart hover feedback. */
 .admin-form.product-form .product-size-options {
-  background: #d0d0cc;
+  background: var(--paper);
 }
 .admin-form.product-form .product-size-options label {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
@@ -3779,4 +3779,8 @@ select {
   border-color: var(--ink);
   background: var(--paper);
   color: var(--ink);
+}
+
+.admin-form.product-form .product-size-options label:has(input:checked) {
+  color: var(--paper);
 }
