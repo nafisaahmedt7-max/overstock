@@ -3766,3 +3766,17 @@ select {
   overflow: visible;
   padding: 0.55rem;
 }
+
+
+/* Darken the available-size box and match Add to Cart hover feedback. */
+.admin-form.product-form .product-size-options {
+  background: #d0d0cc;
+}
+.admin-form.product-form .product-size-options label {
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.admin-form.product-form .product-size-options label:not(:has(input:checked)):hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
