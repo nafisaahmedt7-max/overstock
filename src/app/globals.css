@@ -3795,3 +3795,28 @@ select {
 .admin-form.product-form .product-size-options label:has(input:checked) > span {
   color: #e4e4e0;
 }
+
+
+/* Match portal sign-out controls to the Add to Cart pill treatment. */
+.partner-header-actions > button,
+.admin-sidebar > button:last-child {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font: 600 0.64rem/1.15 var(--font-mono), monospace;
+  letter-spacing: 0.025em;
+  text-align: center;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.partner-header-actions > button:hover,
+.partner-header-actions > button:focus-visible,
+.partner-header-actions > button:active,
+.admin-sidebar > button:last-child:hover,
+.admin-sidebar > button:last-child:focus-visible,
+.admin-sidebar > button:last-child:active {
+  background: var(--paper);
+  color: var(--ink);
+}
