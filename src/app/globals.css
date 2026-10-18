@@ -3625,3 +3625,9 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 0.75rem 1rem;
   }
 }
+
+
+/* Use the website background tone for text inside black condition pills. */
+.product-condition-badge {
+  color: var(--paper);
+}
