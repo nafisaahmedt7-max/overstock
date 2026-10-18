@@ -131,6 +131,7 @@ export function AdminDashboard({ email }: { email: string }) {
     [archiving, setArchiving] = useState<Product | null>(null),
     [notice, setNotice] = useState("");
   const [supabase] = useState(createClient);
+  const [sendingInvite, setSendingInvite] = useState<string | null>(null);
   const router = useRouter();
   const load = useCallback(async () => {
     const [s, p, o, fp, os, fin, fi] = await Promise.all([
@@ -288,6 +289,22 @@ export function AdminDashboard({ email }: { email: string }) {
     );
     form.reset();
     await load();
+  }
+  async function resendInvite(
+    role: "seller" | "fulfilment",
+    memberId: string,
+    email: string,
+    name: string,
+  ) {
+    const inviteKey = `${role}:${memberId}`;
+    setSendingInvite(inviteKey);
+    const error = await sendTeamInvite(role, memberId, email, name);
+    setNotice(
+      error
+        ? `Could not resend the registration email: ${error}`
+        : `Registration email sent again to ${email}.`,
+    );
+    setSendingInvite(null);
   }
   async function addPartner(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -783,6 +800,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
+                  {s.email && <button type="button" disabled={sendingInvite === `seller:${s.id}`} onClick={() => void resendInvite("seller", s.id, s.email!, s.display_name)}>{sendingInvite === `seller:${s.id}` ? "SENDING..." : "RESEND EMAIL"}</button>}
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
@@ -1228,8 +1246,14 @@ export function AdminDashboard({ email }: { email: string }) {
               </form>
             </section>
             <DataTable
-              headings={["TEAM MEMBER", "LOGIN EMAIL"]}
-              rows={partners.map((partner) => [partner.name, partner.email || "—"])}
+              headings={["TEAM MEMBER", "LOGIN EMAIL", "ACTIONS"]}
+              rows={partners.map((partner) => [
+                partner.name,
+                partner.email || "—",
+                <span className="table-actions" key={`${partner.id}-actions`}>
+                  {partner.email && <button type="button" disabled={sendingInvite === `fulfilment:${partner.id}`} onClick={() => void resendInvite("fulfilment", partner.id, partner.email!, partner.name)}>{sendingInvite === `fulfilment:${partner.id}` ? "SENDING..." : "RESEND EMAIL"}</button>}
+                </span>,
+              ])}
             />
             <section className="assignment-queue">
               <header>
