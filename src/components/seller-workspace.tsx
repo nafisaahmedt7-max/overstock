@@ -54,7 +54,7 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
   }
   const actionCount = orders.filter(o => ["admin_confirmed", "seller_preparing"].includes(o.journey_status)).length;
   return <main className="partner-page">
-    <header><div><p className="eyebrow">OVERSTOCK / SELLER PORTAL</p><h1>MY ORDERS</h1></div><div className="partner-header-actions"><div><span>AMOUNT DUE</span><b>{due}</b></div><button onClick={() => void signOut()}>SIGN OUT</button></div></header>
+    <header><div><p className="eyebrow">OVERSTOCK / SELLER PORTAL</p><h1>MY ORDERS</h1></div><div className="partner-header-actions"><div><span>AMOUNT DUE</span><b>{due}</b></div><button type="button" onClick={() => void signOut()}>SIGN OUT</button></div></header>
     {notice && <div className="portal-alert" role="status">{notice}</div>}
     <div className="portal-summary"><article><span>ACTION REQUIRED</span><b>{actionCount}</b></article><article><span>TOTAL ORDERS</span><b>{orders.length}</b></article><article><span>SELLER BALANCE</span><b>{due}</b></article></div>
     <StatusConnectionGuide role="seller" title="SELLER STATUS DICTIONARY" />
