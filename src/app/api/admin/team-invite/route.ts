@@ -83,19 +83,23 @@ export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const missingConfig = [
-    ["BREVO_API_KEY", apiKey],
-    ["BREVO_SENDER_EMAIL", senderEmail],
-    ["NEXT_PUBLIC_SUPABASE_URL", supabaseUrl],
-    ["SUPABASE_SERVICE_ROLE_KEY", serviceRoleKey],
-  ].filter(([, value]) => !value).map(([name]) => name);
+    apiKey ? null : "BREVO_API_KEY",
+    senderEmail ? null : "BREVO_SENDER_EMAIL",
+    supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
+    serviceRoleKey ? null : "SUPABASE_SERVICE_ROLE_KEY",
+  ].filter((name): name is string => name !== null);
   if (missingConfig.length)
     return NextResponse.json({ error: "Registration email is not configured. Missing: " + missingConfig.join(", ") + "." }, { status: 503 });
+  const configuredApiKey = apiKey as string;
+  const configuredSenderEmail = senderEmail as string;
+  const configuredSupabaseUrl = supabaseUrl as string;
+  const configuredServiceRoleKey = serviceRoleKey as string;
 
   const registrationUrl = new URL("/portal/login", request.url);
   registrationUrl.searchParams.set("mode", "register");
   registrationUrl.searchParams.set("email", email);
 
-  const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+  const adminClient = createSupabaseClient(configuredSupabaseUrl, configuredServiceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
   const inviteResult = await adminClient.auth.admin.generateLink({
@@ -147,11 +151,11 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         accept: "application/json",
-        "api-key": apiKey,
+        "api-key": configuredApiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
+        sender: { name: senderName, email: configuredSenderEmail },
         to: [{ email, name: name || email }],
         subject,
         textContent,
