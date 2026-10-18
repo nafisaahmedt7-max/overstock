@@ -705,7 +705,7 @@ export function AdminDashboard({ email }: { email: string }) {
             </button>
           ))}
         </nav>
-        <button onClick={signOut}>SIGN OUT</button>
+        <button type="button" onClick={signOut}>SIGN OUT</button>
       </aside>
       <section className="admin-content">
         <header>
