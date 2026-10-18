@@ -857,17 +857,19 @@ export function AdminDashboard({ email }: { email: string }) {
               <label><span>AUDIENCE</span><select name="audience" required><option value="">SELECT AUDIENCE</option><option value="men">MEN</option><option value="women">WOMEN</option><option value="unisex">UNISEX</option></select></label>
               <label><span>APPAREL TYPE</span><select name="category" required><option value="">SELECT TYPE</option><option value="tops">TOPS</option><option value="bottoms">BOTTOMS</option><option value="accessories">ACCESSORIES</option></select></label>
               <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
-              <fieldset className="product-size-options">
-                <legend>AVAILABLE SIZES</legend>
-                <div role="group" aria-label="Select available sizes">
-                  {["XS", "S", "M", "L", "XL"].map((size) => (
-                    <label key={size}>
-                      <input type="checkbox" name="sizes" value={size} />
-                      <span>{size}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <div className="product-size-group">
+                <span className="product-size-title">AVAILABLE SIZES</span>
+                <fieldset className="product-size-options" aria-label="Available sizes">
+                  <div role="group" aria-label="Select available sizes">
+                    {["XS", "S", "M", "L", "XL"].map((size) => (
+                      <label key={size}>
+                        <input type="checkbox" name="sizes" value={size} />
+                        <span>{size}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
               <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
               <div className="product-pricing-heading"><span>PRODUCT PRICING</span></div>
               <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
