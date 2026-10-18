@@ -3655,6 +3655,16 @@ input[type="number"]::-webkit-outer-spin-button {
   background: var(--paper);
   color: var(--ink);
 }
+.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):hover,
+.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):focus-visible,
+.edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):active {
+  background: var(--ink);
+  color: var(--paper);
+}
 .edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button {
   border: 1px solid var(--ink);
   border-radius: 999px;
