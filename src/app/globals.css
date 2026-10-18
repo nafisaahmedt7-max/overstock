@@ -3784,3 +3784,14 @@ select {
 .admin-form.product-form .product-size-options label:has(input:checked) {
   color: #e4e4e0;
 }
+
+
+/* Explicitly animate the size label text into the gray pill color. */
+.admin-form.product-form .product-size-options label > span {
+  color: inherit;
+  transition: color 160ms ease;
+}
+.admin-form.product-form .product-size-options label:not(:has(input:checked)):hover > span,
+.admin-form.product-form .product-size-options label:has(input:checked) > span {
+  color: #e4e4e0;
+}
