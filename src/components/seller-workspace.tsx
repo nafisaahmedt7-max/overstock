@@ -70,8 +70,6 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
         </div>
       </details>) : <div className="empty-state">NO SELLER ORDERS YET</div>}
     </div>
-  </main>;
-}
   <div className="partner-page-footer"><button type="button" onClick={() => void signOut()}>SIGN OUT</button></div>
   </main>;
 }
