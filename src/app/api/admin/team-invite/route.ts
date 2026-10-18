@@ -127,13 +127,13 @@ export async function POST(request: Request) {
     `Hello ${name || "there"},`,
     "",
     `OVERSTOCK has approved your access as a ${roleLabel}.`,
-    `Use this exact email address to register: ${email}`,
-    `Confirm your email and open account registration: ${actionLink}`,
+    `Your portal access is linked to this email address: ${email}`,
+    `Confirm your invitation and set your password: ${actionLink}`,
     "",
-    "The secure link confirms your invitation and opens the registration form. Create a password and enter it again to confirm. You can then sign in to the portal.",
+    "The secure link confirms your invitation and opens the password setup form. Choose a password and enter it again to confirm. You can then sign in to the portal.",
     "Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.",
   ].join("\n");
-  const htmlContent = `<!doctype html><html><body style="margin:0;background:#f1f1ee;color:#111;font-family:Arial,sans-serif"><main style="max-width:600px;margin:32px auto;padding:32px;background:#fff;border:1px solid #111"><p style="font-size:12px;font-weight:bold;letter-spacing:2px">OVERSTOCK / PORTAL ACCESS</p><h1 style="font-size:24px">Confirm your portal invitation</h1><p>Hello ${safeName},</p><p>OVERSTOCK has approved your access as a ${roleLabel}. Use this exact email address to register:</p><p style="padding:12px;background:#eee;font-weight:bold">${safeEmail}</p><p>The button below confirms your invitation and opens the account registration form. Create a password and enter it again to confirm.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;padding:14px 20px;background:#111;color:#fff;text-decoration:none;font-weight:bold">CONFIRM AND REGISTER</a></p><p>Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.</p></main></body></html>`;
+  const htmlContent = `<!doctype html><html><body style="margin:0;background:#f1f1ee;color:#111;font-family:Arial,sans-serif"><main style="max-width:600px;margin:32px auto;padding:32px;background:#fff;border:1px solid #111"><p style="font-size:12px;font-weight:bold;letter-spacing:2px">OVERSTOCK / PORTAL ACCESS</p><h1 style="font-size:24px">Confirm your portal invitation</h1><p>Hello ${safeName},</p><p>OVERSTOCK has approved your access as a ${roleLabel}. Your portal access is linked to this email address:</p><p style="padding:12px;background:#eee;font-weight:bold">${safeEmail}</p><p>The button below confirms your invitation and opens the password setup form. Choose a password and enter it again to confirm.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;padding:14px 20px;background:#111;color:#fff;text-decoration:none;font-weight:bold">CONFIRM AND SET PASSWORD</a></p><p>Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.</p></main></body></html>`;
 
   let response: Response;
   try {
