@@ -82,8 +82,14 @@ export async function POST(request: Request) {
   const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!apiKey || !senderEmail || !supabaseUrl || !serviceRoleKey)
-    return NextResponse.json({ error: "The invitation service is not configured." }, { status: 503 });
+  const missingConfig = [
+    ["BREVO_API_KEY", apiKey],
+    ["BREVO_SENDER_EMAIL", senderEmail],
+    ["NEXT_PUBLIC_SUPABASE_URL", supabaseUrl],
+    ["SUPABASE_SERVICE_ROLE_KEY", serviceRoleKey],
+  ].filter(([, value]) => !value).map(([name]) => name);
+  if (missingConfig.length)
+    return NextResponse.json({ error: "Registration email is not configured. Missing: " + missingConfig.join(", ") + "." }, { status: 503 });
 
   const registrationUrl = new URL("/portal/login", request.url);
   registrationUrl.searchParams.set("mode", "register");
