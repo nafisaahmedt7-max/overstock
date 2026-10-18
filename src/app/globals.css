@@ -3748,3 +3748,22 @@ select {
 .order-summary-status-select {
   border-radius: 0.5rem;
 }
+
+
+/* Keep the available-size title inside its fieldset above the size choices. */
+.admin-form.product-form .product-size-options {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding: 0.55rem;
+}
+.admin-form.product-form .product-size-options > legend {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
