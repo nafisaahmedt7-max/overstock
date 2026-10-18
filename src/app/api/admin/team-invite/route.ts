@@ -127,7 +127,11 @@ export async function POST(request: Request) {
   const actionLink = linkResult.data?.properties?.action_link;
   if (linkResult.error || !actionLink) {
     const authError = linkResult.error;
-    const errorCode = authError?.code || "action_link_missing";
+    const invalidAdminKey =
+      authError?.status === 401 || /invalid api key/i.test(authError?.message || "");
+    const errorCode = invalidAdminKey
+      ? "invalid_service_role_key"
+      : authError?.code || "action_link_missing";
     const redirectRejected =
       errorCode === "redirect_to_not_allowed" ||
       /redirect.*(not allowed|allowlist|allowed)/i.test(authError?.message || "");
@@ -140,9 +144,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      error: redirectRejected
-        ? `Supabase Auth rejected this site's redirect address (${registrationUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
-        : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
+      error: invalidAdminKey
+        ? `Supabase rejected the server-side API key. Update SUPABASE_SERVICE_ROLE_KEY with a valid key for this Supabase project, then retry.`
+        : redirectRejected
+          ? `Supabase Auth rejected this site's redirect address (${registrationUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
+          : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
     }, { status: 502 });
   }
 
