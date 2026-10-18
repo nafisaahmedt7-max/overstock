@@ -186,11 +186,29 @@ export async function POST(request: Request) {
         htmlContent,
       }),
     });
-  } catch {
+  } catch (error) {
+    console.error("OVERSTOCK registration email request failed before a response", {
+      role,
+      error: error instanceof Error ? error.name : "unknown",
+    });
     return NextResponse.json({ error: "The registration email could not be sent. Please try again." }, { status: 502 });
   }
 
-  if (!response.ok)
-    return NextResponse.json({ error: "The registration email could not be sent. Please check the email service and try again." }, { status: 502 });
-  return NextResponse.json({ ok: true });
+  const brevoResult = await response.json().catch(() => null) as { messageId?: string; code?: string } | null;
+  if (!response.ok) {
+    console.error("OVERSTOCK registration email rejected by Brevo", {
+      role,
+      status: response.status,
+      code: brevoResult?.code || "provider_error",
+    });
+    return NextResponse.json({
+      error: `Brevo rejected the registration email (HTTP ${response.status}). Check the sender configuration in Brevo, then retry.`,
+    }, { status: 502 });
+  }
+
+  console.info("OVERSTOCK registration email accepted by Brevo", {
+    role,
+    messageId: brevoResult?.messageId || "not_returned",
+  });
+  return NextResponse.json({ ok: true, acceptedByProvider: true });
 }
