@@ -28,7 +28,7 @@ const STORAGE_KEY = "overstock-cart-v1";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [notice, setNotice] = useState<{ name: string; size: string } | null>(null);
-  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const restored = useRef(false);
   useEffect(() => {
     const timer = window.setTimeout(() => {
