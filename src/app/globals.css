@@ -3776,11 +3776,11 @@ select {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 .admin-form.product-form .product-size-options label:not(:has(input:checked)):hover {
-  border-color: var(--ink);
-  background: var(--paper);
+  border-color: #e4e4e0;
+  background: var(--ink);
   color: var(--ink);
 }
 
 .admin-form.product-form .product-size-options label:has(input:checked) {
-  color: var(--paper);
+  color: #e4e4e0;
 }
