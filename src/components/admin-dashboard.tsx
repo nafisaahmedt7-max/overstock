@@ -324,20 +324,6 @@ export function AdminDashboard({ email }: { email: string }) {
     form.reset();
     await load();
   }
-  async function resendMemberInvite(
-    role: "seller" | "fulfilment",
-    memberId: string,
-    memberEmail: string | null,
-    memberName: string,
-  ) {
-    if (!memberEmail) {
-      setNotice("This team member does not have a login email. Edit the member details first.");
-      return;
-    }
-    const error = await sendTeamInvite(role, memberId, memberEmail, memberName);
-    setNotice(error ? `Registration email failed: ${error}` : "Registration email sent.");
-  }
-
   async function saveSeller(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editingSeller) return;
@@ -797,7 +783,6 @@ export function AdminDashboard({ email }: { email: string }) {
                 money(finance.filter((line) => line.seller_id === s.id && line.payout_status === "paid").reduce((sum, line) => sum + Number(line.seller_due || 0), 0)),
                 <span className="status-badge" data-status={s.status} key={`${s.id}-status`}>{s.status.toUpperCase()}</span>,
                 <span className="table-actions" key={`${s.id}-actions`}>
-                  <button onClick={() => void resendMemberInvite("seller", s.id, s.email, s.display_name)}>SEND INVITE</button>
                   <button onClick={() => setEditingSeller(s)}>EDIT</button>
                   <button onClick={() => setDeletingSeller(s)}>REMOVE</button>
                 </span>,
@@ -1220,17 +1205,8 @@ export function AdminDashboard({ email }: { email: string }) {
               </form>
             </section>
             <DataTable
-              headings={["TEAM MEMBER", "LOGIN EMAIL", "ACCESS"]}
-              rows={partners.map((partner) => [
-                partner.name,
-                partner.email || "—",
-                <button
-                  key={`${partner.id}-invite`}
-                  onClick={() => void resendMemberInvite("fulfilment", partner.id, partner.email, partner.name)}
-                >
-                  SEND INVITE
-                </button>,
-              ])}
+              headings={["TEAM MEMBER", "LOGIN EMAIL"]}
+              rows={partners.map((partner) => [partner.name, partner.email || "—"])}
             />
             <section className="assignment-queue">
               <header>
