@@ -52,7 +52,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
     setNotice(error?.message || "Cancellation request sent to admin for confirmation.");
   }
   return <main className="partner-page">
-    <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div className="partner-header-actions"><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div><button type="button" onClick={() => void signOut()}>SIGN OUT</button></div></header>
+    <header><div><p className="eyebrow">OVERSTOCK / FULFILLMENT</p><h1>ORDER DESK</h1></div><div className="partner-header-actions"><div><span>ACTION REQUIRED</span><b>{orders.filter(o => next[o.journey_status]).length}</b></div></div></header>
     {notice && <div className="portal-alert" role="alert">{notice}</div>}
     <div className="portal-summary"><article><span>AWAITING PACKAGE</span><b>{orders.filter(o => o.journey_status === "awaiting_package").length}</b></article><article><span>IN WAREHOUSE</span><b>{orders.filter(o => ["received_by_fulfillment","qc_ongoing","package_prepared"].includes(o.journey_status)).length}</b></article><article><span>WITH COURIER</span><b>{orders.filter(o => ["sent_to_customer","package_in_transit"].includes(o.journey_status)).length}</b></article></div>
     <StatusConnectionGuide role="fulfilment" title="FULFILMENT STATUS DICTIONARY" />
@@ -73,5 +73,8 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
         </details>;
       })}
     </div>
+  </main>;
+}
+  <div className="partner-page-footer"><button type="button" onClick={() => void signOut()}>SIGN OUT</button></div>
   </main>;
 }
