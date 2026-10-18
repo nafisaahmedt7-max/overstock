@@ -964,8 +964,13 @@ export function AdminDashboard({ email }: { email: string }) {
                 <form className="edit-panel" onSubmit={saveProduct}>
                   <header>
                     <h2>EDIT PRODUCT</h2>
-                    <button type="button" onClick={() => setEditing(null)}>
-                      CLOSE
+                    <button
+                      className="edit-product-close"
+                      type="button"
+                      aria-label="Close product editor"
+                      onClick={() => setEditing(null)}
+                    >
+                      ×
                     </button>
                   </header>
                   <label className="edit-field edit-field-wide">
@@ -1094,10 +1099,16 @@ export function AdminDashboard({ email }: { email: string }) {
                     </label>
                   </div>
                   <div className="edit-actions">
-                    <button type="button" onClick={() => setEditing(null)}>
+                    <button
+                      className="edit-pill-button"
+                      type="button"
+                      onClick={() => setEditing(null)}
+                    >
                       CANCEL
                     </button>
-                    <button className="admin-primary">SAVE CHANGES</button>
+                    <button className="admin-primary edit-pill-button">
+                      SAVE CHANGES
+                    </button>
                   </div>
                 </form>
               </div>
