@@ -3672,3 +3672,27 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--paper);
   transition: background-color 180ms ease, color 180ms ease;
 }
+
+/* Match the admin submit actions to the storefront Add to Cart transition. */
+.admin-shell .seller-entry-form > button,
+.admin-shell .admin-form.product-form > button,
+.admin-shell .order-entry-form > button,
+.admin-shell .fulfilment-form-action > button {
+  border: 1px solid var(--ink);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.admin-shell .seller-entry-form > button:not(:disabled):hover,
+.admin-shell .seller-entry-form > button:not(:disabled):focus-visible,
+.admin-shell .seller-entry-form > button:not(:disabled):active,
+.admin-shell .admin-form.product-form > button:not(:disabled):hover,
+.admin-shell .admin-form.product-form > button:not(:disabled):focus-visible,
+.admin-shell .admin-form.product-form > button:not(:disabled):active,
+.admin-shell .order-entry-form > button:not(:disabled):hover,
+.admin-shell .order-entry-form > button:not(:disabled):focus-visible,
+.admin-shell .order-entry-form > button:not(:disabled):active,
+.admin-shell .fulfilment-form-action > button:not(:disabled):hover,
+.admin-shell .fulfilment-form-action > button:not(:disabled):focus-visible,
+.admin-shell .fulfilment-form-action > button:not(:disabled):active {
+  background: #fff;
+  color: var(--ink);
+}
