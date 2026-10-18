@@ -3713,3 +3713,7 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--ink);
   cursor: not-allowed;
 }
+
+.seller-edit-panel .edit-actions {
+  justify-content: flex-end;
+}
