@@ -558,9 +558,9 @@ export function AdminDashboard({ email }: { email: string }) {
     if (!deleting) return;
     const { error } = await supabase
       .from("products")
-      .delete()
+      .update({ status: "archived" })
       .eq("id", deleting.id);
-    setNotice(error?.message || "Product removed.");
+    setNotice(error?.message || "Product archived. Its inventory and order history are preserved.");
     if (!error) {
       setDeleting(null);
       await load();
@@ -951,7 +951,7 @@ export function AdminDashboard({ email }: { email: string }) {
                 </span>,
                 <div className="table-actions" key={p.id}>
                   <button onClick={() => setEditing(p)}>EDIT</button>
-                  <button onClick={() => setDeleting(p)}>REMOVE</button>
+                  <button onClick={() => setDeleting(p)}>ARCHIVE</button>
                 </div>,
               ])}
             />
@@ -1091,10 +1091,9 @@ export function AdminDashboard({ email }: { email: string }) {
             {deleting && (
               <div className="modal-backdrop">
                 <section className="confirm-panel">
-                  <h2>REMOVE {deleting.name}?</h2>
+                  <h2>ARCHIVE {deleting.name}?</h2>
                   <p>
-                    This is only allowed when the product has no protected order
-                    history.
+                    This removes the product from the catalogue while preserving its inventory movements and order history.
                   </p>
                   <div>
                     <button onClick={() => setDeleting(null)}>CANCEL</button>
@@ -1102,7 +1101,7 @@ export function AdminDashboard({ email }: { email: string }) {
                       className="danger-button"
                       onClick={() => void removeProduct()}
                     >
-                      REMOVE PRODUCT
+                      ARCHIVE PRODUCT
                     </button>
                   </div>
                 </section>
