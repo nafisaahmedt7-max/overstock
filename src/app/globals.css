@@ -3826,3 +3826,29 @@ select {
 .partner-header-actions > button {
   min-width: 9rem;
 }
+
+
+.partner-page-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+.partner-page-footer > button {
+  min-width: 9rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font: 600 0.64rem/1.15 var(--font-mono), monospace;
+  letter-spacing: 0.025em;
+  text-align: center;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.partner-page-footer > button:hover,
+.partner-page-footer > button:focus-visible,
+.partner-page-footer > button:active {
+  background: var(--paper);
+  color: var(--ink);
+}
