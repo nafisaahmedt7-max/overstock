@@ -3662,13 +3662,13 @@ input[type="number"]::-webkit-outer-spin-button {
 .edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):hover,
 .edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):focus-visible,
 .edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button:not(.admin-primary):active {
-  background: var(--ink);
-  color: var(--paper);
+  background: #e4e4e0;
+  color: var(--ink);
 }
 .edit-panel:not(.seller-edit-panel) .edit-actions .edit-pill-button {
   border: 1px solid var(--ink);
   border-radius: 999px;
   background: var(--ink);
   color: var(--paper);
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color 180ms ease, color 180ms ease;
 }
