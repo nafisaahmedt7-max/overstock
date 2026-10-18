@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     serviceRoleKey ? null : "SUPABASE_SERVICE_ROLE_KEY",
   ].filter((name): name is string => name !== null);
   if (missingConfig.length)
-    return NextResponse.json({ error: "Registration email is not configured. Missing: " + missingConfig.join(", ") + "." }, { status: 503 });
+    return NextResponse.json({ error: `Registration email is not configured. Missing: ${missingConfig.join(", ")}.` }, { status: 503 });
   const configuredApiKey = apiKey as string;
   const configuredSenderEmail = senderEmail as string;
   const configuredSupabaseUrl = supabaseUrl as string;
@@ -114,7 +114,9 @@ export async function POST(request: Request) {
   // An existing Auth account cannot receive another "invite" link. Send a
   // secure sign-in link instead; registration completion will attach the
   // account to the newly added seller or fulfilment record.
-  const useExistingAccountLink = inviteResult.error?.code === "email_exists";
+  const useExistingAccountLink = ["email_exists", "user_already_exists"].includes(
+    inviteResult.error?.code || "",
+  );
   const linkResult = useExistingAccountLink
     ? await adminClient.auth.admin.generateLink({
         type: "magiclink",
@@ -123,10 +125,26 @@ export async function POST(request: Request) {
       })
     : inviteResult;
   const actionLink = linkResult.data?.properties?.action_link;
-  if (linkResult.error || !actionLink)
+  if (linkResult.error || !actionLink) {
+    const authError = linkResult.error;
+    const errorCode = authError?.code || "action_link_missing";
+    const redirectRejected =
+      errorCode === "redirect_to_not_allowed" ||
+      /redirect.*(not allowed|allowlist|allowed)/i.test(authError?.message || "");
+    console.error("OVERSTOCK invitation link generation failed", {
+      flow: useExistingAccountLink ? "magiclink" : "invite",
+      code: errorCode,
+      status: authError?.status,
+      message: authError?.message,
+      redirectOrigin: registrationUrl.origin,
+    });
+
     return NextResponse.json({
-      error: "A secure registration link could not be created. Please verify this email address and try again.",
+      error: redirectRejected
+        ? `Supabase Auth rejected this site's redirect address (${registrationUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
+        : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
     }, { status: 502 });
+  }
 
   const safeName = escapeHtml(name || "there");
   const safeEmail = escapeHtml(email);
