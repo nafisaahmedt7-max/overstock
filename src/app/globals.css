@@ -828,6 +828,16 @@ input[type="number"]::-webkit-outer-spin-button {
   width: 100%;
   margin-top: 1.5rem;
 }
+.admin-login .admin-panel .admin-primary {
+  border: 1px solid var(--ink);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.admin-login .admin-panel .admin-primary:hover:not(:disabled),
+.admin-login .admin-panel .admin-primary:focus-visible:not(:disabled),
+.admin-login .admin-panel .admin-primary:active:not(:disabled) {
+  background: var(--paper);
+  color: var(--ink);
+}
 .admin-error {
   margin-top: 1rem;
   color: #9d0000;
