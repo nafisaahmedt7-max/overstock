@@ -182,12 +182,10 @@ export async function POST(request: Request) {
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;background-color:#e4e4e0;">
       <tr>
         <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;background-color:#e4e4e0;text-align:center;">
-          <span style="font-size:10px;font-weight:700;letter-spacing:.06em;">PORTAL ROLE:</span><br>
-          <strong style="font-size:13px;line-height:1.4;">${role === "seller" ? "SELLER" : "FULFILMENT"}</strong>
+          <span style="font-size:9px;font-weight:700;letter-spacing:.04em;white-space:nowrap;">PORTAL ROLE:</span><strong style="padding-left:5px;font-size:12px;line-height:1.4;">${role === "seller" ? "SELLER" : "FULFILMENT"}</strong>
         </td>
         <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;border-left:1px solid #777777;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;">
-          <span style="font-size:10px;font-weight:700;letter-spacing:.06em;">LOGIN EMAIL:</span><br>
-          <strong style="font-size:13px;line-height:1.4;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
+          <span style="font-size:9px;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="padding-left:5px;font-size:11px;line-height:1.4;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
         </td>
       </tr>
     </table>`;
