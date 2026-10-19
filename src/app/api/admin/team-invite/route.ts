@@ -182,7 +182,7 @@ export async function POST(request: Request) {
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
     <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
     <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
-    <table class="os-invite-details" role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:calc(100% + 84px);max-width:650px;margin:0 -42px;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
+    <table class="os-invite-details" role="presentation" align="center" width="650" border="0" cellpadding="0" cellspacing="0" style="width:calc(100% + 84px);max-width:650px;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
       <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td style="padding:11px 0;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
       <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td style="padding:11px 0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
     </table>
