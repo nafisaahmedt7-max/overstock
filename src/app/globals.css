@@ -3880,7 +3880,7 @@ select {
   border: 1px solid #c8c8c4;
   border-radius: 8px;
   background: #e4e4e0;
-  text-align: center;
+  text-align: left;
 }
 .portal-reset-notice strong {
   font-weight: 700;
