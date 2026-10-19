@@ -99,28 +99,30 @@ export async function POST(request: Request) {
     "OVERSTOCK PASSWORD RESET",
     "",
     "A request was received to reset the password for your OVERSTOCK portal account.",
+    `ACCOUNT EMAIL: ${email}`,
     "Use this secure link to choose a new password:",
     resetUrl.toString(),
     "",
     "If you did not request a password reset, you can ignore this email.",
-    `This request was made for ${email}.`,
     "For any queries about your account, contact us at operations.overstock@gmail.com.",
   ].join("\n");
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ACCOUNT SECURITY</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">RESET YOUR PASSWORD</h1>
     <p style="margin:0 0 18px;">A request was received to reset the password for your OVERSTOCK portal account.</p>
+    <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:0 0 12px;font-size:12px;">Click below to choose a new password.</p>
     <p style="margin:0 0 16px;"><a class="os-button" href="${safeLink}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">RESET PASSWORD</a></p>
     <p style="margin:0;font-size:12px;overflow-wrap:anywhere;word-break:break-word;">If the button does not work, use this secure link:<br><a href="${safeLink}" style="color:#111111;text-decoration:underline;">${safeLink}</a></p>
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:separate;border-spacing:0;background-color:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px;font-size:12px;line-height:1.5;">If you did not request a password reset, you can ignore this email.</td></tr>
     </table>
-    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:collapse;border:1px solid #111111;background-color:#e4e4e0;">
-      <tr><td style="width:40%;padding:11px 8px 11px 12px;font-size:10px;font-weight:700;letter-spacing:.08em;">ACCOUNT EMAIL</td><td align="right" style="padding:11px 12px 11px 8px;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;"><a href="mailto:${safeEmail}" style="color:#111111;font-weight:700;text-decoration:underline;">${safeEmail}</a></td></tr>
-    </table>
     <p style="margin:14px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
-  const htmlContent = renderOverstockEmail(baseUrl, contentHtml);
+  const detailsHtml = `
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;background-color:#e4e4e0;">
+      <tr><td class="os-invite-detail-cell" width="40%" bgcolor="#e4e4e0" style="width:40%;padding:11px 8px 11px 42px;background-color:#e4e4e0;font-size:10px;font-weight:700;letter-spacing:.08em;">ACCOUNT EMAIL</td><td class="os-invite-detail-cell" bgcolor="#e4e4e0" style="padding:11px 42px 11px 8px;background-color:#e4e4e0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;">${safeEmail}</a></td></tr>
+    </table>`;
+  const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
   let response: Response;
   try {
