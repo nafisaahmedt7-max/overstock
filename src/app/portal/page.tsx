@@ -34,16 +34,8 @@ export default async function Portal() {
           <h1 id="portal-role-picker-title">CHOOSE YOUR WORKSPACE</h1>
           <p className="portal-role-picker-copy">This account has access to both workspaces. Choose where you want to go.</p>
           <nav className="portal-role-options" aria-label="Choose a workspace">
-            <Link className="portal-role-option" href="/seller">
-              <span>SELLER</span>
-              <small>Manage seller orders and products.</small>
-              <strong>OPEN SELLER PORTAL</strong>
-            </Link>
-            <Link className="portal-role-option" href="/fulfilment">
-              <span>FULFILMENT</span>
-              <small>Review fulfilment work and shipments.</small>
-              <strong>OPEN FULFILMENT PORTAL</strong>
-            </Link>
+            <Link className="portal-role-option" href="/seller">SELLER</Link>
+            <Link className="portal-role-option" href="/fulfilment">FULFILMENT</Link>
           </nav>
         </section>
       </main>
