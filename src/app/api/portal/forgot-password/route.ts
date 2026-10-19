@@ -116,7 +116,9 @@ export async function POST(request: Request) {
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:separate;border-spacing:0;background-color:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px;font-size:12px;line-height:1.5;">If you did not request a password reset, you can ignore this email.</td></tr>
     </table>
-    <p style="margin:13px 0 0;font-size:11px;">ACCOUNT EMAIL<br><strong>${safeEmail}</strong></p>
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:collapse;border:1px solid #111111;background-color:#e4e4e0;">
+      <tr><td style="width:40%;padding:11px 8px 11px 12px;font-size:10px;font-weight:700;letter-spacing:.08em;">ACCOUNT EMAIL</td><td align="right" style="padding:11px 12px 11px 8px;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;"><a href="mailto:${safeEmail}" style="color:#111111;font-weight:700;text-decoration:underline;">${safeEmail}</a></td></tr>
+    </table>
     <p style="margin:14px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml);
 
