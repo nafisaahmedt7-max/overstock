@@ -133,8 +133,7 @@ export async function POST(request: Request) {
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:center;background-color:#e4e4e0;">
       <tr><td class="os-invite-detail-cell" align="center" bgcolor="#e4e4e0" style="padding:9px 14px;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;">
-        <span style="font-size:10px;font-weight:700;letter-spacing:.06em;">ACCOUNT EMAIL:</span><br>
-        <strong style="font-size:13px;line-height:1.4;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
+        <strong style="font-size:10px;font-weight:700;letter-spacing:.06em;white-space:nowrap;">ACCOUNT EMAIL:</strong>&nbsp;&nbsp;<a href="mailto:${safeEmail}" style="color:#1a73e8;font-size:13px;font-weight:700;line-height:1.4;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a>
       </td></tr>
     </table>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
