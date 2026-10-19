@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:24px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK BELOW TO CHOOSE A NEW PASSWORD.</p>
     <p style="margin:0 0 16px;"><a class="os-button" href="${safeLink}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">RESET PASSWORD</a></p>
-    <p style="margin:14px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>
+    <p style="margin:14px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:separate;border-spacing:0;background-color:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px 14px;">
         <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
         </table>
       </td></tr>
     </table>
-    <p style="margin:12px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeLink}" style="color:#111111;text-decoration:underline;">link</a>.</p>`;
+    <p style="margin:28px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeLink}" style="color:#111111;text-decoration:underline;">link</a>.</p>`;
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;background-color:#e4e4e0;">
       <tr><td class="os-invite-detail-cell" width="40%" bgcolor="#e4e4e0" style="width:40%;padding:11px 8px 11px 42px;background-color:#e4e4e0;font-size:10px;font-weight:700;letter-spacing:.08em;">ACCOUNT EMAIL</td><td class="os-invite-detail-cell" bgcolor="#e4e4e0" style="padding:11px 42px 11px 8px;background-color:#e4e4e0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;">${safeEmail}</a></td></tr>
