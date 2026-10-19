@@ -745,6 +745,68 @@ button {
   line-height: 0.85;
   margin: 1rem 0 2.5rem;
 }
+
+.portal-role-picker {
+  width: min(42rem, 100%);
+}
+.portal-role-picker .portal-role-picker-eyebrow {
+  font: 600 0.68rem/1.4 var(--font-mono), monospace;
+  letter-spacing: 0.04em;
+}
+.portal-role-picker h1 {
+  margin: 1rem 0 0.85rem;
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  line-height: 0.98;
+}
+.portal-role-picker-copy {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.portal-role-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.portal-role-option {
+  min-height: 9.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.portal-role-option > span,
+.portal-role-option > strong {
+  font: 600 0.68rem/1.4 var(--font-mono), monospace;
+  letter-spacing: 0.035em;
+}
+.portal-role-option > small {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.portal-role-option:hover,
+.portal-role-option:focus-visible {
+  background: var(--paper);
+  color: var(--ink);
+}
+.portal-role-option:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .portal-role-picker {
+    padding: 1.25rem;
+  }
+  .portal-role-options {
+    grid-template-columns: 1fr;
+  }
+}
 .admin-panel label {
   display: grid;
   gap: 0.5rem;
