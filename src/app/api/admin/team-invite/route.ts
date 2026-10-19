@@ -178,19 +178,21 @@ export async function POST(request: Request) {
     "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
     "For any queries about your account registration, contact us at operations.overstock@gmail.com.",
   ].join("\n");
+  const detailsHtml = `
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
+      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
+      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
+    </table>`;
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
     <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
     <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
-    <table class="os-invite-details" role="presentation" align="center" width="650" border="0" cellpadding="0" cellspacing="0" style="width:calc(100% + 84px);max-width:650px;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
-      <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td style="padding:11px 0;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
-      <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td style="padding:11px 0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
-    </table>
+    <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p>
     <p style="margin:12px 0 0;"><a class="os-button" href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">LOGIN</a></p>
     <p style="margin:10px 0 0;"><a class="os-button" href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">REGISTER</a></p>
     <p style="margin:13px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account registration, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
-  const htmlContent = renderOverstockEmail(baseUrl, contentHtml);
+  const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
   let response: Response;
   try {

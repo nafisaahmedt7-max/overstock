@@ -7,12 +7,23 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-export function renderOverstockEmail(baseUrl: string, contentHtml: string) {
+export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullWidthHtml?: string) {
   const termsUrl = escapeHtml(new URL("/legal/terms", baseUrl).toString());
   const privacyUrl = escapeHtml(new URL("/legal/privacy", baseUrl).toString());
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
   const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
+
+  let contentRows: string;
+  if (fullWidthHtml) {
+    const parts = contentHtml.split("<!--OVERSTOCK_FULL_WIDTH_SECTION-->");
+    if (parts.length !== 2) throw new Error("Email full-width section marker is missing.");
+    const before = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${parts[0]}</td></tr></table>`;
+    const after = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${parts[1]}</td></tr></table>`;
+    contentRows = `${before}${fullWidthHtml}${after}`;
+  } else {
+    contentRows = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${contentHtml}</td></tr></table>`;
+  }
 
   return `<!doctype html>
 <html lang="en">
@@ -23,12 +34,12 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string) {
   <style type="text/css">
     .os-button { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease !important; }
     .os-button:hover, .os-button:focus { background-color: #f1f1ef !important; color: #111111 !important; box-shadow: inset 0 0 0 1px #111111 !important; }
-    .os-invite-details { width: calc(100% + 84px) !important; max-width: 650px !important; }
     @media only screen and (max-width: 520px) {
-      .os-content { padding: 26px 20px !important; }
+      .os-content { padding-top: 26px !important; padding-bottom: 24px !important; }
+      .os-content-inner { padding-left: 20px !important; padding-right: 20px !important; }
       .os-legal { font-size: 10px !important; }
       .os-social-link { font-size: 9px !important; }
-      .os-invite-details { width: calc(100% + 40px) !important; }
+      .os-invite-detail-cell { padding-left: 20px !important; padding-right: 20px !important; }
     }
   </style>
 </head>
@@ -41,8 +52,8 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string) {
             <td align="center" bgcolor="#111111" style="padding:19px 14px;background-color:#111111;color:#f1f1ef;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:.18em;">OVERSTOCK</td>
           </tr>
           <tr>
-            <td class="os-content" align="center" style="padding:32px 42px 28px;border-left:1px solid #111111;border-right:1px solid #111111;text-align:center;color:#111111;font-size:14px;line-height:1.55;">
-              ${contentHtml}
+            <td class="os-content" align="center" style="padding:32px 0 28px;border-left:1px solid #111111;border-right:1px solid #111111;text-align:center;color:#111111;font-size:14px;line-height:1.55;">
+              ${contentRows}
             </td>
           </tr>
           <tr>
