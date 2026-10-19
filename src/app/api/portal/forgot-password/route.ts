@@ -128,7 +128,7 @@ export async function POST(request: Request) {
         </table>
       </td></tr>
     </table>
-    <p style="margin:14px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeLink}" style="color:#111111;text-decoration:underline;">link</a>.</p>
+    <p style="margin:14px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeLink}" style="color:#1a73e8;text-decoration:underline;">link</a>.</p>
     <!--OVERSTOCK_COMPACT_BOTTOM-->`;
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:center;background-color:#e4e4e0;">
