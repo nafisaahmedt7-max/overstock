@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
       <form className="admin-panel" onSubmit={submit}>
         <p className="eyebrow">OVERSTOCK / SECURE PORTAL</p>
         <h1>RESET PASSWORD</h1>
-        <p>Enter the email address linked to your portal account. We’ll email a secure password reset link.</p>
+        <p>Enter your portal email to receive a secure reset link.</p>
         {!sent && <label>
           Email
           <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
