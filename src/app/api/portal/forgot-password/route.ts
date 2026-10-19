@@ -115,12 +115,18 @@ export async function POST(request: Request) {
     <p style="margin:0 0 16px;"><a class="os-button" href="${safeLink}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">RESET PASSWORD</a></p>
     <p style="margin:14px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:separate;border-spacing:0;background-color:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
-      <tr>
-        <td align="center" style="padding:12px;font-size:12px;line-height:1.5;font-weight:700;">
-          <span aria-hidden="true" style="display:inline-block;width:16px;height:16px;margin-right:7px;border:1px solid #777777;border-radius:50%;color:#555555;font-size:11px;font-weight:700;line-height:16px;text-align:center;vertical-align:middle;">i</span>
-          <strong style="font-weight:700;">IF YOU DID NOT REQUEST A PASSWORD RESET, YOU CAN IGNORE THIS EMAIL.</strong>
-        </td>
-      </tr>
+      <tr><td align="center" style="padding:12px 14px;">
+        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr>
+            <td valign="middle" style="padding:0 9px 0 0;">
+              <span aria-hidden="true" style="display:block;width:18px;height:18px;border:1px solid #777777;border-radius:50%;color:#555555;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:18px;text-align:center;">i</span>
+            </td>
+            <td valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.45;font-weight:700;text-align:left;">
+              <strong style="font-weight:700;">IF YOU DID NOT REQUEST A PASSWORD RESET, YOU CAN IGNORE THIS EMAIL.</strong>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
     </table>
     <p style="margin:12px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeLink}" style="color:#111111;text-decoration:underline;">link</a>.</p>`;
   const detailsHtml = `
