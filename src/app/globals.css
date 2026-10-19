@@ -2771,8 +2771,9 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .portal-auth-link {
-  display: inline-block;
+  display: block;
   margin-top: 1rem;
+  text-align: center;
   color: var(--ink);
   font: 600 0.68rem var(--font-mono), monospace;
   letter-spacing: 0.035em;

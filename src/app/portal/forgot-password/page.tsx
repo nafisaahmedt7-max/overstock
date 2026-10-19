@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
         </label>}
         {!sent && <button className="admin-primary" disabled={busy}>{busy ? "SENDING…" : "SEND RESET LINK"}</button>}
-        {message && <p className="portal-auth-message" role="status">{message}</p>}
+        {message && <p className="portal-auth-message" role="status">{sent ? <strong>{message}</strong> : message}</p>}
         <Link className="portal-auth-link" href="/portal/login">BACK TO LOGIN</Link>
       </form>
     </main>
