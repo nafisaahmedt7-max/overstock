@@ -160,11 +160,6 @@ export async function POST(request: Request) {
 
   const safeName = escapeHtml(name || "there").toUpperCase();
   const safeEmail = escapeHtml(email);
-  const displayEmail =
-    process.env.VERCEL_ENV === "preview" && email === "adiyat.zaman3@gmail.com"
-      ? "adiyat.zaman32002020020202020202200202020220amamamma@gmail.com"
-      : email;
-  const safeDisplayEmail = escapeHtml(displayEmail);
   const safeUrl = escapeHtml(appLink.toString());
   const baseUrl = new URL(request.url).origin;
   const loginUrl = escapeHtml(new URL("/portal/login", baseUrl).toString());
@@ -176,7 +171,7 @@ export async function POST(request: Request) {
     `Hello, ${name || "there"}. You’re invited to join the OVERSTOCK ${roleLabel} portal.`,
     "",
     `PORTAL ROLE: ${role === "seller" ? "SELLER" : "FULFILMENT"}`,
-    `LOGIN EMAIL: ${displayEmail}`,
+    `LOGIN EMAIL: ${email}`,
     "",
     `LOGIN: ${new URL("/portal/login", baseUrl).toString()}`,
     `REGISTER: ${appLink.toString()}`,
@@ -190,7 +185,7 @@ export async function POST(request: Request) {
           <span style="display:inline-block;vertical-align:middle;color:#111111;font-size:12px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">PORTAL ROLE:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;">${role === "seller" ? "SELLER" : "FULFILMENT"}</strong>
         </td>
         <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;border-left:1px solid #777777;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;">
-          <span style="display:inline-block;vertical-align:middle;color:#111111;font-size:12px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeDisplayEmail}</a></strong>
+          <span style="display:inline-block;vertical-align:middle;color:#111111;font-size:12px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
         </td>
       </tr>
     </table>`;
