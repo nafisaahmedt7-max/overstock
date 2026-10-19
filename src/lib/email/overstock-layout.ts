@@ -52,12 +52,12 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td align="center" bgcolor="#111111" style="padding:19px 14px;background-color:#111111;color:#f1f1ef;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:.18em;">OVERSTOCK</td>
           </tr>
           <tr>
-            <td class="os-content" align="center" style="padding:32px 0 28px;border-left:1px solid #111111;border-right:1px solid #111111;text-align:center;color:#111111;font-size:14px;line-height:1.55;">
+            <td class="os-content" align="center" style="padding:32px 0 28px;text-align:center;color:#111111;font-size:14px;line-height:1.55;">
               ${contentRows}
             </td>
           </tr>
           <tr>
-            <td align="center" bgcolor="#e4e4e0" style="padding:13px 8px;background-color:#e4e4e0;border-top:1px solid #111111;border-bottom:1px solid #111111;border-left:1px solid #111111;border-right:1px solid #111111;">
+            <td align="center" bgcolor="#e4e4e0" style="padding:13px 8px;background-color:#e4e4e0;border-top:1px solid #111111;border-bottom:1px solid #111111;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="border-collapse:collapse;">
                 <tr>
                   <td align="center" style="padding:0 10px;"><a class="os-social-link" href="${instagramUrl}" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><span style="font-size:16px;vertical-align:-1px;">◎</span>&nbsp; INSTAGRAM</a></td>
@@ -68,7 +68,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             </td>
           </tr>
           <tr>
-            <td style="padding:0 8px;border-left:1px solid #111111;border-right:1px solid #111111;">
+            <td style="padding:0 8px;">
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                 <tr>
                   <td width="50%" align="left" class="os-legal" style="width:50%;padding:12px 8px;color:#111111;font-size:11px;line-height:1.4;white-space:nowrap;"><strong>© 2026 OVERSTOCK</strong></td>
