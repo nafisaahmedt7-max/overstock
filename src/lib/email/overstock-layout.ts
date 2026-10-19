@@ -13,9 +13,12 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
   const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
-  const instagramIconUrl = escapeHtml(new URL("/email/social/instagram.png", baseUrl).toString());
-  const facebookIconUrl = escapeHtml(new URL("/email/social/facebook.png", baseUrl).toString());
-  const emailIconUrl = escapeHtml(new URL("/email/social/gmail.png", baseUrl).toString());
+  const publicAssetsOrigin = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://overstock-two.vercel.app";
+  const instagramIconUrl = escapeHtml(new URL("/email/social/instagram.png", publicAssetsOrigin).toString());
+  const facebookIconUrl = escapeHtml(new URL("/email/social/facebook.png", publicAssetsOrigin).toString());
+  const emailIconUrl = escapeHtml(new URL("/email/social/gmail.png", publicAssetsOrigin).toString());
   const compactBottom = contentHtml.includes("<!--OVERSTOCK_COMPACT_BOTTOM-->");
   const cleanContentHtml = contentHtml.replace("<!--OVERSTOCK_COMPACT_BOTTOM-->", "");
 
