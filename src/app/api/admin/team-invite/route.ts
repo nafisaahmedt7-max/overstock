@@ -180,8 +180,16 @@ export async function POST(request: Request) {
   ].join("\n");
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;background-color:#e4e4e0;">
-      <tr><td class="os-invite-detail-cell" colspan="2" align="center" bgcolor="#e4e4e0" style="padding:10px 14px;border-bottom:1px solid #111;background-color:#e4e4e0;text-align:center;"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</span><span style="padding-left:10px;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</span></td></tr>
-      <tr><td class="os-invite-detail-cell" colspan="2" align="center" bgcolor="#e4e4e0" style="padding:10px 14px;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</span><span style="padding-left:10px;font-size:13px;font-weight:700;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;">${safeEmail}</a></span></td></tr>
+      <tr><td class="os-invite-detail-cell" colspan="2" align="center" bgcolor="#e4e4e0" style="padding:10px 14px;border-bottom:1px solid #111;background-color:#e4e4e0;text-align:center;">
+        <table role="presentation" align="center" width="360" border="0" cellpadding="0" cellspacing="0" style="width:100%;max-width:360px;border-collapse:collapse;">
+          <tr><td width="112" style="width:112px;padding:0;font-size:10px;font-weight:700;letter-spacing:.08em;text-align:left;white-space:nowrap;">PORTAL ROLE:</td><td style="padding:0 0 0 12px;font-size:13px;font-weight:700;text-align:left;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
+        </table>
+      </td></tr>
+      <tr><td class="os-invite-detail-cell" colspan="2" align="center" bgcolor="#e4e4e0" style="padding:10px 14px;background-color:#e4e4e0;text-align:center;">
+        <table role="presentation" align="center" width="360" border="0" cellpadding="0" cellspacing="0" style="width:100%;max-width:360px;border-collapse:collapse;">
+          <tr><td width="112" style="width:112px;padding:0;font-size:10px;font-weight:700;letter-spacing:.08em;text-align:left;white-space:nowrap;">LOGIN EMAIL:</td><td style="padding:0 0 0 12px;font-size:13px;font-weight:700;text-align:left;overflow-wrap:anywhere;word-break:break-word;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;">${safeEmail}</a></td></tr>
+        </table>
+      </td></tr>
     </table>`;
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
