@@ -2770,6 +2770,27 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
 }
 
+.portal-auth-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--ink);
+  font: 600 0.68rem var(--font-mono), monospace;
+  letter-spacing: 0.035em;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+.portal-auth-message,
+.portal-auth-email {
+  margin: 1rem 0 0;
+  font: 500 0.72rem/1.55 var(--font-mono), monospace;
+}
+.portal-auth-email strong {
+  display: block;
+  margin-top: 0.3rem;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
 
 /* Add-to-cart and seller actions on product cards. */
 
