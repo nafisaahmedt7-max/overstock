@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     `LOGIN: ${new URL("/portal/login", baseUrl).toString()}`,
     `REGISTER: ${appLink.toString()}`,
     "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
-    "For any queries about your account registration, contact us at operations.overstock@gmail.com.",
+    "Need help with your account? For any queries about your account, contact us at operations.overstock@gmail.com.",
   ].join("\n");
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;background-color:#e4e4e0;">
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
           <span style="display:inline-block;vertical-align:middle;font-size:9px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">PORTAL ROLE:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;">${role === "seller" ? "SELLER" : "FULFILMENT"}</strong>
         </td>
         <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;border-left:1px solid #777777;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;">
-          <span style="display:inline-block;vertical-align:middle;font-size:9px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:11px;line-height:1.2;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
+          <span style="display:inline-block;vertical-align:middle;color:#1a73e8;font-size:9px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:11px;line-height:1.2;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
         </td>
       </tr>
     </table>`;
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
     <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p>
     <p style="margin:12px 0 0;"><a class="os-button" href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">LOGIN</a></p>
     <p style="margin:10px 0 0;"><a class="os-button" href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">REGISTER</a></p>
-    <p style="margin:13px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account registration, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
+    <p style="margin:13px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
   let response: Response;
