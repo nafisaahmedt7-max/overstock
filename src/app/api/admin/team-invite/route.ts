@@ -180,8 +180,8 @@ export async function POST(request: Request) {
   ].join("\n");
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
-      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;border-bottom:1px solid #111;text-align:center;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
-      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
+      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;border-bottom:1px solid #111;text-align:left;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
+      <tr><td class="os-invite-detail-cell" width="40%" style="width:40%;padding:11px 8px 11px 42px;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td class="os-invite-detail-cell" style="padding:11px 42px 11px 8px;text-align:left;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
     </table>`;
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
