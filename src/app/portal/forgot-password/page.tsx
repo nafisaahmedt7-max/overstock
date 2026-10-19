@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
   const [busy, setBusy] = useState(false);
@@ -15,18 +14,19 @@ export default function ForgotPasswordPage() {
     setMessage("");
     const values = new FormData(event.currentTarget);
     const email = String(values.get("email")).trim().toLowerCase();
-    const callback = new URL("/auth/callback", window.location.origin);
-    callback.searchParams.set("next", "/portal/new-password");
-    const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: callback.toString(),
+    const response = await fetch("/api/portal/forgot-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
     });
+    const result = await response.json().catch(() => ({}));
     setBusy(false);
-    if (error) {
-      setMessage("The reset email could not be sent right now. Check the address and try again shortly.");
+    if (!response.ok) {
+      setMessage(String(result.error || "The reset email could not be sent right now. Try again shortly."));
       return;
     }
     setSent(true);
-    setMessage("If an account is registered with that email, a password reset link will be sent. Check your inbox for the secure link to choose a new password.");
+    setMessage(String(result.message || "If an account is registered with that email, a password reset link will be sent. Check your inbox for the secure link to choose a new password."));
   }
 
   return (
