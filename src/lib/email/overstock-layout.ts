@@ -23,10 +23,12 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string) {
   <style type="text/css">
     .os-button { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease !important; }
     .os-button:hover, .os-button:focus { background-color: #f1f1ef !important; color: #111111 !important; box-shadow: inset 0 0 0 1px #111111 !important; }
+    .os-invite-details { width: calc(100% + 84px) !important; max-width: 650px !important; margin-left: -42px !important; margin-right: -42px !important; }
     @media only screen and (max-width: 520px) {
       .os-content { padding: 26px 20px !important; }
       .os-legal { font-size: 10px !important; }
       .os-social-link { font-size: 9px !important; }
+      .os-invite-details { width: calc(100% + 40px) !important; margin-left: -20px !important; margin-right: -20px !important; }
     }
   </style>
 </head>

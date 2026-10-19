@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     setSent(true);
-    setMessage(String(result.message || "If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password."));
+    setMessage(String(result.message || "**If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password.**"));
   }
 
   return (

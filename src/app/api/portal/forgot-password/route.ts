@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { renderOverstockEmail } from "@/lib/email/overstock-layout";
 
 const cooldowns = new Map<string, number>();
-const RESET_MESSAGE = "If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password.";
+const RESET_MESSAGE = "**If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password.**";
 
 function escapeHtml(value: string) {
   return value
@@ -68,17 +68,17 @@ export async function POST(request: Request) {
   const adminClient = createSupabaseClient(supabaseUrl, serverKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
-  // Send users directly to the password form after Supabase validates the
-  // one-time recovery link. The callback route is for PKCE links and can
-  // otherwise send an admin-generated recovery link back to the login page.
-  const resetUrl = new URL("/portal/new-password", requestUrl.origin).toString();
+  // Verify the token on our own origin so preview URLs do not depend on the
+  // Supabase Auth redirect allow-list or fall back to its configured Site URL.
+  const resetUrl = new URL("/auth/confirm", requestUrl.origin);
+  resetUrl.searchParams.set("type", "recovery");
+  resetUrl.searchParams.set("next", `/portal/new-password?email=${encodeURIComponent(email)}`);
   const { data, error } = await adminClient.auth.admin.generateLink({
     type: "recovery",
     email,
-    options: { redirectTo: resetUrl },
   });
 
-  if (error || !data.properties?.action_link) {
+  if (error || !data.properties?.hashed_token) {
     const notFound = error?.code === "user_not_found" || /user.*not found|email.*not found/i.test(error?.message || "");
     if (notFound) {
       // Keep the response identical for known and unknown email addresses.
@@ -91,7 +91,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Password reset email could not be sent right now. Try again shortly." }, { status: 502 });
   }
 
-  const safeLink = escapeHtml(data.properties.action_link);
+  resetUrl.searchParams.set("token_hash", data.properties.hashed_token);
+  const safeLink = escapeHtml(resetUrl.toString());
   const safeEmail = escapeHtml(email);
   const baseUrl = requestUrl.origin;
   const textContent = [
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
     "",
     "A request was received to reset the password for your OVERSTOCK portal account.",
     "Use this secure link to choose a new password:",
-    data.properties.action_link,
+    resetUrl.toString(),
     "",
     "If you did not request a password reset, you can ignore this email.",
     `This request was made for ${email}.`,

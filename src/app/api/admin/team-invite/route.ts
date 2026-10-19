@@ -103,8 +103,6 @@ export async function POST(request: Request) {
   const configuredServerKey = serverKey as string;
 
   const newPasswordPath = new URLSearchParams({ mode: "register", email }).toString();
-  const callbackUrl = new URL("/auth/callback", request.url);
-  callbackUrl.searchParams.set("next", `/portal/new-password?${newPasswordPath}`);
 
   const adminClient = createSupabaseClient(configuredSupabaseUrl, configuredServerKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
@@ -113,7 +111,6 @@ export async function POST(request: Request) {
     type: "invite",
     email,
     options: {
-      redirectTo: callbackUrl.toString(),
       data: { portal_role: role, display_name: name },
     },
   });
@@ -128,40 +125,42 @@ export async function POST(request: Request) {
     ? await adminClient.auth.admin.generateLink({
         type: "magiclink",
         email,
-        options: { redirectTo: callbackUrl.toString() },
       })
     : inviteResult;
-  const actionLink = linkResult.data?.properties?.action_link;
-  if (linkResult.error || !actionLink) {
+  const tokenHash = linkResult.data?.properties?.hashed_token;
+  const verificationType = linkResult.data?.properties?.verification_type;
+  if (linkResult.error || !tokenHash || !verificationType) {
     const authError = linkResult.error;
     const invalidAdminKey =
       authError?.status === 401 || /invalid api key/i.test(authError?.message || "");
     const errorCode = invalidAdminKey
       ? "invalid_service_role_key"
       : authError?.code || "action_link_missing";
-    const redirectRejected =
-      errorCode === "redirect_to_not_allowed" ||
-      /redirect.*(not allowed|allowlist|allowed)/i.test(authError?.message || "");
     console.error("OVERSTOCK invitation link generation failed", {
       flow: useExistingAccountLink ? "magiclink" : "invite",
       code: errorCode,
       status: authError?.status,
       message: authError?.message,
-      redirectOrigin: callbackUrl.origin,
+      redirectOrigin: new URL(request.url).origin,
     });
 
     return NextResponse.json({
       error: invalidAdminKey
         ? `Supabase rejected the server-side API key. Update SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY) with a valid key for this Supabase project, then retry.`
-        : redirectRejected
-          ? `Supabase Auth rejected this site's redirect address (${callbackUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
-          : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
+        : `Supabase Auth could not create the registration link (${errorCode}). Check the server-side Auth configuration and whether this email already has a portal account, then retry.`,
     }, { status: 502 });
   }
 
+  // Verify the one-time token on our own origin. This avoids Supabase falling
+  // back to its configured Site URL when a Vercel preview URL is not allow-listed.
+  const appLink = new URL("/auth/confirm", request.url);
+  appLink.searchParams.set("token_hash", tokenHash);
+  appLink.searchParams.set("type", verificationType);
+  appLink.searchParams.set("next", `/portal/new-password?${newPasswordPath}`);
+
   const safeName = escapeHtml(name || "there").toUpperCase();
   const safeEmail = escapeHtml(email);
-  const safeUrl = escapeHtml(actionLink);
+  const safeUrl = escapeHtml(appLink.toString());
   const baseUrl = new URL(request.url).origin;
   const loginUrl = escapeHtml(new URL("/portal/login", baseUrl).toString());
   const roleLabel = role === "seller" ? "seller" : "fulfilment team member";
@@ -175,7 +174,7 @@ export async function POST(request: Request) {
     `LOGIN EMAIL: ${email}`,
     "",
     `LOGIN: ${new URL("/portal/login", baseUrl).toString()}`,
-    `REGISTER: ${actionLink}`,
+    `REGISTER: ${appLink.toString()}`,
     "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
     "For any queries about your account registration, contact us at operations.overstock@gmail.com.",
   ].join("\n");
@@ -183,7 +182,7 @@ export async function POST(request: Request) {
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
     <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
     <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
-    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
+    <table class="os-invite-details" role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:calc(100% + 84px);max-width:650px;margin:0 -42px;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
       <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td style="padding:11px 0;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
       <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td style="padding:11px 0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
     </table>
