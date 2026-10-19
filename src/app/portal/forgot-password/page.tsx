@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     setSent(true);
-    setMessage(String(result.message || "If an account is registered with that email, a password reset link will be sent. Check your inbox for the secure link to choose a new password."));
+    setMessage(String(result.message || "If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password."));
   }
 
   return (
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
         </label>}
         {!sent && <button className="admin-primary" disabled={busy}>{busy ? "SENDING…" : "SEND RESET LINK"}</button>}
-        {message && <p className="portal-auth-message" role="status">{sent ? <strong>{message}</strong> : message}</p>}
+        {message && <p className={`portal-auth-message${sent ? " portal-reset-notice" : ""}`} role="status">{sent ? <strong>{message}</strong> : message}</p>}
         <Link className="portal-auth-link" href="/portal/login">BACK TO LOGIN</Link>
       </form>
     </main>

@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { renderOverstockEmail } from "@/lib/email/overstock-layout";
 
 function escapeHtml(value: string) {
   return value
@@ -163,14 +164,6 @@ export async function POST(request: Request) {
   const safeUrl = escapeHtml(actionLink);
   const baseUrl = new URL(request.url).origin;
   const loginUrl = escapeHtml(new URL("/portal/login", baseUrl).toString());
-  const termsUrl = escapeHtml(new URL("/legal/terms", baseUrl).toString());
-  const privacyUrl = escapeHtml(new URL("/legal/privacy", baseUrl).toString());
-  const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
-  const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
-  const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
-  const instagramIcon = escapeHtml(new URL("/email/social/instagram.png", baseUrl).toString());
-  const facebookIcon = escapeHtml(new URL("/email/social/facebook.png", baseUrl).toString());
-  const emailIcon = escapeHtml(new URL("/email/social/gmail.png", baseUrl).toString());
   const roleLabel = role === "seller" ? "seller" : "fulfilment team member";
   const subject = "You’re invited to the OVERSTOCK portal";
   const textContent = [
@@ -186,7 +179,19 @@ export async function POST(request: Request) {
     "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
     "For any queries about your account registration, contact us at operations.overstock@gmail.com.",
   ].join("\n");
-  const htmlContent = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OVERSTOCK Portal Invitation</title></head><body style="margin:0;padding:24px 14px;background:#f1f1ef;color:#111;font:14px/1.55 Arial,Helvetica,sans-serif"><main style="max-width:650px;margin:0 auto;border:1px solid #111;background:#f1f1ef"><header style="padding:19px 14px;background:#111;color:#f1f1ef;text-align:center;font-size:23px;font-weight:800;letter-spacing:.18em">OVERSTOCK</header><section style="padding:30px 42px 25px;text-align:center"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em">PORTAL INVITATION</span><h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2">YOU’RE INVITED</h1><p style="margin:0 0 17px">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p><table role="presentation" style="width:100%;border-collapse:collapse;border-top:1px solid #111;border-bottom:1px solid #111;text-align:left"><tr><td style="width:38%;padding:11px 8px 11px 0;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em">PORTAL ROLE</td><td style="padding:11px 0;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr><tr><td style="padding:11px 8px 11px 0;font-size:10px;font-weight:700;letter-spacing:.08em">LOGIN EMAIL</td><td style="padding:11px 0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere">${safeEmail}</td></tr></table><p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p><p style="margin:12px 0 0"><a href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em">LOGIN</a></p><p style="margin:10px 0 0"><a href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em">REGISTER</a></p><p style="margin:13px 0 0;font-size:12px">Need help with your account?<br>For any queries about your account registration, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700">contact us</a>.</p></section><footer style="display:flex;justify-content:center;gap:24px;padding:13px 10px;border-top:1px solid #111;border-bottom:1px solid #111;background:#e4e4e0;font-size:10px;font-weight:700"><a href="${instagramUrl}" style="color:#111;text-decoration:none"><img src="${instagramIcon}" width="16" height="16" alt="Instagram" style="vertical-align:middle;border:0"> &nbsp; INSTAGRAM</a><a href="${facebookUrl}" style="color:#111;text-decoration:none"><img src="${facebookIcon}" width="16" height="16" alt="Facebook" style="vertical-align:middle;border:0"> &nbsp; FACEBOOK</a><a href="mailto:operations.overstock@gmail.com" style="color:#111;text-decoration:none"><img src="${emailIcon}" width="16" height="16" alt="Email" style="vertical-align:middle;border:0"> &nbsp; EMAIL</a></footer><div style="display:flex;justify-content:space-between;gap:12px;padding:12px 17px;font-size:11px"><strong style="white-space:nowrap">© 2026 OVERSTOCK</strong><span style="text-align:right;white-space:nowrap"><a href="${termsUrl}" style="color:#111;text-decoration:none">Terms</a> &nbsp;·&nbsp; <a href="${privacyUrl}" style="color:#111;text-decoration:none">Privacy</a> &nbsp;·&nbsp; <a href="${shippingUrl}" style="color:#111;text-decoration:none">Shipping</a></span></div></main></body></html>`;
+  const contentHtml = `
+    <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
+    <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
+    <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;text-align:left;">
+      <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;border-bottom:1px solid #c8c8c4;font-size:10px;font-weight:700;letter-spacing:.08em;">PORTAL ROLE</td><td style="padding:11px 0;border-bottom:1px solid #c8c8c4;text-align:right;font-size:13px;font-weight:700;">${role === "seller" ? "SELLER" : "FULFILMENT"}</td></tr>
+      <tr><td width="40%" style="width:40%;padding:11px 8px 11px 0;font-size:10px;font-weight:700;letter-spacing:.08em;">LOGIN EMAIL</td><td style="padding:11px 0;text-align:right;font-size:13px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</td></tr>
+    </table>
+    <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p>
+    <p style="margin:12px 0 0;"><a class="os-button" href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">LOGIN</a></p>
+    <p style="margin:10px 0 0;"><a class="os-button" href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">REGISTER</a></p>
+    <p style="margin:13px 0 0;font-size:12px;">Need help with your account?<br>For any queries about your account registration, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
+  const htmlContent = renderOverstockEmail(baseUrl, contentHtml);
 
   let response: Response;
   try {

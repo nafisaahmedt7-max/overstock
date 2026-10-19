@@ -3874,3 +3874,28 @@ select {
   background: var(--paper);
   color: var(--ink);
 }
+
+.portal-reset-notice {
+  padding: 0.9rem 1rem;
+  border: 1px solid #c8c8c4;
+  border-radius: 8px;
+  background: #e4e4e0;
+  text-align: center;
+}
+.portal-reset-notice strong {
+  font-weight: 700;
+}
+.portal-password-guidance {
+  margin: 1.25rem 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #c8c8c4;
+  background: #e4e4e0;
+  font: 500 0.7rem/1.55 var(--font-mono), monospace;
+  text-align: left;
+}
+.portal-password-guidance strong {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}

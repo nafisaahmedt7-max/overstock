@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+const SUPPORTED_PASSWORD_SYMBOLS = "!@#$%^&*()_+-=[]{};\':\"|<>?,./`~";
+
+function meetsPasswordRequirements(password: string) {
+  return password.length >= 8
+    && /[a-z]/.test(password)
+    && /[A-Z]/.test(password)
+    && /[0-9]/.test(password)
+    && [...password].some((character) => SUPPORTED_PASSWORD_SYMBOLS.includes(character));
+}
+
 export default function NewPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -41,6 +51,11 @@ export default function NewPasswordPage() {
     const values = new FormData(event.currentTarget);
     const password = String(values.get("password"));
     const confirmation = String(values.get("confirmPassword"));
+    if (!meetsPasswordRequirements(password)) {
+      setMessage("Use at least 8 characters with an uppercase letter, a lowercase letter, a number, and a supported symbol.");
+      setBusy(false);
+      return;
+    }
     if (password !== confirmation) {
       setMessage("Your passwords do not match.");
       setBusy(false);
@@ -79,6 +94,7 @@ export default function NewPasswordPage() {
         <h1>{isInvitation ? "SET YOUR PASSWORD" : "NEW PASSWORD"}</h1>
         {email && <p className="portal-auth-email">ACCOUNT EMAIL <strong>{email}</strong></p>}
         {ready && <>
+          <p className="portal-password-guidance"><strong>PASSWORD REQUIREMENTS</strong><br />Use at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a symbol. Examples: ! @ # $ % ^ &amp; *</p>
           <label>
             New password
             <input type="password" name="password" required minLength={8} autoComplete="new-password" />
