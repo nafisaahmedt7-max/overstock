@@ -13,16 +13,18 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
   const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
+  const compactBottom = contentHtml.includes("<!--OVERSTOCK_COMPACT_BOTTOM-->");
+  const cleanContentHtml = contentHtml.replace("<!--OVERSTOCK_COMPACT_BOTTOM-->", "");
 
   let contentRows: string;
   if (fullWidthHtml) {
-    const parts = contentHtml.split("<!--OVERSTOCK_FULL_WIDTH_SECTION-->");
+    const parts = cleanContentHtml.split("<!--OVERSTOCK_FULL_WIDTH_SECTION-->");
     if (parts.length !== 2) throw new Error("Email full-width section marker is missing.");
     const before = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${parts[0]}</td></tr></table>`;
     const after = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${parts[1]}</td></tr></table>`;
     contentRows = `${before}${fullWidthHtml}${after}`;
   } else {
-    contentRows = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${contentHtml}</td></tr></table>`;
+    contentRows = `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td class="os-content-inner" style="padding:0 42px;">${cleanContentHtml}</td></tr></table>`;
   }
 
   return `<!doctype html>
@@ -36,6 +38,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
     .os-button:hover, .os-button:focus { background-color: #f1f1ef !important; color: #111111 !important; box-shadow: inset 0 0 0 1px #111111 !important; }
     @media only screen and (max-width: 520px) {
       .os-content { padding-top: 26px !important; padding-bottom: 24px !important; }
+      .os-content-compact { padding-bottom: 14px !important; }
       .os-content-inner { padding-left: 20px !important; padding-right: 20px !important; }
       .os-legal { font-size: 10px !important; }
       .os-social-link { font-size: 9px !important; }
@@ -52,7 +55,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td align="center" bgcolor="#111111" style="padding:19px 14px;background-color:#111111;color:#f1f1ef;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:.18em;">OVERSTOCK</td>
           </tr>
           <tr>
-            <td class="os-content" align="center" style="padding:32px 0 28px;text-align:center;color:#111111;font-size:14px;line-height:1.55;">
+            <td class="os-content${compactBottom ? " os-content-compact" : ""}" align="center" style="padding:32px 0 ${compactBottom ? "14px" : "28px"};text-align:center;color:#111111;font-size:14px;line-height:1.55;">
               ${contentRows}
             </td>
           </tr>
