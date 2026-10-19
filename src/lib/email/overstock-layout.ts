@@ -13,6 +13,9 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
   const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
+  const instagramIconUrl = escapeHtml(new URL("/email/social/instagram.png", baseUrl).toString());
+  const facebookIconUrl = escapeHtml(new URL("/email/social/facebook.png", baseUrl).toString());
+  const emailIconUrl = escapeHtml(new URL("/email/social/gmail.png", baseUrl).toString());
   const compactBottom = contentHtml.includes("<!--OVERSTOCK_COMPACT_BOTTOM-->");
   const cleanContentHtml = contentHtml.replace("<!--OVERSTOCK_COMPACT_BOTTOM-->", "");
 
@@ -63,9 +66,9 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td align="center" bgcolor="#e4e4e0" style="padding:13px 8px;background-color:#e4e4e0;border-top:1px solid #111111;border-bottom:1px solid #111111;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="border-collapse:collapse;">
                 <tr>
-                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="${instagramUrl}" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><span style="font-size:16px;vertical-align:-1px;">◎</span>&nbsp; INSTAGRAM</a></td>
-                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="${facebookUrl}" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><span style="font-size:16px;vertical-align:-1px;">f</span>&nbsp; FACEBOOK</a></td>
-                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="mailto:operations.overstock@gmail.com" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><span style="font-size:15px;vertical-align:-1px;">✉</span>&nbsp; EMAIL</a></td>
+                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="${instagramUrl}" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><img src="${instagramIconUrl}" width="16" height="16" alt="" style="display:inline-block;width:16px;height:16px;vertical-align:middle;border:0;outline:none;text-decoration:none;">&nbsp; INSTAGRAM</a></td>
+                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="${facebookUrl}" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><img src="${facebookIconUrl}" width="16" height="16" alt="" style="display:inline-block;width:16px;height:16px;vertical-align:middle;border:0;outline:none;text-decoration:none;">&nbsp; FACEBOOK</a></td>
+                  <td align="center" style="padding:0 10px;"><a class="os-social-link" href="mailto:operations.overstock@gmail.com" style="color:#111111;text-decoration:none;font-size:10px;line-height:1.4;font-weight:700;white-space:nowrap;"><img src="${emailIconUrl}" width="16" height="16" alt="" style="display:inline-block;width:16px;height:16px;vertical-align:middle;border:0;outline:none;text-decoration:none;">&nbsp; EMAIL</a></td>
                 </tr>
               </table>
             </td>
