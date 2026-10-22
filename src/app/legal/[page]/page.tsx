@@ -113,6 +113,7 @@ const contactOptions = [
   },
   {
     label: "ADDRESS",
+    icon: "location",
     href: "",
     value: "24 Eolian Loop, Clayton, Sydney",
   },
@@ -414,29 +415,33 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
         <section className="contact-options" aria-label="Contact options">
           {contactOptions.map((option) => (
             <div className="contact-option" key={option.label}>
-              <h2>
-                {option.icon && (
-                  <Image
-                    src={option.icon}
-                    alt=""
-                    width={40}
-                    height={40}
-                    className="contact-option-icon"
-                  />
+              {option.icon === "location" ? (
+                <svg className="contact-option-icon" viewBox="0 0 32 32" role="img" aria-label="Address" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M26 13.2c0 7-10 16.2-10 16.2S6 20.2 6 13.2a10 10 0 1 1 20 0Z" />
+                  <circle cx="16" cy="13" r="3.2" />
+                </svg>
+              ) : option.icon ? (
+                <Image
+                  src={option.icon}
+                  alt={option.label}
+                  width={32}
+                  height={32}
+                  className="contact-option-icon"
+                />
+              ) : null}
+              <div className="contact-option-content">
+                {option.href ? (
+                  <a
+                    href={option.href}
+                    target={option.label === "EMAIL" ? undefined : "_blank"}
+                    rel={option.label === "EMAIL" ? undefined : "noreferrer"}
+                  >
+                    <strong>{option.value}</strong>
+                  </a>
+                ) : (
+                  <span><strong>{option.value}</strong></span>
                 )}
-                <span>{option.label}</span>
-              </h2>
-              {option.href ? (
-                <a
-                  href={option.href}
-                  target={option.label === "EMAIL" ? undefined : "_blank"}
-                  rel={option.label === "EMAIL" ? undefined : "noreferrer"}
-                >
-                  <strong>{option.value}</strong>
-                </a>
-              ) : (
-                <span><strong>{option.value}</strong></span>
-              )}
+              </div>
             </div>
           ))}
         </section>
