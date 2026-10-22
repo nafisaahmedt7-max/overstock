@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
     const result = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) {
-      setMessage(String(result.error || "The reset email could not be sent right now. Try again shortly."));
+      setMessage(String(result.error || "Password reset email could not be sent right now. Try again shortly."));
       return;
     }
     setSent(true);
