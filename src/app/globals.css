@@ -4042,3 +4042,84 @@ select {
     gap: 0.75rem;
   }
 }
+
+
+/* Restored receipt-style contact page */
+.legal-page-contact .legal-section {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.legal-page-contact .legal-section + .legal-section {
+  border-top: 1px solid var(--line);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+.legal-page-contact .legal-section:last-of-type {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
+}
+.legal-page-contact .contact-options {
+  display: table;
+  width: max-content;
+  max-width: 100%;
+  margin: 2rem auto 0;
+  border: 1px solid var(--line);
+  border-collapse: collapse;
+  background: #e4e4e0;
+  text-align: left;
+  table-layout: auto;
+}
+.legal-page-contact .contact-option {
+  display: table-row;
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.legal-page-contact .contact-option:not(:last-child) {
+  border-bottom: 1px solid var(--line);
+}
+.legal-page-contact .contact-option-icon-cell {
+  width: 4.3rem;
+  padding: 1rem 1.25rem 1rem 1.4rem;
+  vertical-align: middle;
+}
+.legal-page-contact .contact-option-icon {
+  display: block;
+  width: 1.65rem;
+  height: 1.65rem;
+  color: var(--ink);
+}
+.legal-page-contact .contact-option-value-cell {
+  padding: 1rem 1.6rem 1rem 0;
+  vertical-align: middle;
+}
+.legal-page-contact .contact-option-value-cell a,
+.legal-page-contact .contact-option-value-cell span {
+  font-size: .95rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.legal-page-contact .contact-option-value-cell a {
+  text-decoration: underline;
+  text-underline-offset: .2rem;
+}
+.legal-page-contact .contact-option-value-cell span {
+  color: #555;
+}
+@media (max-width: 480px) {
+  .legal-page-contact .contact-option-icon-cell {
+    width: 4.05rem;
+    padding: .9rem 1.2rem .9rem 1.35rem;
+  }
+  .legal-page-contact .contact-option-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .legal-page-contact .contact-option-value-cell {
+    padding: .9rem 1.55rem .9rem 0;
+  }
+  .legal-page-contact .contact-option-value-cell a,
+  .legal-page-contact .contact-option-value-cell span {
+    font-size: .9rem;
+  }
+}
