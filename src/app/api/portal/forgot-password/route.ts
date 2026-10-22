@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">RESET YOUR PASSWORD</h1>
     <p style="margin:0 0 18px;">A request was received to reset the password for your OVERSTOCK portal account.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
-    <p style="margin:24px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK BELOW TO CHOOSE A NEW PASSWORD.</p>
+    <p style="margin:24px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK BELOW TO CHOOSE A NEW PASSWORD</p>
     <p style="margin:0 0 16px;"><a class="os-button" href="${safeLink}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">RESET PASSWORD</a></p>
     <p style="margin:14px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:18px;border-collapse:separate;border-spacing:0;background-color:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
