@@ -3977,3 +3977,26 @@ select {
   flex: 0 0 2.5rem;
   object-fit: contain;
 }
+
+/* Compact icon-led rows on the Contact page. */
+.legal-page-contact .contact-option {
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+.legal-page-contact .contact-option-icon {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  object-fit: contain;
+}
+.legal-page-contact .contact-option-content {
+  min-width: 0;
+}
+@media (max-width: 480px) {
+  .legal-page-contact .contact-option {
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+}
