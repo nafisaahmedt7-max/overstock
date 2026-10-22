@@ -4183,3 +4183,9 @@ select {
     font-size: .9rem;
   }
 }
+
+
+/* Remove dividers between the borderless contact entries. */
+.legal-page-contact .contact-option:not(:last-child) {
+  border-bottom: 0;
+}
