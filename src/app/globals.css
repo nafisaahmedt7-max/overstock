@@ -4000,3 +4000,19 @@ select {
     gap: 0.75rem;
   }
 }
+
+/* Contact entries sit centered without dividers; guidance bullets remain left aligned. */
+.legal-page-contact .contact-options {
+  border-top: 0;
+  text-align: center;
+}
+.legal-page-contact .contact-option {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 0;
+  text-align: left;
+}
+.legal-page-contact .contact-option-content {
+  text-align: left;
+}
