@@ -4016,3 +4016,29 @@ select {
 .legal-page-contact .contact-option-content {
   text-align: left;
 }
+
+/* Center the contact list as one block while keeping every row on shared left edges. */
+.legal-page-contact .contact-options {
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+  text-align: left;
+}
+.legal-page-contact .contact-option {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+}
+.legal-page-contact .contact-option-content {
+  min-width: 0;
+  text-align: left;
+}
+@media (max-width: 480px) {
+  .legal-page-contact .contact-option {
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+}
