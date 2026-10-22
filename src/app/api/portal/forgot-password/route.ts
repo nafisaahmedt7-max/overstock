@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { renderOverstockEmail } from "@/lib/email/overstock-layout";
+import { sendToLocalMailpit } from "@/lib/email/mailpit";
 
 const cooldowns = new Map<string, number>();
 const RESET_MESSAGE = "**If an account is registered with that email, a password reset link will be sent. Check your mail's INBOX or SPAM for the secure link to choose a new password.**";
@@ -51,14 +52,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Wait a moment before requesting another reset link." }, { status: 429 });
   }
 
+  const useMailpit = process.env.NODE_ENV === "development" && process.env.EMAIL_PROVIDER === "mailpit";
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || (useMailpit ? "no-reply@overstock.local" : undefined);
   const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!apiKey || !senderEmail || !supabaseUrl || !serverKey) {
+  if ((!useMailpit && !apiKey) || !senderEmail || !supabaseUrl || !serverKey) {
     console.error("OVERSTOCK password reset email is not configured", {
       brevo: Boolean(apiKey && senderEmail),
+      mailpit: useMailpit,
       supabaseAdmin: Boolean(supabaseUrl && serverKey),
     });
     return NextResponse.json({ error: "Password reset email could not be sent right now. Try again shortly." }, { status: 503 });
@@ -137,13 +140,40 @@ export async function POST(request: Request) {
     </table>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
+  if (useMailpit) {
+    try {
+      const localResponse = await sendToLocalMailpit({
+        fromEmail: senderEmail,
+        fromName: senderName,
+        toEmail: email,
+        subject: "Reset your OVERSTOCK portal password",
+        text: textContent,
+        html: htmlContent,
+      });
+      if (!localResponse.ok) {
+        console.error("OVERSTOCK password reset email rejected by local Mailpit", {
+          status: localResponse.status,
+        });
+        return NextResponse.json({ error: "Mailpit could not capture the password reset email. Check that it is running on the configured local URL." }, { status: 502 });
+      }
+      console.info("OVERSTOCK password reset email captured by local Mailpit");
+      return NextResponse.json({ ok: true, message: RESET_MESSAGE });
+    } catch (sendError) {
+      console.error("OVERSTOCK local Mailpit request failed", {
+        error: sendError instanceof Error ? sendError.message : "unknown",
+      });
+      return NextResponse.json({ error: "Could not connect to local Mailpit. Start Mailpit and try again." }, { status: 502 });
+    }
+  }
+
+  const brevoApiKey = apiKey as string;
   let response: Response;
   try {
     response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         accept: "application/json",
-        "api-key": apiKey,
+        "api-key": brevoApiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
