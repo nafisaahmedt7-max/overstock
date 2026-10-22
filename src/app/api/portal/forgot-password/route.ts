@@ -51,18 +51,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Wait a moment before requesting another reset link." }, { status: 429 });
   }
 
-  const apiKey = process.env.MAILJET_API_KEY;
-  const secretKey = process.env.MAILJET_SECRET_KEY;
-  const senderEmail = process.env.MAILJET_SENDER_EMAIL;
-  const senderName = process.env.MAILJET_SENDER_NAME || "OVERSTOCK";
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!apiKey || !secretKey || !senderEmail || !supabaseUrl || !serverKey) {
+  if (!apiKey || !senderEmail || !supabaseUrl || !serverKey) {
     console.error("OVERSTOCK password reset email is not configured", {
-      mailjet: Boolean(apiKey && secretKey && senderEmail),
+      brevo: Boolean(apiKey && senderEmail),
       supabaseAdmin: Boolean(supabaseUrl && serverKey),
     });
-    return NextResponse.json({ error: "Password reset email is not available right now. Try again shortly." }, { status: 503 });
+    return NextResponse.json({ error: "Password reset email could not be sent right now. Try again shortly." }, { status: 503 });
   }
 
   const adminClient = createSupabaseClient(supabaseUrl, serverKey, {
@@ -140,20 +139,19 @@ export async function POST(request: Request) {
 
   let response: Response;
   try {
-    response = await fetch("https://api.mailjet.com/v3.1/send", {
+    response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        authorization: `Basic ${Buffer.from(`${apiKey}:${secretKey}`).toString("base64")}`,
+        accept: "application/json",
+        "api-key": apiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        Messages: [{
-          From: { Name: senderName, Email: senderEmail },
-          To: [{ Email: email }],
-          Subject: "Reset your OVERSTOCK portal password",
-          TextPart: textContent,
-          HTMLPart: htmlContent,
-        }],
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email }],
+        subject: "Reset your OVERSTOCK portal password",
+        textContent,
+        htmlContent,
       }),
     });
   } catch (sendError) {
@@ -163,20 +161,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Password reset email could not be sent right now. Try again shortly." }, { status: 502 });
   }
 
-  const mailjetResult = await response.json().catch(() => null) as {
-    ErrorMessage?: string;
-    Messages?: Array<{ Status?: string; To?: Array<{ MessageID?: string }> }>;
+  const brevoResult = await response.json().catch(() => null) as {
+    message?: string;
+    messageId?: string;
+    code?: string;
   } | null;
   if (!response.ok) {
-    console.error("OVERSTOCK password reset email rejected by Mailjet", {
+    console.error("OVERSTOCK password reset email rejected by Brevo", {
       status: response.status,
-      message: mailjetResult?.ErrorMessage || "provider_error",
+      message: brevoResult?.message || brevoResult?.code || "provider_error",
     });
     return NextResponse.json({ error: "Password reset email could not be sent right now. Try again shortly." }, { status: 502 });
   }
 
-  console.info("OVERSTOCK password reset email accepted by Mailjet", {
-    messageId: mailjetResult?.Messages?.[0]?.To?.[0]?.MessageID || "not_returned",
+  console.info("OVERSTOCK password reset email accepted by Brevo", {
+    messageId: brevoResult?.messageId || "not_returned",
   });
   return NextResponse.json({ ok: true, message: RESET_MESSAGE });
 }
