@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -92,6 +93,7 @@ type LegalContent = {
 const contactOptions = [
   {
     label: "EMAIL",
+    icon: "/email/social/gmail.png",
     href: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim()
       ? `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL.trim()}`
       : "mailto:operations.overstock@gmail.com",
@@ -99,11 +101,13 @@ const contactOptions = [
   },
   {
     label: "FACEBOOK",
+    icon: "/email/social/facebook.png",
     href: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "",
     value: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "Facebook profile coming soon",
   },
   {
     label: "INSTAGRAM",
+    icon: "/email/social/instagram.png",
     href: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "https://www.instagram.com/overstock.bd/",
     value: "@overstock.bd",
   },
@@ -383,7 +387,8 @@ const pages: Record<string, LegalContent> = {
   contact: {
     title: "CONTACT",
     copy: [
-      "For questions or to report accessibility issues, please contact our support team via the channels below. For an order issue, include your order number and photos if the item arrived damaged.",
+      "For questions or to report accessibility issues, please contact our support team via the channels below.",
+      "For an order issue, include your order number and photos if the item arrived damaged.",
     ],
   },
 };
@@ -398,12 +403,29 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
       <p className="eyebrow">OVERSTOCK / HELP</p>
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
-      {content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
+      {page === "contact" ? (
+        <ul className="contact-guidance">
+          {content.copy?.map((text) => <li key={text}>{renderFormatted(text)}</li>)}
+        </ul>
+      ) : (
+        content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)
+      )}
       {page === "contact" && (
         <section className="contact-options" aria-label="Contact options">
           {contactOptions.map((option) => (
             <div className="contact-option" key={option.label}>
-              <h2>{option.label}</h2>
+              <h2>
+                {option.icon && (
+                  <Image
+                    src={option.icon}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="contact-option-icon"
+                  />
+                )}
+                <span>{option.label}</span>
+              </h2>
               {option.href ? (
                 <a
                   href={option.href}
