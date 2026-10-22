@@ -439,29 +439,28 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
         </section>
       ))}
       {page === "contact" && (
-        <table className="contact-options" aria-label="Contact options">
-          <tbody>
-            {contactOptions.map((option) => (
-              <tr className="contact-option" key={option.label}>
-                <td className="contact-option-icon-cell"><ContactIcon label={option.label} /></td>
-                <td className="contact-option-value-cell">
-                  {option.href ? (
-                    <a
-                      href={option.href}
-                      aria-label={`${option.label}: ${option.value}`}
-                      target={option.label === "EMAIL" ? undefined : "_blank"}
-                      rel={option.label === "EMAIL" ? undefined : "noreferrer"}
-                    >
-                      <strong>{option.value}</strong>
-                    </a>
-                  ) : (
-                    <span aria-label={`${option.label}: ${option.value}`}><strong>{option.value}</strong></span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="contact-options" aria-label="Contact options">
+          {contactOptions.map((option) => (
+            <div className="contact-option" key={option.label}>
+              <ContactIcon label={option.label} />
+              {option.href ? (
+                <a
+                  className="contact-option-value"
+                  href={option.href}
+                  aria-label={`${option.label}: ${option.value}`}
+                  target={option.label === "EMAIL" ? undefined : "_blank"}
+                  rel={option.label === "EMAIL" ? undefined : "noreferrer"}
+                >
+                  <strong>{option.value}</strong>
+                </a>
+              ) : (
+                <span className="contact-option-value" aria-label={`${option.label}: ${option.value}`}>
+                  <strong>{option.value}</strong>
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </main>
   );
