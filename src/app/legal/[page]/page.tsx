@@ -122,7 +122,7 @@ function ContactIcon({ label }: { label: string }) {
   };
 
   if (label === "FACEBOOK") {
-    return <svg {...common}><circle cx="12" cy="12" r="11" fill="currentColor" /><path d="M13.4 20v-7h2.3l.35-2.7H13.4V8.6c0-.78.22-1.3 1.35-1.3h1.45V4.9c-.25-.03-1.1-.1-2.1-.1-2.08 0-3.5 1.27-3.5 3.62v1.88H8.25V13h2.35v7h2.8Z" fill="var(--paper)" /></svg>;
+    return <svg {...common}><circle cx="12" cy="12" r="11" fill="var(--paper)" /><path d="M13.4 20v-7h2.3l.35-2.7H13.4V8.6c0-.78.22-1.3 1.35-1.3h1.45V4.9c-.25-.03-1.1-.1-2.1-.1-2.08 0-3.5 1.27-3.5 3.62v1.88H8.25V13h2.35v7h2.8Z" fill="var(--ink)" /></svg>;
   }
 
   if (label === "INSTAGRAM") {
