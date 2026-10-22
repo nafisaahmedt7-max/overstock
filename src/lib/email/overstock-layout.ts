@@ -40,13 +40,14 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>OVERSTOCK</title>
   <style type="text/css">
+    @import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap");
     .os-button { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease !important; }
     .os-button:hover, .os-button:focus { background-color: #f1f1ef !important; color: #111111 !important; box-shadow: inset 0 0 0 1px #111111 !important; }
     @media only screen and (max-width: 520px) {
       .os-content { padding-top: 26px !important; padding-bottom: 24px !important; }
       .os-content-compact { padding-bottom: 14px !important; }
       .os-content-inner { padding-left: 20px !important; padding-right: 20px !important; }
-      .os-legal { font-size: 10px !important; }
+      .os-legal { font-size: 11px !important; }
       .os-social-link { font-size: 9px !important; }
       .os-invite-detail-cell { padding-left: 20px !important; padding-right: 20px !important; }
     }
@@ -80,8 +81,8 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td style="padding:0 8px;">
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                 <tr>
-                  <td width="35%" align="left" class="os-legal os-legal-brand" style="width:35%;padding:12px 8px;color:#111111;font-family:Courier New,Courier,monospace;font-size:11px;line-height:1.4;font-weight:400;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;">© 2026 OVERSTOCK</td>
-                  <td width="65%" align="right" class="os-legal os-legal-links" style="width:65%;padding:12px 8px;color:#111111;font-family:Courier New,Courier,monospace;font-size:11px;line-height:1.4;font-weight:400;letter-spacing:.04em;text-transform:uppercase;white-space:normal;"><a href="${shopUrl}" style="color:#111111;font-family:Courier New,Courier,monospace;font-weight:400;letter-spacing:.04em;text-decoration:none;white-space:nowrap;">SHOP</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${contactUrl}" style="color:#111111;font-family:Courier New,Courier,monospace;font-weight:400;letter-spacing:.04em;text-decoration:none;white-space:nowrap;">CONTACT</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${termsUrl}" style="color:#111111;font-family:Courier New,Courier,monospace;font-weight:400;letter-spacing:.04em;text-decoration:none;white-space:nowrap;">TERMS</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${shippingUrl}" style="color:#111111;font-family:Courier New,Courier,monospace;font-weight:400;letter-spacing:.04em;text-decoration:none;white-space:nowrap;">SHIPPING</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${refundsUrl}" style="color:#111111;font-family:Courier New,Courier,monospace;font-weight:400;letter-spacing:.04em;text-decoration:none;white-space:nowrap;">REFUNDS</a></td>
+                  <td width="35%" align="left" class="os-legal os-legal-brand" style="width:35%;padding:12px 8px;color:#555555;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-size:11px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:nowrap;">© 2026 OVERSTOCK</td>
+                  <td width="65%" align="right" class="os-legal os-legal-links" style="width:65%;padding:12px 8px;color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-size:11px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:normal;"><a href="${shopUrl}" style="color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHOP</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${contactUrl}" style="color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">CONTACT</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${termsUrl}" style="color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">TERMS</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${shippingUrl}" style="color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHIPPING</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${refundsUrl}" style="color:#111111;font-family:"Geist Mono",Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">REFUNDS</a></td>
                 </tr>
               </table>
             </td>
