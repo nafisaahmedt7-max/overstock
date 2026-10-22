@@ -13,7 +13,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
   const facebookUrl = escapeHtml(process.env.NEXT_PUBLIC_FACEBOOK_URL || "#");
-  const emailAssetsBaseUrl = "https://raw.githubusercontent.com/nafisaahmedt7-max/overstock/c46c5890aa5922f3d738630ac34482e117cd9820/public/email/social/";
+  const emailAssetsBaseUrl = "https://raw.githubusercontent.com/nafisaahmedt7-max/overstock/0937c7d06141730dc2537a97d221d9ab6c0ca84b/public/email/social/";
   const instagramIconUrl = escapeHtml(new URL("instagram.png", emailAssetsBaseUrl).toString());
   const facebookIconUrl = escapeHtml(new URL("facebook.png", emailAssetsBaseUrl).toString());
   const emailIconUrl = escapeHtml(new URL("gmail.png", emailAssetsBaseUrl).toString());
@@ -67,9 +67,9 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td align="center" bgcolor="#e4e4e0" style="padding:13px 8px;background-color:#e4e4e0;border-top:1px solid #111111;border-bottom:1px solid #111111;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="border-collapse:collapse;">
                 <tr>
-                  <td align="center" style="padding:0 14px;"><a href="${instagramUrl}" aria-label="Instagram" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${instagramIconUrl}" width="28" height="28" alt="" style="display:block;width:28px;height:28px;border:0;outline:none;text-decoration:none;"></a></td>
-                  <td align="center" style="padding:0 14px;"><a href="${facebookUrl}" aria-label="Facebook" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${facebookIconUrl}" width="28" height="28" alt="" style="display:block;width:28px;height:28px;border:0;outline:none;text-decoration:none;"></a></td>
-                  <td align="center" style="padding:0 14px;"><a href="mailto:operations.overstock@gmail.com" aria-label="Email" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${emailIconUrl}" width="28" height="28" alt="" style="display:block;width:28px;height:28px;border:0;outline:none;text-decoration:none;"></a></td>
+                  <td align="center" style="padding:0 12px;"><a href="${instagramUrl}" aria-label="Instagram" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${instagramIconUrl}" width="22" height="22" alt="" style="display:block;width:22px;height:22px;border:0;outline:none;text-decoration:none;"></a></td>
+                  <td align="center" style="padding:0 12px;"><a href="${facebookUrl}" aria-label="Facebook" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${facebookIconUrl}" width="22" height="22" alt="" style="display:block;width:22px;height:22px;border:0;outline:none;text-decoration:none;"></a></td>
+                  <td align="center" style="padding:0 12px;"><a href="mailto:operations.overstock@gmail.com" aria-label="Email" style="display:inline-block;text-decoration:none;line-height:0;"><img src="${emailIconUrl}" width="22" height="22" alt="" style="display:block;width:22px;height:22px;border:0;outline:none;text-decoration:none;"></a></td>
                 </tr>
               </table>
             </td>
