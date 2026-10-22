@@ -11,7 +11,6 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
   const shopUrl = escapeHtml(new URL("/", baseUrl).toString());
   const contactUrl = escapeHtml(new URL("/legal/contact", baseUrl).toString());
   const termsUrl = escapeHtml(new URL("/legal/terms", baseUrl).toString());
-  const privacyUrl = escapeHtml(new URL("/legal/privacy", baseUrl).toString());
   const shippingUrl = escapeHtml(new URL("/legal/shipping", baseUrl).toString());
   const refundsUrl = escapeHtml(new URL("/legal/refunds", baseUrl).toString());
   const instagramUrl = escapeHtml(process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/overstock.bd/");
@@ -82,7 +81,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                 <tr>
                   <td width="35%" align="left" class="os-legal os-legal-brand" style="width:35%;padding:12px 8px;color:#111111;font-size:11px;line-height:1.4;font-weight:400;white-space:nowrap;">© 2026 OVERSTOCK</td>
-                  <td width="65%" align="right" class="os-legal os-legal-links" style="width:65%;padding:12px 8px;color:#111111;font-size:11px;line-height:1.4;font-weight:400;white-space:normal;"><a href="${shopUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Shop</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${contactUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Contact</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${termsUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Terms</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${privacyUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Privacy</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${shippingUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Shipping</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${refundsUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Refunds</a></td>
+                  <td width="65%" align="right" class="os-legal os-legal-links" style="width:65%;padding:12px 8px;color:#111111;font-size:11px;line-height:1.4;font-weight:400;white-space:normal;"><a href="${shopUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Shop</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${contactUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Contact</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${termsUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Terms</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${shippingUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Shipping</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="${refundsUrl}" style="color:#111111;font-weight:400;text-decoration:none;white-space:nowrap;">Refunds</a></td>
                 </tr>
               </table>
             </td>
