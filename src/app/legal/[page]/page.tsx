@@ -115,27 +115,22 @@ const contactOptions = [
 ];
 
 function ContactIcon({ label }: { label: string }) {
-  const common = {
-    "aria-hidden": true as const,
-    viewBox: "0 0 24 24",
-    className: "contact-option-icon",
-  };
+  const imageClass = "contact-option-icon";
 
   if (label === "FACEBOOK") {
-    return <svg {...common}><circle cx="12" cy="12" r="11" fill="var(--paper)" /><path d="M13.4 20v-7h2.3l.35-2.7H13.4V8.6c0-.78.22-1.3 1.35-1.3h1.45V4.9c-.25-.03-1.1-.1-2.1-.1-2.08 0-3.5 1.27-3.5 3.62v1.88H8.25V13h2.35v7h2.8Z" fill="var(--ink)" /></svg>;
+    return <img aria-hidden="true" className={imageClass} src="/email/social/facebook.png" alt="" />;
   }
 
   if (label === "INSTAGRAM") {
-    return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.7" r=".8" fill="currentColor" stroke="none" /></svg>;
+    return <svg aria-hidden="true" viewBox="0 0 24 24" className={imageClass} fill="none" stroke="var(--ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.7" r=".8" fill="var(--ink)" stroke="none" /></svg>;
   }
 
   if (label === "ADDRESS") {
-    return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.4" strokeWidth="2.4" /></svg>;
+    return <svg aria-hidden="true" viewBox="0 0 24 24" className={imageClass} fill="none" stroke="var(--ink)" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.4" strokeWidth="2.4" /></svg>;
   }
 
-  return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5" /><path d="m4 7 8 6 8-6" /></svg>;
+  return <img aria-hidden="true" className={imageClass} src="/email/social/gmail.png" alt="" />;
 }
-
 const pages: Record<string, LegalContent> = {
   terms: {
     title: "TERMS AND CONDITIONS",
