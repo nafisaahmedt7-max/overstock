@@ -47,7 +47,7 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
       .os-content { padding-top: 26px !important; padding-bottom: 24px !important; }
       .os-content-compact { padding-bottom: 14px !important; }
       .os-content-inner { padding-left: 20px !important; padding-right: 20px !important; }
-      .os-legal { font-size: 11px !important; }
+      .os-legal { font-size: 11.2px !important; }
       .os-social-link { font-size: 9px !important; }
       .os-invite-detail-cell { padding-left: 20px !important; padding-right: 20px !important; }
     }
