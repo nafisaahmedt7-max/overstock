@@ -47,7 +47,9 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
       .os-content { padding-top: 26px !important; padding-bottom: 24px !important; }
       .os-content-compact { padding-bottom: 14px !important; }
       .os-content-inner { padding-left: 20px !important; padding-right: 20px !important; }
-      .os-legal { font-size: 11.2px !important; }
+      .os-legal { display:block !important; width:100% !important; padding:7px 8px !important; font-size:9px !important; }
+      .os-legal-brand { text-align:left !important; }
+      .os-legal-links { text-align:right !important; }
       .os-social-link { font-size: 9px !important; }
       .os-invite-detail-cell { padding-left: 20px !important; padding-right: 20px !important; }
     }
@@ -81,8 +83,8 @@ export function renderOverstockEmail(baseUrl: string, contentHtml: string, fullW
             <td style="padding:0 8px;">
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                 <tr>
-                  <td width="35%" align="left" class="os-legal os-legal-brand" style="width:35%;padding:12px 8px;color:#555555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:11.2px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:nowrap;">© 2026 OVERSTOCK</td>
-                  <td width="65%" align="right" class="os-legal os-legal-links" style="width:65%;padding:12px 8px;color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:11.2px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:normal;"><a href="${shopUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHOP</a>&nbsp;·&nbsp;<a href="${contactUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">CONTACT</a>&nbsp;·&nbsp;<a href="${termsUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">TERMS</a>&nbsp;·&nbsp;<a href="${shippingUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHIPPING</a>&nbsp;·&nbsp;<a href="${refundsUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">REFUNDS</a></td>
+                  <td width="50%" align="left" class="os-legal os-legal-brand" style="width:50%;padding:10px 8px;color:#555555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:9px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:nowrap;">© 2026 OVERSTOCK</td>
+                  <td width="50%" align="right" class="os-legal os-legal-links" style="width:50%;padding:10px 8px;color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:9px;line-height:1.5;font-weight:400;text-transform:uppercase;white-space:nowrap;"><a href="${shopUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHOP</a>·<a href="${contactUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">CONTACT</a>·<a href="${termsUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">TERMS</a>·<a href="${shippingUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">SHIPPING</a>·<a href="${refundsUrl}" style="color:#111111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-weight:400;text-decoration:none;white-space:nowrap;">REFUNDS</a></td>
                 </tr>
               </table>
             </td>
