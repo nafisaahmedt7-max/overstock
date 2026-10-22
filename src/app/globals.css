@@ -4060,14 +4060,14 @@ select {
 }
 .legal-page-contact .contact-options {
   display: table;
-  width: min(25rem, 100%);
+  width: max-content;
   max-width: 100%;
   margin: 2rem auto 0;
   border: 1px solid var(--line);
   border-collapse: collapse;
   background: #e4e4e0;
   text-align: left;
-  table-layout: fixed;
+  table-layout: auto;
 }
 .legal-page-contact .contact-option {
   display: table-row;
@@ -4080,7 +4080,7 @@ select {
 }
 .legal-page-contact .contact-option-icon-cell {
   width: 4.3rem;
-  padding: 1rem 1.25rem 1rem 1.4rem;
+  padding: 1rem 1.9rem 1rem 1.9rem;
   vertical-align: middle;
 }
 .legal-page-contact .contact-option-icon {
@@ -4090,7 +4090,7 @@ select {
   color: var(--ink);
 }
 .legal-page-contact .contact-option-value-cell {
-  padding: 1rem 1.6rem 1rem 0;
+  padding: 1rem 1.9rem 1rem 0;
   vertical-align: middle;
 }
 .legal-page-contact .contact-option-value-cell a,
@@ -4109,14 +4109,14 @@ select {
 @media (max-width: 480px) {
   .legal-page-contact .contact-option-icon-cell {
     width: 4.05rem;
-    padding: .9rem 1.2rem .9rem 1.35rem;
+    padding: .9rem 1.5rem .9rem 1.5rem;
   }
   .legal-page-contact .contact-option-icon {
     width: 1.5rem;
     height: 1.5rem;
   }
   .legal-page-contact .contact-option-value-cell {
-    padding: .9rem 1.55rem .9rem 0;
+    padding: .9rem 1.5rem .9rem 0;
   }
   .legal-page-contact .contact-option-value-cell a,
   .legal-page-contact .contact-option-value-cell span {
