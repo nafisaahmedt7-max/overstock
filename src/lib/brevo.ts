@@ -56,10 +56,12 @@ function buildEmailContent(order: QueuedOrderEmail, contactEmail: string) {
   const safeName = escapeHtml(order.customer_name);
   const safeAddress = escapeHtml(order.delivery_address || "—");
   const safeOrigin = escapeHtml(publicOrigin);
+  const safeShop = escapeHtml(publicOrigin);
+  const safeContactUrl = escapeHtml(publicOrigin + "/legal/contact");
   const safeTerms = escapeHtml(publicOrigin + "/legal/terms");
   const safePrivacy = escapeHtml(publicOrigin + "/legal/privacy");
   const safeShipping = escapeHtml(publicOrigin + "/legal/shipping");
-  const safeContactUrl = escapeHtml(publicOrigin + "/legal/contact");
+  const safeRefunds = escapeHtml(publicOrigin + "/legal/refunds");
   const instagramUrl = safeSocialUrl(process.env.OVERSTOCK_INSTAGRAM_URL, "instagram.com");
   const facebookUrl = safeSocialUrl(process.env.OVERSTOCK_FACEBOOK_URL, "facebook.com");
   const safeContactEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
@@ -105,17 +107,19 @@ function buildEmailContent(order: QueuedOrderEmail, contactEmail: string) {
     '<tr><td align="center" style="padding:28px 30px 22px;text-align:center"><p style="margin:0"><a href="__STORE_URL__" style="display:inline-block;padding:11px 18px;background:#050505;color:#f1f1ef;text-decoration:none;font-size:11px;line-height:16px;font-weight:600;letter-spacing:.4px">CONTINUE SHOPPING</a></p></td></tr>',
     '<tr><td align="center" style="padding:0 30px 22px;text-align:center"><p style="margin:0;font-size:13px;line-height:20px;font-weight:600">Need help with your order?</p><p style="margin:5px 0 0;font-size:11px;line-height:18px;color:#555">For questions about your purchase or delivery, please <a href="__CONTACT_URL__" style="color:#050505;text-decoration:underline;text-underline-offset:2px">contact us</a>.</p></td></tr>',
     socialLinks,
-    '<tr><td style="padding:12px 18px;border-top:1px solid #050505"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-family:Geist,Arial,Helvetica,sans-serif;font-size:9px;line-height:13px;color:#050505"><tr><td align="left" style="font-weight:600;letter-spacing:.3px;white-space:nowrap">© 2026 OVERSTOCK</td><td align="right" style="white-space:nowrap"><a href="__TERMS_URL__" style="color:#050505;text-decoration:none">Terms</a><span> &nbsp;·&nbsp; </span><a href="__PRIVACY_URL__" style="color:#050505;text-decoration:none">Privacy</a><span> &nbsp;·&nbsp; </span><a href="__SHIPPING_URL__" style="color:#050505;text-decoration:none">Shipping</a></td></tr></table></td></tr>',
+    '<tr><td style="padding:12px 18px;border-top:1px solid #050505"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-family:Geist,Arial,Helvetica,sans-serif;font-size:9px;line-height:13px;color:#050505"><tr><td align="left" style="font-weight:400;letter-spacing:.3px;white-space:nowrap">© 2026 OVERSTOCK</td><td align="right" style="white-space:normal"><a href="__SHOP_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Shop</a><span> &nbsp;·&nbsp; </span><a href="__CONTACT_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Contact</a><span> &nbsp;·&nbsp; </span><a href="__TERMS_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Terms</a><span> &nbsp;·&nbsp; </span><a href="__PRIVACY_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Privacy</a><span> &nbsp;·&nbsp; </span><a href="__SHIPPING_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Shipping</a><span> &nbsp;·&nbsp; </span><a href="__REFUNDS_URL__" style="color:#050505;font-weight:400;text-decoration:none;white-space:nowrap">Refunds</a></td></tr></table></td></tr>',
     '</table></td></tr></table></body></html>',
   ].join("");
   return html
     .replaceAll("__NAME__", safeName)
     .replaceAll("__ORDER__", String(order.order_number))
     .replaceAll("__STORE_URL__", safeOrigin)
+    .replace("__SHOP_URL__", safeShop)
     .replace("__CONTACT_URL__", safeContactUrl)
     .replace("__TERMS_URL__", safeTerms)
     .replace("__PRIVACY_URL__", safePrivacy)
     .replace("__SHIPPING_URL__", safeShipping)
+    .replace("__REFUNDS_URL__", safeRefunds)
     .replace("__ITEMS__", itemRows)
     .replace("__TOTAL__", total)
     .replace("__ADDRESS__", safeAddress);
