@@ -78,16 +78,14 @@ export async function POST(request: Request) {
     name = partner.name;
   }
 
-  const apiKey = process.env.MAILJET_API_KEY;
-  const secretKey = process.env.MAILJET_SECRET_KEY;
-  const senderEmail = process.env.MAILJET_SENDER_EMAIL;
-  const senderName = process.env.MAILJET_SENDER_NAME || "OVERSTOCK";
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const missingConfig = [
-    apiKey ? null : "MAILJET_API_KEY",
-    secretKey ? null : "MAILJET_SECRET_KEY",
-    senderEmail ? null : "MAILJET_SENDER_EMAIL",
+    apiKey ? null : "BREVO_API_KEY",
+    senderEmail ? null : "BREVO_SENDER_EMAIL",
     supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
     serverKey ? null : "SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)",
   ].filter((name): name is string => name !== null);
@@ -97,7 +95,6 @@ export async function POST(request: Request) {
     }, { status: 503 });
   }
   const configuredApiKey = apiKey as string;
-  const configuredSecretKey = secretKey as string;
   const configuredSenderEmail = senderEmail as string;
   const configuredSupabaseUrl = supabaseUrl as string;
   const configuredServerKey = serverKey as string;
@@ -202,20 +199,19 @@ export async function POST(request: Request) {
 
   let response: Response;
   try {
-    response = await fetch("https://api.mailjet.com/v3.1/send", {
+    response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        authorization: `Basic ${Buffer.from(`${configuredApiKey}:${configuredSecretKey}`).toString("base64")}`,
+        accept: "application/json",
+        "api-key": configuredApiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        Messages: [{
-          From: { Name: senderName, Email: configuredSenderEmail },
-          To: [{ Email: email, Name: name || email }],
-          Subject: subject,
-          TextPart: textContent,
-          HTMLPart: htmlContent,
-        }],
+        sender: { name: senderName, email: configuredSenderEmail },
+        to: [{ email, name: name || email }],
+        subject,
+        textContent,
+        htmlContent,
       }),
     });
   } catch (error) {
@@ -226,24 +222,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The registration email could not be sent. Please try again." }, { status: 502 });
   }
 
-  const mailjetResult = await response.json().catch(() => null) as {
-    ErrorMessage?: string;
-    Messages?: Array<{ Status?: string; To?: Array<{ MessageID?: string; MessageUUID?: string }> }>;
+  const brevoResult = await response.json().catch(() => null) as {
+    message?: string;
+    messageId?: string;
+    code?: string;
   } | null;
   if (!response.ok) {
-    console.error("OVERSTOCK registration email rejected by Mailjet", {
+    console.error("OVERSTOCK registration email rejected by Brevo", {
       role,
       status: response.status,
-      message: mailjetResult?.ErrorMessage || "provider_error",
+      message: brevoResult?.message || brevoResult?.code || "provider_error",
     });
     return NextResponse.json({
-      error: `Mailjet rejected the registration email (HTTP ${response.status}). Check the sender configuration in Mailjet, then retry.`,
+      error: `Brevo rejected the registration email (HTTP ${response.status}). Check the sender configuration in Brevo, then retry.`,
     }, { status: 502 });
   }
 
-  console.info("OVERSTOCK registration email accepted by Mailjet", {
+  console.info("OVERSTOCK registration email accepted by Brevo", {
     role,
-    messageId: mailjetResult?.Messages?.[0]?.To?.[0]?.MessageID || "not_returned",
+    messageId: brevoResult?.messageId || "not_returned",
   });
   return NextResponse.json({ ok: true, acceptedByProvider: true });
 }
