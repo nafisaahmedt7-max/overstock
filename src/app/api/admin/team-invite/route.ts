@@ -194,7 +194,7 @@ export async function POST(request: Request) {
     <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
     <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
-    <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p>
+    <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD</p>
     <p style="margin:10px 0 0;"><a class="os-button" href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">REGISTER</a></p>
     <p style="margin:12px 0 0;"><a class="os-button" href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">LOGIN</a></p>
     <p style="margin:13px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
