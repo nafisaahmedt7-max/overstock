@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -93,7 +92,6 @@ type LegalContent = {
 const contactOptions = [
   {
     label: "EMAIL",
-    icon: "/email/social/gmail.png",
     href: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim()
       ? `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL.trim()}`
       : "mailto:operations.overstock@gmail.com",
@@ -101,23 +99,42 @@ const contactOptions = [
   },
   {
     label: "FACEBOOK",
-    icon: "/email/social/facebook.png",
     href: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "",
     value: process.env.NEXT_PUBLIC_FACEBOOK_URL?.trim() || "Facebook profile coming soon",
   },
   {
     label: "INSTAGRAM",
-    icon: "/email/social/instagram.png",
     href: process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() || "https://www.instagram.com/overstock.bd/",
     value: "@overstock.bd",
   },
   {
     label: "ADDRESS",
-    icon: "location",
     href: "",
     value: "24 Eolian Loop, Clayton, Sydney",
   },
 ];
+
+function ContactIcon({ label }: { label: string }) {
+  const common = {
+    "aria-hidden": true as const,
+    viewBox: "0 0 24 24",
+    className: "contact-option-icon",
+  };
+
+  if (label === "FACEBOOK") {
+    return <svg {...common}><circle cx="12" cy="12" r="11" fill="currentColor" /><path d="M13.4 20v-7h2.3l.35-2.7H13.4V8.6c0-.78.22-1.3 1.35-1.3h1.45V4.9c-.25-.03-1.1-.1-2.1-.1-2.08 0-3.5 1.27-3.5 3.62v1.88H8.25V13h2.35v7h2.8Z" fill="var(--paper)" /></svg>;
+  }
+
+  if (label === "INSTAGRAM") {
+    return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.7" r=".8" fill="currentColor" stroke="none" /></svg>;
+  }
+
+  if (label === "ADDRESS") {
+    return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.4" strokeWidth="2.4" /></svg>;
+  }
+
+  return <svg {...common} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.5" /><path d="m4 7 8 6 8-6" /></svg>;
+}
 
 const pages: Record<string, LegalContent> = {
   terms: {
@@ -387,9 +404,19 @@ const pages: Record<string, LegalContent> = {
   },
   contact: {
     title: "CONTACT",
-    copy: [
-      "For questions or to report accessibility issues, please contact our support team via the channels below.",
-      "For an order issue, include your order number and photos if the item arrived damaged.",
+    sections: [
+      {
+        heading: "1. Account support",
+        paragraphs: [
+          "For questions or accessibility issues, contact our support team using the channels below.",
+        ],
+      },
+      {
+        heading: "2. Order support",
+        paragraphs: [
+          "For an order issue, include your order number. If an item arrived damaged, include photos to help us review it.",
+        ],
+      },
     ],
   },
 };
@@ -404,54 +431,38 @@ export default async function LegalPage({ params }: { params: Promise<{ page: st
       <p className="eyebrow">OVERSTOCK / HELP</p>
       <h1>{content.title}</h1>
       {content.updated && <p className="legal-updated">{content.updated}</p>}
-      {page === "contact" ? (
-        <ul className="contact-guidance">
-          {content.copy?.map((text) => <li key={text}>{renderFormatted(text)}</li>)}
-        </ul>
-      ) : (
-        content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)
-      )}
-      {page === "contact" && (
-        <section className="contact-options" aria-label="Contact options">
-          {contactOptions.map((option) => (
-            <div className="contact-option" key={option.label}>
-              {option.icon === "location" ? (
-                <svg className="contact-option-icon" viewBox="0 0 32 32" role="img" aria-label="Address" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M26 13.2c0 7-10 16.2-10 16.2S6 20.2 6 13.2a10 10 0 1 1 20 0Z" />
-                  <circle cx="16" cy="13" r="3.2" />
-                </svg>
-              ) : option.icon ? (
-                <Image
-                  src={option.icon}
-                  alt={option.label}
-                  width={32}
-                  height={32}
-                  className="contact-option-icon"
-                />
-              ) : null}
-              <div className="contact-option-content">
-                {option.href ? (
-                  <a
-                    href={option.href}
-                    target={option.label === "EMAIL" ? undefined : "_blank"}
-                    rel={option.label === "EMAIL" ? undefined : "noreferrer"}
-                  >
-                    <strong>{option.value}</strong>
-                  </a>
-                ) : (
-                  <span><strong>{option.value}</strong></span>
-                )}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
+      {content.copy?.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
       {content.sections?.map((section) => (
         <section className="legal-section" key={section.heading}>
           <h2>{section.heading}</h2>
           {section.paragraphs.map((text) => <p key={text}>{renderFormatted(text)}</p>)}
         </section>
       ))}
+      {page === "contact" && (
+        <table className="contact-options" aria-label="Contact options">
+          <tbody>
+            {contactOptions.map((option) => (
+              <tr className="contact-option" key={option.label}>
+                <td className="contact-option-icon-cell"><ContactIcon label={option.label} /></td>
+                <td className="contact-option-value-cell">
+                  {option.href ? (
+                    <a
+                      href={option.href}
+                      aria-label={`${option.label}: ${option.value}`}
+                      target={option.label === "EMAIL" ? undefined : "_blank"}
+                      rel={option.label === "EMAIL" ? undefined : "noreferrer"}
+                    >
+                      <strong>{option.value}</strong>
+                    </a>
+                  ) : (
+                    <span aria-label={`${option.label}: ${option.value}`}><strong>{option.value}</strong></span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </main>
   );
 }
