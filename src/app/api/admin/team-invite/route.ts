@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderOverstockEmail } from "@/lib/email/overstock-layout";
+import { sendToLocalMailpit } from "@/lib/email/mailpit";
 
 function escapeHtml(value: string) {
   return value
@@ -78,13 +79,14 @@ export async function POST(request: Request) {
     name = partner.name;
   }
 
+  const useMailpit = process.env.NODE_ENV === "development" && process.env.EMAIL_PROVIDER === "mailpit";
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || (useMailpit ? "no-reply@overstock.local" : undefined);
   const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const missingConfig = [
-    apiKey ? null : "BREVO_API_KEY",
+    useMailpit || apiKey ? null : "BREVO_API_KEY",
     senderEmail ? null : "BREVO_SENDER_EMAIL",
     supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
     serverKey ? null : "SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)",
@@ -197,13 +199,43 @@ export async function POST(request: Request) {
     <p style="margin:13px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
+  if (useMailpit) {
+    try {
+      const localResponse = await sendToLocalMailpit({
+        fromEmail: configuredSenderEmail,
+        fromName: senderName,
+        toEmail: email,
+        toName: name || email,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
+      if (!localResponse.ok) {
+        console.error("OVERSTOCK registration email rejected by local Mailpit", {
+          role,
+          status: localResponse.status,
+        });
+        return NextResponse.json({ error: "Mailpit could not capture the registration email. Check that it is running on the configured local URL." }, { status: 502 });
+      }
+      console.info("OVERSTOCK registration email captured by local Mailpit", { role });
+      return NextResponse.json({ ok: true, acceptedByProvider: true, provider: "mailpit" });
+    } catch (error) {
+      console.error("OVERSTOCK local Mailpit request failed", {
+        role,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      return NextResponse.json({ error: "Could not connect to local Mailpit. Start Mailpit and try again." }, { status: 502 });
+    }
+  }
+
+  const brevoApiKey = apiKey as string;
   let response: Response;
   try {
     response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         accept: "application/json",
-        "api-key": configuredApiKey,
+        "api-key": brevoApiKey,
         "content-type": "application/json",
       },
       body: JSON.stringify({
