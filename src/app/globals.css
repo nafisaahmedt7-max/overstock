@@ -4060,14 +4060,14 @@ select {
 }
 .legal-page-contact .contact-options {
   display: table;
-  width: max-content;
+  width: min(25rem, 100%);
   max-width: 100%;
   margin: 2rem auto 0;
   border: 1px solid var(--line);
   border-collapse: collapse;
   background: #e4e4e0;
   text-align: left;
-  table-layout: auto;
+  table-layout: fixed;
 }
 .legal-page-contact .contact-option {
   display: table-row;
