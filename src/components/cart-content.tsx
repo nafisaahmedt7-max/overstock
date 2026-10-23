@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
+import { phoneCountryCodes } from "@/data/phone-country-codes";
 
 export function CartContent({
   productImages,
@@ -17,6 +18,7 @@ export function CartContent({
   const router = useRouter();
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -152,19 +154,23 @@ export function CartContent({
               <div className="local-phone-fields">
                 <label>
                   Country code
-                  <select
-                    name="phoneCountryCode"
-                    autoComplete="tel-country-code"
-                    defaultValue="+1"
-                    aria-label="Phone country calling code"
-                  >
-                    <option value="+1">United States (+1)</option>
-                    <option value="+61">Australia (+61)</option>
-                    <option value="+880">Bangladesh (+880)</option>
-                    <option value="+44">United Kingdom (+44)</option>
-                    <option value="+64">New Zealand (+64)</option>
-                    <option value="+91">India (+91)</option>
-                  </select>
+                  <span className="local-phone-code-control">
+                    <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode}</span>
+                    <select
+                      name="phoneCountryCode"
+                      autoComplete="tel-country-code"
+                      value={phoneCountryCode}
+                      onChange={(event) => setPhoneCountryCode(event.target.value)}
+                      aria-label="Phone country calling code"
+                    >
+                      {phoneCountryCodes.map(([country, code], index) => (
+                        <option key={`${country}-${code}-${index}`} value={code}>
+                          {country} ({code})
+                        </option>
+                      ))}
+                    </select>
+                    <span className="local-phone-code-chevron" aria-hidden="true" />
+                  </span>
                 </label>
                 <label>
                   Phone number, including area code <span>(optional)</span>

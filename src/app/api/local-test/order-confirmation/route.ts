@@ -52,7 +52,7 @@ function parseCustomer(value: unknown): CheckoutCustomer | null {
   const phoneCountryCode = readText(raw.phoneCountryCode, 5);
   const phoneNumber = readText(raw.phone, 32);
   const hasPhoneNumber = phoneNumber.length > 0;
-  if (phoneCountryCode && !/^\+[1-9]\d{0,3}$/.test(phoneCountryCode)) return null;
+  if (phoneCountryCode && !/^\+[1-9]\d{0,4}$/.test(phoneCountryCode)) return null;
   if (hasPhoneNumber && !/^[+\d().\s-]+$/.test(phoneNumber)) return null;
   const customer = {
     fullName: readText(raw.fullName, 100),
