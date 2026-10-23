@@ -9,5 +9,13 @@ export default async function CartPage() {
     products.map((product) => [product.slug, product.imageUrl]),
   );
 
-  return <CartContent productImages={productImages} />;
+  return (
+    <CartContent
+      productImages={productImages}
+      localCheckoutTest={
+        process.env.NODE_ENV === "development" &&
+        process.env.EMAIL_PROVIDER === "mailpit"
+      }
+    />
+  );
 }
