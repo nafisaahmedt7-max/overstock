@@ -152,15 +152,19 @@ export function CartContent({
               <div className="local-phone-fields">
                 <label>
                   Country code
-                  <input
+                  <select
                     name="phoneCountryCode"
-                    type="tel"
-                    inputMode="tel"
                     autoComplete="tel-country-code"
-                    placeholder="+1"
-                    maxLength={5}
+                    defaultValue="+1"
                     aria-label="Phone country calling code"
-                  />
+                  >
+                    <option value="+1">United States (+1)</option>
+                    <option value="+61">Australia (+61)</option>
+                    <option value="+880">Bangladesh (+880)</option>
+                    <option value="+44">United Kingdom (+44)</option>
+                    <option value="+64">New Zealand (+64)</option>
+                    <option value="+91">India (+91)</option>
+                  </select>
                 </label>
                 <label>
                   Phone number, including area code <span>(optional)</span>
@@ -192,19 +196,19 @@ export function CartContent({
                   State / region
                   <input name="region" autoComplete="address-level1" placeholder="State or region" maxLength={80} required />
                 </label>
-                <label>
-                  Postal code
-                  <input name="postalCode" autoComplete="postal-code" placeholder="Postal code" maxLength={24} required />
-                </label>
-                <label>
-                  Country
-                  <select name="country" autoComplete="country-name" defaultValue="United States" required>
-                    <option>United States</option>
-                    <option>Australia</option>
-                    <option>Other</option>
-                  </select>
-                </label>
               </div>
+              <label>
+                Postal code
+                <input name="postalCode" autoComplete="postal-code" placeholder="Postal code" maxLength={24} required />
+              </label>
+              <label>
+                Country
+                <select name="country" autoComplete="country-name" defaultValue="United States" required>
+                  <option>United States</option>
+                  <option>Australia</option>
+                  <option>Other</option>
+                </select>
+              </label>
               <button type="submit" disabled={checkoutPending}>
                 {checkoutPending ? "SENDING TEST RECEIPT..." : "CONTINUE TO CHECKOUT"}
               </button>
