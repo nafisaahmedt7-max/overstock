@@ -149,10 +149,32 @@ export function CartContent({
                 Email address
                 <input name="email" type="email" autoComplete="email" placeholder="name@example.com" maxLength={254} required />
               </label>
-              <label>
-                Phone number <span>(optional)</span>
-                <input name="phone" type="tel" autoComplete="tel" placeholder="Phone number" maxLength={32} />
-              </label>
+              <div className="local-phone-fields">
+                <label>
+                  Country code
+                  <input
+                    name="phoneCountryCode"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel-country-code"
+                    placeholder="+1"
+                    maxLength={5}
+                    aria-label="Phone country calling code"
+                  />
+                </label>
+                <label>
+                  Phone number, including area code <span>(optional)</span>
+                  <input
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel-national"
+                    placeholder="212 555 0123"
+                    maxLength={32}
+                  />
+                </label>
+              </div>
+              <p className="local-checkout-helper">Add a country calling code, such as +1 or +61. Include your area code with the phone number.</p>
               <label>
                 Address line 1
                 <input name="addressLine1" autoComplete="address-line1" placeholder="Street address" maxLength={120} required />

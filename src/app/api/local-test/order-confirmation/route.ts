@@ -49,10 +49,17 @@ function readText(value: unknown, maxLength: number) {
 function parseCustomer(value: unknown): CheckoutCustomer | null {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
+  const phoneCountryCode = readText(raw.phoneCountryCode, 5);
+  const phoneNumber = readText(raw.phone, 32);
+  const hasPhoneNumber = phoneNumber.length > 0;
+  if (phoneCountryCode && !/^\\+[1-9]\\d{0,3}$/.test(phoneCountryCode)) return null;
+  if (hasPhoneNumber && !/^[+\\d().\\s-]+$/.test(phoneNumber)) return null;
   const customer = {
     fullName: readText(raw.fullName, 100),
     email: readText(raw.email, 254).toLowerCase(),
-    phone: readText(raw.phone, 32),
+    phone: hasPhoneNumber
+      ? [phoneCountryCode, phoneNumber].filter(Boolean).join(" ")
+      : "",
     addressLine1: readText(raw.addressLine1, 120),
     addressLine2: readText(raw.addressLine2, 120),
     city: readText(raw.city, 80),
