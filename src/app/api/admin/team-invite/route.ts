@@ -1,6 +1,8 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { renderOverstockEmail } from "@/lib/email/overstock-layout";
+import { isLocalMailpitEnabled, sendToMailpit } from "@/lib/email/mailpit";
 
 function escapeHtml(value: string) {
   return value
@@ -77,27 +79,32 @@ export async function POST(request: Request) {
     name = partner.name;
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL;
-  const senderName = process.env.BREVO_SENDER_NAME || "OVERSTOCK";
+  const apiKey = process.env.MAILJET_API_KEY;
+  const secretKey = process.env.MAILJET_SECRET_KEY;
+  const senderEmail = process.env.MAILJET_SENDER_EMAIL;
+  const senderName = process.env.MAILJET_SENDER_NAME || "OVERSTOCK";
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serverKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const useMailpit = isLocalMailpitEnabled();
   const missingConfig = [
-    apiKey ? null : "BREVO_API_KEY",
-    senderEmail ? null : "BREVO_SENDER_EMAIL",
+    useMailpit || apiKey ? null : "MAILJET_API_KEY",
+    useMailpit || secretKey ? null : "MAILJET_SECRET_KEY",
+    useMailpit || senderEmail ? null : "MAILJET_SENDER_EMAIL",
     supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
     serverKey ? null : "SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)",
   ].filter((name): name is string => name !== null);
-  if (missingConfig.length)
-    return NextResponse.json({ error: `Registration email is not configured. Missing: ${missingConfig.join(", ")}.` }, { status: 503 });
+  if (missingConfig.length) {
+    return NextResponse.json({
+      error: `Registration email is not configured. Missing: ${missingConfig.join(", ")}.`,
+    }, { status: 503 });
+  }
   const configuredApiKey = apiKey as string;
+  const configuredSecretKey = secretKey as string;
   const configuredSenderEmail = senderEmail as string;
   const configuredSupabaseUrl = supabaseUrl as string;
   const configuredServerKey = serverKey as string;
 
-  const registrationUrl = new URL("/portal/login", request.url);
-  registrationUrl.searchParams.set("mode", "register");
-  registrationUrl.searchParams.set("email", email);
+  const newPasswordPath = new URLSearchParams({ mode: "register", email }).toString();
 
   const adminClient = createSupabaseClient(configuredSupabaseUrl, configuredServerKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
@@ -106,7 +113,6 @@ export async function POST(request: Request) {
     type: "invite",
     email,
     options: {
-      redirectTo: registrationUrl.toString(),
       data: { portal_role: role, display_name: name },
     },
   });
@@ -121,69 +127,120 @@ export async function POST(request: Request) {
     ? await adminClient.auth.admin.generateLink({
         type: "magiclink",
         email,
-        options: { redirectTo: registrationUrl.toString() },
       })
     : inviteResult;
-  const actionLink = linkResult.data?.properties?.action_link;
-  if (linkResult.error || !actionLink) {
+  const tokenHash = linkResult.data?.properties?.hashed_token;
+  const verificationType = linkResult.data?.properties?.verification_type;
+  if (linkResult.error || !tokenHash || !verificationType) {
     const authError = linkResult.error;
     const invalidAdminKey =
       authError?.status === 401 || /invalid api key/i.test(authError?.message || "");
     const errorCode = invalidAdminKey
       ? "invalid_service_role_key"
       : authError?.code || "action_link_missing";
-    const redirectRejected =
-      errorCode === "redirect_to_not_allowed" ||
-      /redirect.*(not allowed|allowlist|allowed)/i.test(authError?.message || "");
     console.error("OVERSTOCK invitation link generation failed", {
       flow: useExistingAccountLink ? "magiclink" : "invite",
       code: errorCode,
       status: authError?.status,
       message: authError?.message,
-      redirectOrigin: registrationUrl.origin,
+      redirectOrigin: new URL(request.url).origin,
     });
 
     return NextResponse.json({
       error: invalidAdminKey
         ? `Supabase rejected the server-side API key. Update SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY) with a valid key for this Supabase project, then retry.`
-        : redirectRejected
-          ? `Supabase Auth rejected this site's redirect address (${registrationUrl.origin}). Add this site to Supabase Auth → URL Configuration → Redirect URLs, then retry.`
-          : `Supabase Auth could not create the registration link (${errorCode}). Check the Auth redirect URL settings and whether this email already has a portal account, then retry.`,
+        : `Supabase Auth could not create the registration link (${errorCode}). Check the server-side Auth configuration and whether this email already has a portal account, then retry.`,
     }, { status: 502 });
   }
 
-  const safeName = escapeHtml(name || "there");
+  // Verify the one-time token on our own origin. This avoids Supabase falling
+  // back to its configured Site URL when a Vercel preview URL is not allow-listed.
+  const appLink = new URL("/auth/confirm", request.url);
+  appLink.searchParams.set("token_hash", tokenHash);
+  appLink.searchParams.set("type", verificationType);
+  appLink.searchParams.set("next", `/portal/new-password?${newPasswordPath}`);
+
+  const safeName = escapeHtml(name || "there").toUpperCase();
   const safeEmail = escapeHtml(email);
-  const safeUrl = escapeHtml(actionLink);
+  const safeUrl = escapeHtml(appLink.toString());
+  const baseUrl = new URL(request.url).origin;
+  const loginUrl = escapeHtml(new URL("/portal/login", baseUrl).toString());
   const roleLabel = role === "seller" ? "seller" : "fulfilment team member";
-  const subject = useExistingAccountLink ? "Confirm your OVERSTOCK portal access" : "Confirm your OVERSTOCK portal invitation";
+  const subject = "You’re invited to the OVERSTOCK portal";
   const textContent = [
-    `Hello ${name || "there"},`,
+    "YOU’RE INVITED",
     "",
-    `OVERSTOCK has approved your access as a ${roleLabel}.`,
-    `Your portal access is linked to this email address: ${email}`,
-    `Confirm your invitation and set your password: ${actionLink}`,
+    `Hello, ${name || "there"}. You’re invited to join the OVERSTOCK ${roleLabel} portal.`,
     "",
-    "The secure link confirms your invitation and opens the password setup form. Choose a password and enter it again to confirm. You can then sign in to the portal.",
-    "Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.",
+    `PORTAL ROLE: ${role === "seller" ? "SELLER" : "FULFILMENT"}`,
+    `LOGIN EMAIL: ${email}`,
+    "",
+    `LOGIN: ${new URL("/portal/login", baseUrl).toString()}`,
+    `REGISTER: ${appLink.toString()}`,
+    "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
+    "Need help with your account? For any queries about your account, contact us at operations.overstock@gmail.com.",
   ].join("\n");
-  const htmlContent = `<!doctype html><html><body style="margin:0;background:#f1f1ee;color:#111;font-family:Arial,sans-serif"><main style="max-width:600px;margin:32px auto;padding:32px;background:#fff;border:1px solid #111"><p style="font-size:12px;font-weight:bold;letter-spacing:2px">OVERSTOCK / PORTAL ACCESS</p><h1 style="font-size:24px">Confirm your portal invitation</h1><p>Hello ${safeName},</p><p>OVERSTOCK has approved your access as a ${roleLabel}. Your portal access is linked to this email address:</p><p style="padding:12px;background:#eee;font-weight:bold">${safeEmail}</p><p>The button below confirms your invitation and opens the password setup form. Choose a password and enter it again to confirm.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;padding:14px 20px;background:#111;color:#fff;text-decoration:none;font-weight:bold">CONFIRM AND SET PASSWORD</a></p><p>Your portal access is linked to the invited email address. If you were not expecting this invitation, you can ignore this message.</p></main></body></html>`;
+  const detailsHtml = `
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;background-color:#e4e4e0;">
+      <tr>
+        <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;background-color:#e4e4e0;text-align:center;">
+          <span style="display:inline-block;vertical-align:middle;color:#111111;font-size:12px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">PORTAL ROLE:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;">${role === "seller" ? "SELLER" : "FULFILMENT"}</strong>
+        </td>
+        <td class="os-invite-detail-cell" width="50%" align="center" valign="middle" bgcolor="#e4e4e0" style="width:50%;padding:10px 12px;border-left:1px solid #777777;background-color:#e4e4e0;text-align:center;overflow-wrap:anywhere;word-break:break-word;">
+          <span style="display:inline-block;vertical-align:middle;color:#111111;font-size:12px;line-height:1.2;font-weight:700;letter-spacing:.04em;white-space:nowrap;">LOGIN EMAIL:</span><strong style="display:inline-block;vertical-align:middle;padding-left:5px;font-size:12px;line-height:1.2;"><a href="mailto:${safeEmail}" style="color:#1a73e8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word;">${safeEmail}</a></strong>
+        </td>
+      </tr>
+    </table>`;
+  const contentHtml = `
+    <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">PORTAL INVITATION</span></p>
+    <h1 style="margin:20px 0 9px;font-size:24px;line-height:1.2;">YOU’RE INVITED</h1>
+    <p style="margin:0 0 17px;">Hello, ${safeName}. You’re invited to join the OVERSTOCK ${roleLabel} portal.</p>
+    <!--OVERSTOCK_FULL_WIDTH_SECTION-->
+    <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK REGISTER TO SET UP YOUR ACCOUNT AND PASSWORD.</p>
+    <p style="margin:10px 0 0;"><a class="os-button" href="${safeUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">REGISTER</a></p>
+    <p style="margin:12px 0 0;"><a class="os-button" href="${loginUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">LOGIN</a></p>
+    <p style="margin:13px 0 0;font-size:12px;">Need help with your account? For any queries about your account, <a href="mailto:operations.overstock@gmail.com" style="color:#111111;font-weight:700;">contact us</a>.</p>`;
+  const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
+
+  if (useMailpit) {
+    try {
+      await sendToMailpit({
+        From: { Email: senderEmail || process.env.MAILPIT_FROM_EMAIL || "operations.overstock@gmail.com", Name: senderName },
+        To: [{ Email: email, Name: name || email }],
+        Subject: subject,
+        Text: textContent,
+        HTML: htmlContent,
+      });
+    } catch (error) {
+      console.error("OVERSTOCK registration email could not be captured by local Mailpit", {
+        role,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      if (process.env.NODE_ENV === "development") {
+        return NextResponse.json({ error: "Local Mailpit is unavailable. Start Mailpit and try again." }, { status: 502 });
+      }
+      return NextResponse.json({ error: "The registration email could not be sent. Please try again." }, { status: 502 });
+    }
+    console.info("OVERSTOCK registration email captured by local Mailpit", { role });
+    return NextResponse.json({ ok: true, acceptedByProvider: true });
+  }
 
   let response: Response;
   try {
-    response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    response = await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
       headers: {
-        accept: "application/json",
-        "api-key": configuredApiKey,
+        authorization: `Basic ${Buffer.from(`${configuredApiKey}:${configuredSecretKey}`).toString("base64")}`,
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: senderName, email: configuredSenderEmail },
-        to: [{ email, name: name || email }],
-        subject,
-        textContent,
-        htmlContent,
+        Messages: [{
+          From: { Name: senderName, Email: configuredSenderEmail },
+          To: [{ Email: email, Name: name || email }],
+          Subject: subject,
+          TextPart: textContent,
+          HTMLPart: htmlContent,
+        }],
       }),
     });
   } catch (error) {
@@ -194,21 +251,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The registration email could not be sent. Please try again." }, { status: 502 });
   }
 
-  const brevoResult = await response.json().catch(() => null) as { messageId?: string; code?: string } | null;
+  const mailjetResult = await response.json().catch(() => null) as {
+    ErrorMessage?: string;
+    Messages?: Array<{ Status?: string; To?: Array<{ MessageID?: string; MessageUUID?: string }> }>;
+  } | null;
   if (!response.ok) {
-    console.error("OVERSTOCK registration email rejected by Brevo", {
+    console.error("OVERSTOCK registration email rejected by Mailjet", {
       role,
       status: response.status,
-      code: brevoResult?.code || "provider_error",
+      message: mailjetResult?.ErrorMessage || "provider_error",
     });
     return NextResponse.json({
-      error: `Brevo rejected the registration email (HTTP ${response.status}). Check the sender configuration in Brevo, then retry.`,
+      error: `Mailjet rejected the registration email (HTTP ${response.status}). Check the sender configuration in Mailjet, then retry.`,
     }, { status: 502 });
   }
 
-  console.info("OVERSTOCK registration email accepted by Brevo", {
+  console.info("OVERSTOCK registration email accepted by Mailjet", {
     role,
-    messageId: brevoResult?.messageId || "not_returned",
+    messageId: mailjetResult?.Messages?.[0]?.To?.[0]?.MessageID || "not_returned",
   });
   return NextResponse.json({ ok: true, acceptedByProvider: true });
 }
