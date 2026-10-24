@@ -67,6 +67,23 @@ export function CartContent({
         throw new Error(result.error || "Could not send the local test confirmation.");
       }
 
+      try {
+        const receiptItems = items.map((item) => ({
+          ...item,
+          imageUrl: item.imageUrl ?? productImages[item.slug] ?? null,
+        }));
+        sessionStorage.setItem(
+          `overstock:local-receipt:${result.orderNumber}`,
+          JSON.stringify({
+            orderNumber: result.orderNumber,
+            customer: Object.fromEntries(formData.entries()),
+            items: receiptItems,
+            itemTotal: total,
+          }),
+        );
+      } catch {
+        // The email is already captured; the thank-you page can still show its order reference.
+      }
       clear();
       router.push(`/checkout/thank-you?order=${encodeURIComponent(result.orderNumber)}`);
     } catch (error) {
