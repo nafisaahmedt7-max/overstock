@@ -4253,21 +4253,24 @@ select {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem;
 }
+.local-phone-group {
+  display: grid;
+  min-width: 0;
+  gap: 0.4rem;
+}
 .local-phone-fields {
   display: flex;
   width: 100%;
   align-items: flex-end;
   gap: 0.4rem;
 }
-.local-phone-fields > label {
+.local-phone-fields > * {
   min-width: 0;
 }
-.local-phone-fields > label:first-child {
+.local-phone-code-control {
   flex: 0 0 4.5rem;
-  white-space: nowrap;
-  font-size: 0.56rem;
 }
-.local-phone-fields > label:last-child {
+.local-phone-fields > input {
   flex: 1 1 0;
 }
 .local-phone-code-control {
@@ -4277,14 +4280,16 @@ select {
   height: 3.5rem;
   min-height: 3.5rem;
   align-items: center;
+  justify-content: center;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   background: #e4e4e0;
 }
 .local-phone-code-value {
-  padding-left: 0.55rem;
+  width: 100%;
   color: var(--ink);
-  font: 500 0.68rem var(--font-mono), monospace;
+  font: 700 0.68rem var(--font-mono), monospace;
+  text-align: center;
 }
 .local-phone-code-control select {
   position: absolute;

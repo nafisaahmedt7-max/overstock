@@ -155,9 +155,9 @@ export function CartContent({
                 Email address
                 <input name="email" type="email" autoComplete="email" placeholder="ALEX@EMAIL.COM" maxLength={254} required />
               </label>
-              <div className="local-phone-fields">
-                <label>
-                  Country code
+              <div className="local-phone-group">
+                <label className="local-phone-group-title" htmlFor="checkout-phone-number">Phone number</label>
+                <div className="local-phone-fields">
                   <span className="local-phone-code-control">
                     <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode}</span>
                     <select
@@ -175,10 +175,8 @@ export function CartContent({
                     </select>
                     <span className="local-phone-code-chevron" aria-hidden="true" />
                   </span>
-                </label>
-                <label>
-                  Phone number
                   <input
+                    id="checkout-phone-number"
                     name="phone"
                     type="tel"
                     inputMode="tel"
@@ -186,7 +184,7 @@ export function CartContent({
                     placeholder="212 555 0123"
                     maxLength={32}
                   />
-                </label>
+                </div>
               </div>
               <label>
                 Address line 1
