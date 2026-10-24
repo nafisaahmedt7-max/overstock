@@ -130,6 +130,14 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
       <Link className="checkout-test-return" href="/">
         CONTINUE SHOPPING
       </Link>
+      <p className="checkout-thank-you-help">
+        Need help with your order? For any queries about your purchase or delivery,{" "}
+        <a href="mailto:operations.overstock@gmail.com">contact us</a>.
+      </p>
+      <p className="checkout-thank-you-shipping" role="note">
+        <span className="checkout-thank-you-shipping-icon" aria-hidden="true">i</span>
+        <span>SHIPPING CONFIRMATION WILL BE SENT TO YOUR EMAIL AFTER DISPATCH.</span>
+      </p>
     </main>
   );
 }
