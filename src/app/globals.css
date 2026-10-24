@@ -4257,10 +4257,13 @@ select {
 .local-phone-group {
   display: grid;
   min-width: 0;
-  gap: 0.4rem;
+  gap: 0.25rem;
 }
 .local-phone-group-title {
+  display: block !important;
   width: 100%;
+  margin: 0;
+  line-height: 1.4;
 }
 .local-phone-fields {
   display: flex;
