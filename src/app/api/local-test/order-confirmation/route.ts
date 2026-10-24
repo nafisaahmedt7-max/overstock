@@ -154,13 +154,14 @@ export async function POST(request: Request) {
   const safeContactHtml = [customer.email, customer.phone].filter(Boolean).map(escapeHtml).join("<br>");
   const addressText = addressLines.join("\n");
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
-  const itemRows = items.map((item) => {
+  const itemRows = items.map((item, index) => {
     const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
+    const itemNumber = String(index + 1).padStart(2, "0");
     return `
     <tr><td colspan="2" align="center" style="padding:0;">
-      <table role="presentation" width="54%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:54%;min-width:230px;max-width:360px;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;box-shadow:0 2px 5px rgba(0,0,0,.12);">
+      <table role="presentation" width="58%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:58%;min-width:230px;max-width:380px;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">
         <tr>
-          <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;">${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
+          <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;"><span style="font-weight:700;">${itemNumber}.</span> ${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
           <td align="right" style="padding:9px 18px;white-space:nowrap;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.45;text-decoration:none;">× ${item.quantity}</a></td>
         </tr>
       </table>
@@ -178,7 +179,7 @@ export async function POST(request: Request) {
     "CONTACT:",
     contactText,
     "ORDER ITEMS:",
-    ...items.map((item) => `${item.name} · ${item.size} × ${item.quantity}`),
+    ...items.map((item, index) => `${index + 1}. ${item.name} · ${item.size} × ${item.quantity}`),
     `ORDER TOTAL: ${money(total)}`,
     "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
