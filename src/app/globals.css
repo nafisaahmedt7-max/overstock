@@ -4254,18 +4254,21 @@ select {
   gap: 0.8rem;
 }
 .local-phone-fields {
-  display: grid;
+  display: flex;
   width: 100%;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  gap: 0.25rem;
+  align-items: flex-end;
+  gap: 0.4rem;
 }
 .local-phone-fields > label {
-  width: 100%;
   min-width: 0;
 }
 .local-phone-fields > label:first-child {
+  flex: 0 0 4.5rem;
   white-space: nowrap;
   font-size: 0.56rem;
+}
+.local-phone-fields > label:last-child {
+  flex: 1 1 0;
 }
 .local-phone-code-control {
   position: relative;
