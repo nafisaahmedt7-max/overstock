@@ -177,6 +177,7 @@ export async function POST(request: Request) {
     "Click REGISTER to confirm your invitation and set your password. LOGIN opens the OVERSTOCK portal.",
     "Need help with your account? For any queries about your account, contact us at operations.overstock@gmail.com.",
     "IF YOU DID NOT REQUEST AN INVITATION, YOU CAN IGNORE THIS EMAIL.",
+    `If the button does not work, use this secure link: ${appLink.toString()}`,
   ].join("\n");
   const detailsHtml = `
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#e4e4e0" style="width:100%;border-collapse:collapse;border-top:1px solid #111111;border-bottom:1px solid #111111;background-color:#e4e4e0;">
@@ -211,7 +212,8 @@ export async function POST(request: Request) {
           </tr>
         </table>
       </td></tr>
-    </table>`;
+    </table>
+    <p style="margin:14px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeUrl}" style="color:#1a73e8;text-decoration:underline;">link</a>.</p>`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
   if (useMailpit) {
