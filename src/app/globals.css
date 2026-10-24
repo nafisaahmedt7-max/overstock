@@ -4294,9 +4294,10 @@ select {
 }
 .local-phone-code-value {
   width: 100%;
+  padding: 0 0.6rem 0 0.75rem;
   color: #575753;
   font: 500 0.68rem var(--font-mono), monospace;
-  text-align: center;
+  text-align: left;
 }
 .local-phone-code-control[data-selected="true"] .local-phone-code-value {
   color: var(--ink);
