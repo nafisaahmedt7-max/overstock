@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     "OVERSTOCK PASSWORD RESET",
     "",
     `RESET YOUR PASSWORD${safeName ? `, ${safeName}` : ""}`,
-    "A REQUEST WAS RECEIVED TO RESET THE PASSWORD FOR YOUR OVERSTOCK PORTAL ACCOUNT.",
+    "REQUEST RECEIVED TO RESET PASSWORD FOR YOUR OVERSTOCK ACCOUNT.",
     `ACCOUNT EMAIL: ${email}`,
     "Use this secure link to choose a new password:",
     resetUrl.toString(),
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ACCOUNT SECURITY</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">RESET YOUR PASSWORD${safeName ? `, ${safeName}` : ""}</h1>
-    <p style="margin:0 0 18px;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">A REQUEST WAS RECEIVED TO RESET THE PASSWORD FOR YOUR OVERSTOCK PORTAL ACCOUNT.</p>
+    <p style="margin:0 0 18px;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">REQUEST RECEIVED TO RESET PASSWORD FOR YOUR OVERSTOCK ACCOUNT.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:24px 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;">CLICK BELOW TO CHOOSE A NEW PASSWORD</p>
     <p style="margin:0 0 16px;"><a class="os-button" href="${safeLink}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111111;border-radius:999px;background-color:#111111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;">RESET PASSWORD</a></p>
