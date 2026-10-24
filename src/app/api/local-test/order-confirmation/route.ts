@@ -155,8 +155,8 @@ export async function POST(request: Request) {
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
   const itemRows = items.map((item) => `
     <tr>
-      <td style="padding:7px 9px;background:#e7e7e3;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
-      <td align="right" style="padding:7px 9px;background:#e7e7e3;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
+      <td style="padding:7px 9px;border-top:1px solid #d0d0cc;border-bottom:1px solid #d0d0cc;border-left:1px solid #d0d0cc;background:#e7e7e3;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
+      <td align="right" style="padding:7px 9px;border-top:1px solid #d0d0cc;border-right:1px solid #d0d0cc;border-bottom:1px solid #d0d0cc;background:#e7e7e3;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
     </tr>`).join("");
 
   const textContent = [
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION · LOCAL TEST</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">THANK YOU, ${uppercaseSafeName}.</h1>
     <p style="margin:0 0 18px;">Hello, ${firstName}. Your order confirmation is ready from OVERSTOCK.</p>
-    <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:.12em;">DETAILS</h2>
+    <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:.12em;">ORDER DETAILS</h2>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin:14px 0 0;border-collapse:separate;border-spacing:0;background:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px 14px;font-size:12px;line-height:1.5;font-weight:600;">
@@ -198,7 +198,7 @@ export async function POST(request: Request) {
       <tr><td colspan="2" style="padding:13px 42px;border-top:1px solid #111;border-bottom:1px solid #111;background:#e4e4e0;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
           <td style="font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER NUMBER</td>
-          <td align="right" style="font-size:14px;font-weight:700;">${safeOrderNumber}</td>
+          <td align="right" style="font-size:14px;font-weight:700;"><span style="display:inline-block;padding:7px 17px;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">${safeOrderNumber}</span></td>
         </tr></table>
       </td></tr>
       <tr class="os-receipt-columns">
@@ -220,7 +220,7 @@ export async function POST(request: Request) {
       <tr><td colspan="2" style="padding:12px 42px;border-bottom:1px solid #111;background:#e4e4e0;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
           <td style="font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td>
-          <td align="right" style="font-size:16px;font-weight:700;">${money(total)}</td>
+          <td align="right" style="font-size:20px;font-weight:700;letter-spacing:.01em;">${money(total)}</td>
         </tr></table>
       </td></tr>
     </table>`;
