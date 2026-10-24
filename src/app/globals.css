@@ -5051,7 +5051,7 @@ select {
 }
 .checkout-thank-you-help a { color: var(--ink); font-weight: 700; text-decoration: underline; }
 .checkout-thank-you-shipping {
-  width: min(42rem, 100%);
+  width: min(36rem, 100%);
   margin: 12px 0 0;
   padding: 12px 14px;
   display: flex;
