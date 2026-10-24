@@ -4523,6 +4523,7 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
   .checkout-receipt-item-image { width: 3.6rem; height: 4.4rem; }
   .checkout-receipt-item-name { font-size: 0.68rem; }
   .checkout-receipt-item-name small { font-size: 0.55rem; }
+  .checkout-receipt-summary > div { padding-inline: 0.45rem; }
 }
 @media (max-width: 520px) {
   .local-checkout-form-grid { grid-template-columns: minmax(0, 1fr); }
