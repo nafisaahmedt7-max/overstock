@@ -69,9 +69,9 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
   return (
     <main className="checkout-thank-you">
       <p className="eyebrow">OVERSTOCK / ORDER CONFIRMATION</p>
-      <h1>THANK YOU.</h1>
+      <h1>THANK YOU</h1>
       <p className="legal-updated checkout-thank-you-message">
-        YOUR ORDER HAS BEEN RECEIVED. A CONFIRMATION EMAIL WILL BE SENT TO THE EMAIL ADDRESS PROVIDED.
+        YOUR ORDER IS CONFIRMED. ORDER DETAILS ARE BELOW.
       </p>
 
       {orderNumber && (
