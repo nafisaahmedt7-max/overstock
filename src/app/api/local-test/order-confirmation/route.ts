@@ -198,7 +198,7 @@ export async function POST(request: Request) {
     contactText,
     "ORDER SUMMARY",
     ...items.map((item) => `${item.name} · SIZE ${item.size} · QTY ${item.quantity} · ${money(item.price * item.quantity)}`),
-              <tr><td style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+    `ITEM TOTAL: ${money(total)}`,
     "DELIVERY: Calculated at checkout",
     "TAXES: Calculated at checkout\\n(ALL AMOUNTS SHOWN IN USD)",
     `ORDER TOTAL: ${money(total)}`,
@@ -211,7 +211,7 @@ export async function POST(request: Request) {
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">THANK YOU, ${firstName}</h1>
-    <p style="margin:0 0 4px;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.</p>
+    <p style="margin:0;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:14px 0 7px;font-size:10px;font-weight:700;letter-spacing:.1em;">CLICK BELOW TO CONTINUE SHOPPING</p>
     <p style="margin:0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
@@ -250,7 +250,7 @@ export async function POST(request: Request) {
           ${itemRows}
           <tr><td colspan="2" style="padding:0;">
             <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
-              <tr><td style="padding:5px 2% 4px;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:5px 2% 4px;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout<br><span style="font-size:8px;font-style:italic;font-weight:700;letter-spacing:.04em;color:#666;white-space:nowrap;">(ALL AMOUNTS SHOWN IN USD)</span></td></tr>
                             <tr><td colspan="2" style="padding:10px 0 0;">
