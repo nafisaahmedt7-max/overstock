@@ -235,7 +235,7 @@ export async function POST(request: Request) {
       <tr><td colspan="2" style="padding:12px 42px;border-bottom:1px solid #111;background:#e4e4e0;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
           <td style="font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td>
-          <td align="right" style="font-size:20px;font-weight:700;letter-spacing:.01em;">${money(total)}</td>
+          <td align="right" style="font-size:20px;font-weight:700;letter-spacing:.01em;"><span style="display:inline-block;padding:8px 17px;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">${money(total)}</span></td>
         </tr></table>
       </td></tr>
     </table>`;
