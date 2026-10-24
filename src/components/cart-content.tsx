@@ -184,7 +184,6 @@ export function CartContent({
                   />
                 </label>
               </div>
-              <p className="local-checkout-helper">Add a country calling code, such as +1 or +61. Include your area code with the phone number.</p>
               <label>
                 Address line 1
                 <input name="addressLine1" autoComplete="address-line1" placeholder="Street address" maxLength={120} required />
