@@ -156,13 +156,20 @@ export async function POST(request: Request) {
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
   const itemRows = items.map((item, index) => {
     const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
-    const itemNumber = String(index + 1).padStart(2, "0");
+    const itemNumber = index + 1;
     return `
     <tr><td colspan="2" align="center" style="padding:0;">
-      <table role="presentation" width="58%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:58%;min-width:230px;max-width:380px;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">
+      <table role="presentation" width="64%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:64%;min-width:260px;max-width:420px;border-collapse:separate;border-spacing:0;">
         <tr>
-          <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;"><span style="font-weight:700;">${itemNumber}.</span> ${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
-          <td align="right" style="padding:9px 18px;white-space:nowrap;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.45;text-decoration:none;">× ${item.quantity}</a></td>
+          <td width="28" align="right" valign="middle" style="width:28px;padding-right:8px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.45;white-space:nowrap;">${itemNumber}.</td>
+          <td align="center" valign="middle">
+            <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">
+              <tr>
+                <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;">${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
+                <td align="right" style="padding:9px 18px;white-space:nowrap;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.45;text-decoration:none;">× ${item.quantity}</a></td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     </td></tr>`;
