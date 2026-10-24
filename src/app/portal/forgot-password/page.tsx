@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
         <p>Enter your portal email to receive a secure reset link.</p>
         {!sent && <label>
           Email
-          <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
+          <input type="email" name="email" placeholder="EMAIL ADDRESS" required autoComplete="email" />
         </label>}
         {!sent && <button className="admin-primary" disabled={busy}>{busy ? "SENDING…" : "SEND RESET LINK"}</button>}
         {message && <p className={`portal-auth-message${sent ? " portal-reset-notice" : ""}`} role="status">{sent ? <strong>{message}</strong> : message}</p>}

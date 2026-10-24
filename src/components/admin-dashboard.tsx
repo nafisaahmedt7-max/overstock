@@ -767,9 +767,9 @@ export function AdminDashboard({ email }: { email: string }) {
             <section className="order-entry-panel seller-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW SELLER</p><h2>SELLER DETAILS</h2></div></header>
               <form className="admin-form seller-entry-form" onSubmit={addSeller}>
-              <label><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
-              <label><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" required /></label>
-              <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" required /></label>
+              <label><span>SELLER CODE</span><input name="code" placeholder="SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
+              <label><span>SELLER NAME</span><input name="name" placeholder="VANTA" required /></label>
+              <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="SELLER@EMAIL.COM" required /></label>
               <label className="percent-field">
                 <span>SELLER SHARE</span>
                 <span className="percent-input">
@@ -820,11 +820,11 @@ export function AdminDashboard({ email }: { email: string }) {
                       ×
                     </button>
                   </header>
-                  <label className="edit-field edit-field-wide"><span>SELLER NAME</span><input name="name" placeholder="EXAMPLE: VANTA" defaultValue={editingSeller.display_name} required /></label>
-                  <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="seller@example.com" defaultValue={editingSeller.email || ""} required /></label>
+                  <label className="edit-field edit-field-wide"><span>SELLER NAME</span><input name="name" placeholder="VANTA" defaultValue={editingSeller.display_name} required /></label>
+                  <label className="edit-field edit-field-wide"><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="SELLER@EMAIL.COM" defaultValue={editingSeller.email || ""} required /></label>
                   <div className="edit-grid">
-                    <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="EXAMPLE: SEL-001" defaultValue={editingSeller.seller_code} required /></label>
-                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="EXAMPLE: 20" defaultValue={editingSeller.commission_percent} required /></span></label>
+                    <label className="edit-field"><span>SELLER CODE</span><input name="code" placeholder="SEL-001" defaultValue={editingSeller.seller_code} required /></label>
+                    <label className="edit-field"><span>SELLER SHARE</span><span className="percent-input"><input name="commission" type="number" min="0" max="100" step="0.01" placeholder="20" defaultValue={editingSeller.commission_percent} required /></span></label>
                     <label className="edit-field edit-field-wide"><span>ACCOUNT STATUS</span><select name="status" defaultValue={editingSeller.status}><option value="active">ACTIVE — CAN SIGN IN</option><option value="inactive">INACTIVE — ACCESS PAUSED</option><option value="archived">ARCHIVED — HISTORY ONLY</option></select></label>
                   </div>
                   <div className="edit-actions">
@@ -867,14 +867,14 @@ export function AdminDashboard({ email }: { email: string }) {
             <section className="order-entry-panel product-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW PRODUCT</p><h2>PRODUCT DETAILS</h2></div></header>
               <form className="admin-form product-form" onSubmit={addProduct}>
-              <label><span>SKU</span><input name="sku" placeholder="EXAMPLE: NORTH-HOOD-001" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required /></label>
-              <label><span>PRODUCT NAME</span><input name="name" placeholder="EXAMPLE: HEAVYWEIGHT HOODIE" minLength={3} maxLength={80} required /></label>
-              <label><span>BRAND</span><input name="brand" placeholder="EXAMPLE: NORTH STUDIO" maxLength={40} /></label>
-              <label><span>COLOUR</span><input name="color" placeholder="EXAMPLE: WASHED BLACK" maxLength={40} /></label>
-              <label><span>CONDITION</span><input name="condition" placeholder="EXAMPLE: NEW" minLength={3} maxLength={40} required /></label>
+              <label><span>SKU</span><input name="sku" placeholder="NORTH-HOOD-001" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required /></label>
+              <label><span>PRODUCT NAME</span><input name="name" placeholder="HEAVYWEIGHT HOODIE" minLength={3} maxLength={80} required /></label>
+              <label><span>BRAND</span><input name="brand" placeholder="NORTH STUDIO" maxLength={40} /></label>
+              <label><span>COLOUR</span><input name="color" placeholder="WASHED BLACK" maxLength={40} /></label>
+              <label><span>CONDITION</span><input name="condition" placeholder="NEW" minLength={3} maxLength={40} required /></label>
               <label><span>AUDIENCE</span><select name="audience" required><option value="">SELECT AUDIENCE</option><option value="men">MEN</option><option value="women">WOMEN</option><option value="unisex">UNISEX</option></select></label>
               <label><span>APPAREL TYPE</span><select name="category" required><option value="">SELECT TYPE</option><option value="tops">TOPS</option><option value="bottoms">BOTTOMS</option><option value="accessories">ACCESSORIES</option></select></label>
-              <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="EXAMPLE: MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
+              <label className="product-form-wide"><span>PRODUCT DESCRIPTION</span><textarea name="description" placeholder="MIDWEIGHT COTTON HOODIE WITH A RELAXED FIT." required /></label>
               <div className="product-size-group">
                 <span className="product-size-title">AVAILABLE SIZES</span>
                 <fieldset className="product-size-options" aria-label="Available sizes">
@@ -890,13 +890,13 @@ export function AdminDashboard({ email }: { email: string }) {
               </div>
               <label><span>PRODUCT OWNER</span><select name="seller"><option value="">OVERSTOCK OWN STOCK</option>{sellers.map((s) => (<option key={s.id} value={s.id}>{s.display_name}</option>))}</select></label>
               <div className="product-pricing-heading"><span>PRODUCT PRICING</span></div>
-              <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="EXAMPLE: 70.00" required /></label>
-              <label><span>DELIVERY TO FULFILMENT (USD)</span><input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="EXAMPLE: 8.00" defaultValue="0" /></label>
-              <label><span>FULFILMENT SERVICE FEE (USD)</span><input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="EXAMPLE: 8.00" required /></label>
-              <label><span>GPO FEE PER 500G (USD)</span><input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="EXAMPLE: 3.00" required /></label>
-              <label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" placeholder="EXAMPLE: 700" required /></label>
-              <label><span>CUSTOMER SELLING PRICE (USD)</span><input name="price" type="number" min="0" step="0.01" placeholder="EXAMPLE: 145.00" required /></label>
-              <label><span>MINIMUM OVERSTOCK PROFIT (USD)</span><input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="EXAMPLE: 30.00" required /></label>
+              <label><span>ITEM COST (USD)</span><input name="cost_of_goods" type="number" min="0" step="0.01" placeholder="70.00" required /></label>
+              <label><span>DELIVERY TO FULFILMENT (USD)</span><input name="inbound_delivery_fee" type="number" min="0" step="0.01" placeholder="8.00" defaultValue="0" /></label>
+              <label><span>FULFILMENT SERVICE FEE (USD)</span><input name="fulfillment_service_fee" type="number" min="0" step="0.01" placeholder="8.00" required /></label>
+              <label><span>GPO FEE PER 500G (USD)</span><input name="gpo_fee_per_500g" type="number" min="0" step="0.01" placeholder="3.00" required /></label>
+              <label><span>ITEM WEIGHT (GRAMS)</span><input name="weight_grams" type="number" min="1" step="1" placeholder="700" required /></label>
+              <label><span>CUSTOMER SELLING PRICE (USD)</span><input name="price" type="number" min="0" step="0.01" placeholder="145.00" required /></label>
+              <label><span>MINIMUM OVERSTOCK PROFIT (USD)</span><input name="minimum_overstock_profit" type="number" min="0" step="0.01" placeholder="30.00" required /></label>
               <aside className="image-upload-guidance" role="note">
                 <strong>IMAGE UPLOAD REQUIREMENTS</strong>
                 <ul>
@@ -1169,10 +1169,10 @@ export function AdminDashboard({ email }: { email: string }) {
                 <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
               </header>
               <form className="order-entry-form" onSubmit={addOrder}>
-                <label><span>CUSTOMER NAME</span><input name="customer" placeholder="EXAMPLE: JANE SMITH" required /></label>
-                <label><span>EMAIL</span><input name="email" type="email" placeholder="jane@example.com" /></label>
-                <label><span>PHONE</span><input name="phone" placeholder="EXAMPLE: +1 415 555 0123" /></label>
-                <label className="order-field-wide"><span>DELIVERY ADDRESS</span><input name="address" placeholder="EXAMPLE: 100 MARKET ST, SAN FRANCISCO, CA 94105" /></label>
+                <label><span>CUSTOMER NAME</span><input name="customer" placeholder="JANE SMITH" required /></label>
+                <label><span>EMAIL</span><input name="email" type="email" placeholder="CUSTOMER@EMAIL.COM" /></label>
+                <label><span>PHONE</span><input name="phone" placeholder="+1 415 555 0123" /></label>
+                <label className="order-field-wide"><span>DELIVERY ADDRESS</span><input name="address" placeholder="100 MARKET ST, SAN FRANCISCO, CA 94105" /></label>
                 <label className="order-field-wide"><span>PRODUCT</span><select name="product" value={orderProductId} onChange={(e) => setOrderProductId(e.target.value)} required>
                   <option value="">CHOOSE PRODUCT</option>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name} / {p.sku} / {money(p.price)}</option>)}
@@ -1239,9 +1239,9 @@ export function AdminDashboard({ email }: { email: string }) {
             <section className="order-entry-panel team-member-panel">
               <header><div><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2></div></header>
               <form className="admin-form fulfilment-account-form" onSubmit={addPartner}>
-                <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="EXAMPLE: RAHIM" required /></label>
-                <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="rahim@example.com" required /></label>
-                <label><span>ADDRESS</span><input name="address" placeholder="EXAMPLE: WAREHOUSE OR WORK ADDRESS" required /></label>
+                <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="RAHIM" required /></label>
+                <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="TEAM@EMAIL.COM" required /></label>
+                <label><span>ADDRESS</span><input name="address" placeholder="WAREHOUSE OR WORK ADDRESS" required /></label>
                 <div className="fulfilment-form-action"><button>ADD TEAM MEMBER</button></div>
               </form>
             </section>

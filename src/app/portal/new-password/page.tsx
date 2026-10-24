@@ -94,17 +94,17 @@ export default function NewPasswordPage() {
         <h1>{isInvitation ? "SET YOUR PASSWORD" : "NEW PASSWORD"}</h1>
         {email && <label>
           Account email
-          <input type="email" value={email} readOnly autoComplete="username" aria-readonly="true" placeholder="name@example.com" />
+          <input type="email" value={email} readOnly autoComplete="username" aria-readonly="true" placeholder="ACCOUNT EMAIL" />
         </label>}
         {ready && <>
           <p className="portal-password-guidance"><strong>PASSWORD REQUIREMENTS</strong><br />Use at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a symbol. Examples: ! @ # $ % ^ &amp; *</p>
           <label>
             New password
-            <input type="password" name="password" required minLength={8} autoComplete="new-password" placeholder="Enter new password" />
+            <input type="password" name="password" required minLength={8} autoComplete="new-password" placeholder="ENTER NEW PASSWORD" />
           </label>
           <label>
             Confirm password
-            <input type="password" name="confirmPassword" required minLength={8} autoComplete="new-password" placeholder="Re-enter new password" />
+            <input type="password" name="confirmPassword" required minLength={8} autoComplete="new-password" placeholder="CONFIRM NEW PASSWORD" />
           </label>
           <button className="admin-primary" disabled={busy}>{busy ? "SAVING…" : "SAVE PASSWORD"}</button>
         </>}

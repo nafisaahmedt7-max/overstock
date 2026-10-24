@@ -46,11 +46,11 @@ export default function PortalLogin() {
         <h1>PORTAL LOGIN</h1>
         <label>
           Email
-          <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
+          <input type="email" name="email" placeholder="EMAIL ADDRESS" required autoComplete="email" />
         </label>
         <label>
           Password
-          <input type="password" name="password" placeholder="Enter your password" required autoComplete="current-password" />
+          <input type="password" name="password" placeholder="ENTER YOUR PASSWORD" required autoComplete="current-password" />
         </label>
         <button className="admin-primary" disabled={busy}>
           {busy ? "SIGNING IN…" : "SIGN IN"}

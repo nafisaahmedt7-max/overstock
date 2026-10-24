@@ -119,7 +119,7 @@ export default function PortalLoginForm({
             name="email"
             required
             autoComplete="email"
-            placeholder={mode === "login" ? "Email address" : undefined}
+            placeholder={mode === "login" ? "EMAIL ADDRESS" : undefined}
             value={mode === "register" ? invitationEmail : email}
             readOnly={mode === "register"}
             aria-readonly={mode === "register"}
