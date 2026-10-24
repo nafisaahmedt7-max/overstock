@@ -4255,8 +4255,13 @@ select {
 }
 .local-phone-fields {
   display: grid;
-  grid-template-columns: minmax(4rem, 0.15fr) minmax(0, 1fr);
-  gap: 0.25rem;
+  width: 100%;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.local-phone-fields > label {
+  width: 100%;
+  min-width: 0;
 }
 .local-phone-code-control {
   position: relative;
