@@ -7,6 +7,10 @@ import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { phoneCountryCodes } from "@/data/phone-country-codes";
 
+const checkoutCountries = Array.from(
+  new Set(phoneCountryCodes.map(([country]) => country)),
+).sort((a, b) => a.localeCompare(b));
+
 export function CartContent({
   productImages,
   localCheckoutTest = false,
@@ -145,11 +149,11 @@ export function CartContent({
               <p className="local-checkout-form-title">DELIVERY AND CONTACT DETAILS</p>
               <label>
                 Full name
-                <input name="fullName" autoComplete="name" placeholder="FULL NAME" maxLength={100} required />
+                <input name="fullName" autoComplete="name" placeholder="ALEX MORGAN" maxLength={100} required />
               </label>
               <label>
                 Email address
-                <input name="email" type="email" autoComplete="email" placeholder="EMAIL ADDRESS" maxLength={254} required />
+                <input name="email" type="email" autoComplete="email" placeholder="ALEX@EMAIL.COM" maxLength={254} required />
               </label>
               <div className="local-phone-fields">
                 <label>
@@ -165,7 +169,7 @@ export function CartContent({
                     >
                       {phoneCountryCodes.map(([country, code], index) => (
                         <option key={`${country}-${code}-${index}`} value={code}>
-                          {country} ({code})
+                          {country.toUpperCase()} ({code})
                         </option>
                       ))}
                     </select>
@@ -186,32 +190,32 @@ export function CartContent({
               </div>
               <label>
                 Address line 1
-                <input name="addressLine1" autoComplete="address-line1" placeholder="STREET ADDRESS" maxLength={120} required />
+                <input name="addressLine1" autoComplete="address-line1" placeholder="123 MARKET ST" maxLength={120} required />
               </label>
               <label>
                 Address line 2 <span>(optional)</span>
-                <input name="addressLine2" autoComplete="address-line2" placeholder="APARTMENT, UNIT, ETC." maxLength={120} />
+                <input name="addressLine2" autoComplete="address-line2" placeholder="APT 4B" maxLength={120} />
               </label>
               <div className="local-checkout-form-grid">
                 <label>
                   City
-                  <input name="city" autoComplete="address-level2" placeholder="CITY" maxLength={80} required />
+                  <input name="city" autoComplete="address-level2" placeholder="SAN FRANCISCO" maxLength={80} required />
                 </label>
                 <label>
                   State / region
-                  <input name="region" autoComplete="address-level1" placeholder="STATE OR REGION" maxLength={80} required />
+                  <input name="region" autoComplete="address-level1" placeholder="CA" maxLength={80} required />
                 </label>
               </div>
               <label>
                 Postal code
-                <input name="postalCode" autoComplete="postal-code" placeholder="POSTAL CODE" maxLength={24} required />
+                <input name="postalCode" autoComplete="postal-code" placeholder="94105" maxLength={24} required />
               </label>
               <label>
                 Country
                 <select name="country" autoComplete="country-name" defaultValue="United States" required>
-                  <option>United States</option>
-                  <option>Australia</option>
-                  <option>Other</option>
+                  {checkoutCountries.map((country) => (
+                    <option key={country} value={country}>{country.toUpperCase()}</option>
+                  ))}
                 </select>
               </label>
               <button type="submit" disabled={checkoutPending}>
