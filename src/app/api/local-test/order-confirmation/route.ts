@@ -203,6 +203,7 @@ export async function POST(request: Request) {
     "DELIVERY: Calculated at checkout",
     "TAXES: Calculated at checkout",
     `ORDER TOTAL: ${money(total)}`,
+    "ALL PRICES ARE IN USD",
     "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
   ].join("\n");
@@ -252,7 +253,8 @@ export async function POST(request: Request) {
               <tr><td style="padding:4px 2%;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2%;color:#555;">TAXES</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
               <tr><td colspan="2" style="height:6px;padding:0 0 5px;border-bottom:1px solid #111;font-size:1px;line-height:1px;">&nbsp;</td></tr>
-              <tr><td style="padding:12px 2% 4px;font-size:14px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="padding:12px 2% 4px;font-size:14px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td style="padding:12px 2% 4px;font-size:16px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="padding:12px 2% 4px;font-size:16px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td colspan="2" align="right" style="padding:0 2% 4px;color:#555;font-size:10px;font-weight:400;letter-spacing:.06em;">ALL PRICES ARE IN USD</td></tr>
               <tr><td colspan="2" style="height:6px;padding:0 0 5px;border-bottom:1px solid #111;font-size:1px;line-height:1px;">&nbsp;</td></tr>
             </table>
           </td></tr>
