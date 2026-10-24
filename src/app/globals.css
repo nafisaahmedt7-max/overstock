@@ -4407,6 +4407,77 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
   color: var(--ink);
   white-space: nowrap;
 }
+.checkout-receipt {
+  width: min(42rem, 100%);
+  margin-top: 0.6rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+.checkout-receipt-order {
+  min-height: 3.6rem;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--ink);
+  background: #e4e4e0;
+  font: 700 0.68rem var(--font-mono), monospace;
+  letter-spacing: 0.04em;
+}
+.checkout-receipt-order strong {
+  padding: 0.42rem 0.75rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.checkout-receipt-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--ink);
+}
+.checkout-receipt-columns section { min-width: 0; padding: 0.9rem 1rem 1rem; }
+.checkout-receipt-columns section + section { border-left: 1px solid var(--ink); }
+.checkout-receipt h2 {
+  margin: 0 0 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--ink);
+  font: 700 0.62rem var(--font-mono), monospace;
+  letter-spacing: 0.07em;
+}
+.checkout-receipt-columns p { margin: 0; color: #555; font: 400 0.68rem/1.6 var(--font-mono), monospace; overflow-wrap: anywhere; }
+.checkout-receipt-columns p span { display: block; }
+.checkout-receipt-items { padding: 0.9rem 1rem 0.85rem; border-bottom: 1px solid var(--ink); }
+.checkout-receipt-items h2 { margin-bottom: 0.7rem; text-align: center; }
+.checkout-receipt-item {
+  min-width: 0;
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid #d0d0cc;
+  background: #e7e7e3;
+  font: 400 0.68rem/1.4 var(--font-mono), monospace;
+}
+.checkout-receipt-item-index { color: #555; }
+.checkout-receipt-item-name { min-width: 0; overflow-wrap: anywhere; }
+.checkout-receipt-item-name small { display: block; margin-top: 0.15rem; color: #555; font-size: 0.58rem; }
+.checkout-receipt-item > strong { padding-left: 0.4rem; white-space: nowrap; font-weight: 600; }
+.checkout-receipt-summary { padding: 0.35rem 1rem 0; font: 400 0.66rem/1.45 var(--font-mono), monospace; }
+.checkout-receipt-summary > div { min-height: 2.2rem; padding: 0.45rem 0.15rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #c8c8c4; }
+.checkout-receipt-summary > div > :last-child { text-align: right; }
+.checkout-receipt-summary > div:first-child strong:last-child { font-weight: 700; }
+.checkout-receipt-taxes { min-height: 2.7rem !important; border-bottom: 1px solid var(--ink) !important; }
+.checkout-receipt-taxes > span:last-child small { display: block; margin-top: 0.08rem; color: #666; font-size: 0.52rem; font-style: italic; letter-spacing: 0.025em; }
+.checkout-receipt-summary > .checkout-receipt-total { min-height: 3.3rem; border-bottom: 0; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.045em; }
+.checkout-receipt-unavailable { margin: 0; padding: 1rem; color: #555; font: 500 0.64rem/1.5 var(--font-mono), monospace; text-align: center; }
 .checkout-test-disclaimer {
   max-width: 31rem;
   margin-top: 0.2rem;
@@ -4431,6 +4502,15 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 .checkout-test-return:focus-visible { background: var(--paper); color: var(--ink); }
 @media (max-width: 600px) {
   .checkout-thank-you { min-height: 48vh; padding: 3rem 1rem; }
+  .checkout-receipt-columns section { padding-inline: 0.7rem; }
+  .checkout-receipt-items { padding-inline: 0.7rem; }
+  .checkout-receipt-summary { padding-inline: 0.7rem; }
+}
+@media (max-width: 420px) {
+  .checkout-receipt-columns { grid-template-columns: 1fr; }
+  .checkout-receipt-columns section + section { border-top: 1px solid var(--ink); border-left: 0; }
+  .checkout-receipt-order { padding-inline: 0.7rem; font-size: 0.6rem; }
+  .checkout-receipt-item { grid-template-columns: 1rem minmax(0, 1fr) auto; gap: 0.35rem; padding-inline: 0.45rem; font-size: 0.62rem; }
 }
 @media (max-width: 520px) {
   .local-checkout-form-grid { grid-template-columns: minmax(0, 1fr); }
