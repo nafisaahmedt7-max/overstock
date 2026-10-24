@@ -199,6 +199,7 @@ export async function POST(request: Request) {
     contactText,
     "ORDER SUMMARY:",
     ...items.map((item) => `${item.name} · SIZE ${item.size} · QTY ${item.quantity} · ${money(item.price * item.quantity)}`),
+    "PRICE BREAKDOWN:",
     `ITEM TOTAL: ${money(total)}`,
     "DELIVERY: Calculated at checkout",
     "TAXES: Calculated at checkout",
@@ -249,7 +250,8 @@ export async function POST(request: Request) {
           ${itemRows}
           <tr><td colspan="2" style="padding:0;">
             <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
-              <tr><td style="padding:10px 2% 4px;border-top:1px solid #111;color:#555;">ITEM TOTAL</td><td align="right" style="padding:10px 2% 4px;border-top:1px solid #111;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td colspan="2" style="padding:10px 2% 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">PRICE BREAKDOWN</td></tr>
+              <tr><td style="padding:10px 2% 4px;color:#555;">ITEM TOTAL</td><td align="right" style="padding:10px 2% 4px;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout</td></tr>
                             <tr><td colspan="2" style="padding:10px 2%;border-bottom:1px solid #111;">
