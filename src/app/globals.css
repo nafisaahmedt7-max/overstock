@@ -4256,12 +4256,16 @@ select {
 .local-phone-fields {
   display: grid;
   width: 100%;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 0.25rem;
 }
 .local-phone-fields > label {
   width: 100%;
   min-width: 0;
+}
+.local-phone-fields > label:first-child {
+  white-space: nowrap;
+  font-size: 0.56rem;
 }
 .local-phone-code-control {
   position: relative;
@@ -4275,9 +4279,9 @@ select {
   background: #e4e4e0;
 }
 .local-phone-code-value {
-  padding-left: 0.9rem;
+  padding-left: 0.55rem;
   color: var(--ink);
-  font: 500 0.75rem var(--font-mono), monospace;
+  font: 500 0.68rem var(--font-mono), monospace;
 }
 .local-phone-code-control select {
   position: absolute;
@@ -4301,9 +4305,9 @@ select {
 .local-phone-code-chevron {
   position: absolute;
   top: 50%;
-  right: 0.85rem;
-  width: 0.45rem;
-  height: 0.45rem;
+  right: 0.6rem;
+  width: 0.4rem;
+  height: 0.4rem;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: translateY(-70%) rotate(45deg);
