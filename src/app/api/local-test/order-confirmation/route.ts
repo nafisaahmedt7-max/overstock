@@ -188,7 +188,7 @@ export async function POST(request: Request) {
   const textContent = [
     "ORDER CONFIRMATION",
     "THANK YOU",
-    "YOUR ORDER IS CONFIRMED. ORDER DETAILS ARE BELOW.",
+    "YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.",
     "",
     `ORDER NUMBER: ${orderNumber}`,
     "DELIVERY ADDRESS:",
@@ -210,7 +210,7 @@ export async function POST(request: Request) {
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">THANK YOU</h1>
-    <p style="margin:0 0 4px;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">YOUR ORDER IS CONFIRMED. ORDER DETAILS ARE BELOW.</p>
+    <p style="margin:0 0 4px;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:10px;font-weight:500;line-height:1.5;letter-spacing:.04em;text-transform:uppercase;">YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:14px 0 7px;font-size:10px;font-weight:700;letter-spacing:.1em;">CLICK BELOW TO CONTINUE SHOPPING</p>
     <p style="margin:0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
