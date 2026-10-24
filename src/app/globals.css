@@ -4207,6 +4207,7 @@ select {
   color: var(--ink) !important;
   font: 700 0.7rem/1.4 var(--font-mono), monospace !important;
   letter-spacing: 0.05em;
+  text-align: center;
 }
 .local-checkout-form label {
   display: grid;
@@ -4258,6 +4259,9 @@ select {
   min-width: 0;
   gap: 0.4rem;
 }
+.local-phone-group-title {
+  width: 100%;
+}
 .local-phone-fields {
   display: flex;
   width: 100%;
@@ -4287,9 +4291,13 @@ select {
 }
 .local-phone-code-value {
   width: 100%;
-  color: var(--ink);
-  font: 700 0.68rem var(--font-mono), monospace;
+  color: #575753;
+  font: 500 0.68rem var(--font-mono), monospace;
   text-align: center;
+}
+.local-phone-code-control[data-selected="true"] .local-phone-code-value {
+  color: var(--ink);
+  font-weight: 700;
 }
 .local-phone-code-control select {
   position: absolute;

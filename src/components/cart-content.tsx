@@ -23,6 +23,7 @@ export function CartContent({
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
+  const [phoneCountryCodeSelected, setPhoneCountryCodeSelected] = useState(false);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -146,7 +147,7 @@ export function CartContent({
                 void startCheckoutPreview(new FormData(event.currentTarget));
               }}
             >
-              <p className="local-checkout-form-title">DELIVERY AND CONTACT DETAILS</p>
+              <p className="local-checkout-form-title">DELIVERY DETAILS</p>
               <label>
                 Full name
                 <input name="fullName" autoComplete="name" placeholder="ALEX MORGAN" maxLength={100} required />
@@ -158,13 +159,16 @@ export function CartContent({
               <div className="local-phone-group">
                 <label className="local-phone-group-title" htmlFor="checkout-phone-number">Phone number</label>
                 <div className="local-phone-fields">
-                  <span className="local-phone-code-control">
+                  <span className="local-phone-code-control" data-selected={phoneCountryCodeSelected}>
                     <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode}</span>
                     <select
                       name="phoneCountryCode"
                       autoComplete="tel-country-code"
                       value={phoneCountryCode}
-                      onChange={(event) => setPhoneCountryCode(event.target.value)}
+                      onChange={(event) => {
+                        setPhoneCountryCode(event.target.value);
+                        setPhoneCountryCodeSelected(true);
+                      }}
                       aria-label="Phone country calling code"
                     >
                       {phoneCountryCodes.map(([country, code], index) => (
