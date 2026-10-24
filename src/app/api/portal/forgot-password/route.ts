@@ -96,9 +96,22 @@ export async function POST(request: Request) {
   resetUrl.searchParams.set("token_hash", data.properties.hashed_token);
   const safeLink = escapeHtml(resetUrl.toString());
   const safeEmail = escapeHtml(email);
-  const accountName = typeof data.user?.user_metadata?.display_name === "string"
-    ? data.user.user_metadata.display_name.trim().split(/\s+/)[0]
-    : "";
+  const [{ data: sellerAccount }, { data: fulfillmentInvite }] = await Promise.all([
+    adminClient.from("sellers").select("display_name").eq("email", email).maybeSingle(),
+    adminClient.from("fulfillment_invites").select("partner_id").eq("email", email).limit(1).maybeSingle(),
+  ]);
+  let accountName = sellerAccount?.display_name?.trim() || "";
+  if (!accountName && fulfillmentInvite?.partner_id) {
+    const { data: fulfillmentMember } = await adminClient
+      .from("fulfillment_partners")
+      .select("name")
+      .eq("id", fulfillmentInvite.partner_id)
+      .maybeSingle();
+    accountName = fulfillmentMember?.name?.trim() || "";
+  }
+  if (!accountName && typeof data.user?.user_metadata?.display_name === "string") {
+    accountName = data.user.user_metadata.display_name.trim();
+  }
   const safeName = escapeHtml(accountName.toUpperCase());
   const baseUrl = requestUrl.origin;
   const textContent = [
