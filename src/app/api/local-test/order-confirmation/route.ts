@@ -245,8 +245,8 @@ export async function POST(request: Request) {
         </td>
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;">
-        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-          <tr><td colspan="2" align="center" style="padding:0 0 7px;border-bottom:1px solid #111;text-align:center;font-size:10px;font-weight:700;letter-spacing:.1em;">ITEMS PURCHASED<br><span style="font-size:8px;font-style:italic;font-weight:700;letter-spacing:.04em;color:#666;">(ALL AMOUNTS SHOWN IN USD)</span></td></tr>
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-left:1px solid #111;border-right:1px solid #111;">
+          <tr><td colspan="2" align="center" style="padding:0 0 7px;border-top:1px solid #111;border-bottom:1px solid #111;text-align:center;font-size:10px;font-weight:700;letter-spacing:.1em;">ITEMS PURCHASED<br><span style="font-size:8px;font-style:italic;font-weight:700;letter-spacing:.04em;color:#666;">(ALL AMOUNTS SHOWN IN USD)</span></td></tr>
           <tr><td colspan="2" style="height:8px;font-size:8px;line-height:8px;">&nbsp;</td></tr>
           ${itemRows}
           <tr><td colspan="2" style="padding:0;">
