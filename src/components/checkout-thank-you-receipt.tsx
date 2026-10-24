@@ -55,6 +55,7 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
   }, [orderNumber]);
 
   const customer = receipt?.customer;
+  const firstName = customer?.fullName?.trim().split(/\s+/)[0];
   const address = customer
     ? [
         customer.fullName,
@@ -69,8 +70,8 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
   return (
     <main className="checkout-thank-you">
       <p className="eyebrow">OVERSTOCK / ORDER CONFIRMATION</p>
-      <h1>THANK YOU</h1>
-      <p className="legal-updated checkout-thank-you-message">
+      <h1>THANK YOU{firstName ? `, ${firstName.toUpperCase()}` : ""}</h1>
+      <p className="checkout-thank-you-message">
         YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.
       </p>
 
