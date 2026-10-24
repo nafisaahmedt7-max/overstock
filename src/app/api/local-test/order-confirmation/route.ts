@@ -204,7 +204,6 @@ export async function POST(request: Request) {
     "TAXES: Calculated at checkout",
     "ALL PRICES ARE IN USD",
     `ORDER TOTAL: ${money(total)}`,
-    "ALL PRICES ARE IN USD",
     "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
   ].join("\n");
