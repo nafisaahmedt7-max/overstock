@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { renderOverstockEmail } from "@/lib/email/overstock-layout";
 import { sendToLocalMailpit } from "@/lib/email/mailpit";
 
-type ReceiptItem = { name: string; size: string; quantity: number; price: number };
+type ReceiptItem = { slug: string; name: string; size: string; quantity: number; price: number };
 type CheckoutCustomer = {
   fullName: string;
   email: string;
@@ -30,14 +30,15 @@ function parseItems(value: unknown): ReceiptItem[] | null {
   for (const entry of value) {
     if (!entry || typeof entry !== "object") return null;
     const item = entry as Record<string, unknown>;
+    const slug = typeof item.slug === "string" ? item.slug.trim() : "";
     const name = typeof item.name === "string" ? item.name.trim() : "";
     const size = typeof item.size === "string" ? item.size.trim() : "";
     const quantity = Number(item.quantity);
     const price = Number(item.price);
-    if (!name || name.length > 120 || !size || size.length > 32) return null;
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !name || name.length > 120 || !size || size.length > 32) return null;
     if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return null;
     if (!Number.isFinite(price) || price < 0 || price > 100_000) return null;
-    items.push({ name, size, quantity, price });
+    items.push({ slug, name, size, quantity, price });
   }
   return items;
 }
@@ -153,15 +154,18 @@ export async function POST(request: Request) {
   const safeContactHtml = [customer.email, customer.phone].filter(Boolean).map(escapeHtml).join("<br>");
   const addressText = addressLines.join("\n");
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
-  const itemRows = items.map((item) => `
+  const itemRows = items.map((item) => {
+    const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
+    return `
     <tr><td colspan="2" align="center" style="padding:0;">
-      <table role="presentation" width="68%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:68%;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;box-shadow:0 2px 5px rgba(0,0,0,.12);">
+      <table role="presentation" width="54%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:54%;min-width:230px;max-width:360px;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;box-shadow:0 2px 5px rgba(0,0,0,.12);">
         <tr>
-          <td style="padding:7px 9px;font-size:14px;font-weight:700;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
-          <td align="right" style="padding:7px 12px;font-size:16px;font-weight:700;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
+          <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;">${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
+          <td align="right" style="padding:9px 18px;white-space:nowrap;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.45;text-decoration:none;">× ${item.quantity}</a></td>
         </tr>
       </table>
-    </td></tr>`).join("");
+    </td></tr>`;
+  }).join("");
 
   const textContent = [
     "ORDER CONFIRMATION · LOCAL TEST",
@@ -178,7 +182,6 @@ export async function POST(request: Request) {
     `ORDER TOTAL: ${money(total)}`,
     "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
-    "LOCAL TEST ONLY. No payment was processed and no live order was created.",
   ].join("\n");
 
   const contentHtml = `
@@ -195,7 +198,7 @@ export async function POST(request: Request) {
     </table>
     <p style="margin:14px 0 0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
     <p style="margin:12px 0 0;font-size:11px;line-height:1.45;">Need help with your order? For any queries about your purchase or delivery, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700;text-decoration:underline;">contact us</a>.</p>
-    <p style="margin:16px 0 0;color:#555;font-size:10px;line-height:1.45;">LOCAL TEST ONLY · NO PAYMENT WAS PROCESSED · NO LIVE ORDER WAS CREATED</p>`;
+    `;
 
   const fullWidthHtml = `
     <table class="os-receipt" role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;text-align:left;">
@@ -216,7 +219,7 @@ export async function POST(request: Request) {
         </td>
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;border-bottom:1px solid #111;">
-        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0 6px;">
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0 11px;">
           <tr><td colspan="2" style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER ITEMS</td></tr>
           ${itemRows}
         </table>
