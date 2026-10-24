@@ -155,10 +155,10 @@ export async function POST(request: Request) {
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
   const itemRows = items.map((item) => `
     <tr><td colspan="2" align="center" style="padding:0;">
-      <table role="presentation" width="88%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:88%;border-collapse:separate;border-spacing:0;border:1px solid #d0d0cc;border-radius:999px;background:#f1f1ef;box-shadow:0 2px 5px rgba(0,0,0,.12);">
+      <table role="presentation" width="68%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:68%;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;box-shadow:0 2px 5px rgba(0,0,0,.12);">
         <tr>
-          <td style="padding:7px 9px;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
-          <td align="right" style="padding:7px 9px;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
+          <td style="padding:7px 9px;font-size:14px;font-weight:700;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
+          <td align="right" style="padding:7px 12px;font-size:16px;font-weight:700;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
         </tr>
       </table>
     </td></tr>`).join("");
@@ -194,7 +194,7 @@ export async function POST(request: Request) {
       </td></tr>
     </table>
     <p style="margin:14px 0 0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
-    <p style="margin:12px 0 0;font-size:12px;line-height:1.5;"><strong style="display:block;margin-bottom:3px;font-size:13px;">Need help with your order?</strong>For any queries about your purchase or delivery, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700;text-decoration:underline;">contact us</a>.</p>
+    <p style="margin:12px 0 0;font-size:11px;line-height:1.45;">Need help with your order? For any queries about your purchase or delivery, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700;text-decoration:underline;">contact us</a>.</p>
     <p style="margin:16px 0 0;color:#555;font-size:10px;line-height:1.45;">LOCAL TEST ONLY · NO PAYMENT WAS PROCESSED · NO LIVE ORDER WAS CREATED</p>`;
 
   const fullWidthHtml = `
