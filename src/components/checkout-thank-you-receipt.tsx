@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type ReceiptItem = {
@@ -8,6 +9,7 @@ type ReceiptItem = {
   size: string;
   quantity: number;
   price: number;
+  imageUrl?: string | null;
 };
 
 type ReceiptDetails = {
@@ -96,7 +98,11 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
                 <h2>ITEMS PURCHASED</h2>
                 {receipt.items.map((item, index) => (
                   <div className="checkout-receipt-item" key={`${item.name}-${item.size}-${index}`}>
-                    <span className="checkout-receipt-item-index">{index + 1}.</span>
+                    <div className="checkout-receipt-item-image">
+                      {item.imageUrl ? (
+                        <Image src={item.imageUrl} alt={item.name} width={84} height={100} unoptimized />
+                      ) : null}
+                    </div>
                     <span className="checkout-receipt-item-name">
                       {item.name}<small>SIZE {item.size} · QTY × {item.quantity}</small>
                     </span>
