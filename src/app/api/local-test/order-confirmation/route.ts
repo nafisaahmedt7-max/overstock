@@ -74,9 +74,29 @@ function parseCustomer(value: unknown): CheckoutCustomer | null {
     !customer.city ||
     !customer.region ||
     !customer.postalCode ||
-    !["United States", "Australia", "Other"].includes(customer.country)
+    !customer.country
   ) return null;
   return customer;
+}
+
+function missingCustomerFields(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return ["full name", "email address", "address line 1", "city", "state / region", "postal code", "country"];
+  }
+  const raw = value as Record<string, unknown>;
+  const required: Array<[string, number]> = [
+    ["fullName", 100],
+    ["email", 254],
+    ["addressLine1", 120],
+    ["city", 80],
+    ["region", 80],
+    ["postalCode", 24],
+    ["country", 80],
+  ];
+  const labels = ["full name", "email address", "address line 1", "city", "state / region", "postal code", "country"];
+  return required.flatMap(([key, maxLength], index) =>
+    readText(raw[key], maxLength) ? [] : [labels[index]],
+  );
 }
 
 function money(value: number) {
@@ -104,9 +124,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
   const items = parseItems(body.items);
+  const missingFields = missingCustomerFields(body.customer);
+  if (missingFields.length) {
+    return NextResponse.json({
+      error: `Complete required fields: ${missingFields.join(", ")}.`,
+    }, { status: 400 });
+  }
   const customer = parseCustomer(body.customer);
   if (!items || !customer) {
-    return NextResponse.json({ error: "Enter valid delivery and contact details, then try again." }, { status: 400 });
+    return NextResponse.json({ error: "Enter valid order items and delivery details, then try again." }, { status: 400 });
   }
 
   const orderNumber = `OS-${Date.now().toString().slice(-8)}`;

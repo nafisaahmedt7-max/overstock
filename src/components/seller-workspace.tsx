@@ -2,6 +2,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { validateRequiredFields } from "@/lib/form-validation";
 import { journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
 import { StatusConnectionGuide } from "./status-connection-guide";
 
@@ -25,6 +26,8 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
   }
   async function advance(event: FormEvent<HTMLFormElement>, order: SellerOrder, target: JourneyStatus) {
     event.preventDefault();
+    const validationError = validateRequiredFields(event.currentTarget);
+    if (validationError) { setNotice(validationError); return; }
     const form = new FormData(event.currentTarget);
     if (order.package_id && target === "sent_to_fulfillment") {
       const { error } = await sb.from("seller_package_updates").upsert({
@@ -64,8 +67,8 @@ export function SellerWorkspace({ orders, due }: { orders: SellerOrder[]; due: s
         <div className="order-receipt-body">
         <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.product_name}</h2><small>{order.selected_size || "NO SIZE"} / QTY {order.quantity}</small></div></header>
         <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
-        {order.journey_status === "admin_confirmed" && <form onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press when you begin sourcing and preparing it.</p><button className="seller-action">SELLER PREPARING ORDER</button></form>}
-        {order.journey_status === "seller_preparing" && <form className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER TO FULFILMENT<input name="courier" placeholder="PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>PACKAGE TRACKING NUMBER<input name="tracking" inputMode="numeric" pattern="[0-9]{6,30}" title="Use 6 to 30 tracking digits only." placeholder="NUMBERS ONLY" defaultValue={order.inbound_tracking || ""} required /></label><button className="seller-action">PACKAGE SENT TO FULFILMENT</button></form>}
+        {order.journey_status === "admin_confirmed" && <form noValidate onSubmit={e => void advance(e, order, "seller_preparing")}><p>The order is confirmed. Press when you begin sourcing and preparing it.</p><button className="seller-action">SELLER PREPARING ORDER</button></form>}
+        {order.journey_status === "seller_preparing" && <form noValidate className="order-action-form" onSubmit={e => void advance(e, order, "sent_to_fulfillment")}><label>COURIER TO FULFILMENT<input name="courier" placeholder="PATHAO" defaultValue={order.inbound_courier || ""} required /></label><label>PACKAGE TRACKING NUMBER<input name="tracking" inputMode="numeric" pattern="[0-9]{6,30}" title="Use 6 to 30 tracking digits only." placeholder="NUMBERS ONLY" defaultValue={order.inbound_tracking || ""} required /></label><button className="seller-action">PACKAGE SENT TO FULFILMENT</button></form>}
         <footer><span>YOUR SHARE</span><b>US\${Number(order.seller_due || 0).toFixed(2)}</b><span>{order.payout_status === "held" ? "REFUND REQUESTED" : order.payout_status === "paid" ? "PAID" : "PAYMENT DUE"}</span>{order.journey_status === "cancelled" && order.refund_status === "due_from_seller" && <button className="seller-action" onClick={() => void markRefundSent(order.id)}>MARK REFUND SENT</button>}{!["delivered","cancelled"].includes(order.journey_status) && <button className="cancellation-request-button" onClick={() => void requestCancellation(order.id)}>REQUEST CANCELLATION</button>}</footer>
         </div>
       </details>) : <div className="empty-state">NO SELLER ORDERS YET</div>}

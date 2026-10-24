@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
+import { validateRequiredFields } from "@/lib/form-validation";
 import { phoneCountryCodes } from "@/data/phone-country-codes";
 
 const checkoutCountries = Array.from(
@@ -142,8 +143,15 @@ export function CartContent({
             <p>Applicable taxes are calculated at checkout.</p>
             <form
               className="local-checkout-form"
+              noValidate
               onSubmit={(event) => {
                 event.preventDefault();
+                const validationError = validateRequiredFields(event.currentTarget);
+                if (validationError) {
+                  setCheckoutError(validationError);
+                  return;
+                }
+                setCheckoutError("");
                 void startCheckoutPreview(new FormData(event.currentTarget));
               }}
             >
