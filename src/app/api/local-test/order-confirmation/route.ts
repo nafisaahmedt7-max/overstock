@@ -234,11 +234,11 @@ export async function POST(request: Request) {
       <tr class="os-receipt-columns">
         <td width="50%" valign="top" style="width:50%;padding:14px 21px 16px 42px;border-bottom:1px solid #111;">
           <p style="margin:0 0 9px;padding-bottom:7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">DELIVERY ADDRESS</p>
-          <p style="margin:0;font-size:12px;line-height:1.65;">${safeAddressHtml}</p>
+          <p style="margin:0;color:#555;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;line-height:1.5;">${safeAddressHtml}</p>
         </td>
         <td width="50%" valign="top" style="width:50%;padding:14px 42px 16px 21px;border-bottom:1px solid #111;border-left:1px solid #111;">
           <p style="margin:0 0 9px;padding-bottom:7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">CONTACT</p>
-          <p style="margin:0;font-size:12px;line-height:1.65;">${safeContactHtml}</p>
+          <p style="margin:0;color:#555;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;line-height:1.5;">${safeContactHtml}</p>
         </td>
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;border-bottom:1px solid #111;">
