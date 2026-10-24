@@ -126,9 +126,6 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
         </section>
       )}
 
-      <p className="checkout-test-disclaimer">
-        TEST CHECKOUT · NO PAYMENT WAS PROCESSED · NO LIVE ORDER WAS CREATED
-      </p>
       <Link className="checkout-test-return" href="/">
         CONTINUE SHOPPING
       </Link>
