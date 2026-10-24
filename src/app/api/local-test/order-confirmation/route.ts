@@ -155,7 +155,7 @@ export async function POST(request: Request) {
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
   const itemRows = items.map((item) => `
     <tr><td colspan="2" align="center" style="padding:0;">
-      <table role="presentation" width="96%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:96%;border-collapse:separate;border-spacing:0;border:1px solid #d0d0cc;background:#e7e7e3;box-shadow:0 2px 5px rgba(0,0,0,.12);">
+      <table role="presentation" width="88%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:88%;border-collapse:separate;border-spacing:0;border:1px solid #d0d0cc;border-radius:999px;background:#f1f1ef;box-shadow:0 2px 5px rgba(0,0,0,.12);">
         <tr>
           <td style="padding:7px 9px;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
           <td align="right" style="padding:7px 9px;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
@@ -217,7 +217,7 @@ export async function POST(request: Request) {
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;border-bottom:1px solid #111;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0 6px;">
-          <tr><td style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER ITEMS</td><td align="right" style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">QTY</td></tr>
+          <tr><td colspan="2" style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER ITEMS</td></tr>
           ${itemRows}
         </table>
       </td></tr>
