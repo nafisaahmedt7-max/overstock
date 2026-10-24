@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
-import { validateRequiredFields } from "@/lib/form-validation";
+import {
+  clearRequiredFieldError,
+  reportMissingRequiredField,
+  validateRequiredFields,
+} from "@/lib/form-validation";
 import { phoneCountryCodes } from "@/data/phone-country-codes";
 
 const checkoutCountries = Array.from(
@@ -23,12 +27,7 @@ export function CartContent({
   const router = useRouter();
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
-  const [phoneCountryIndex, setPhoneCountryIndex] = useState(() => {
-    const unitedStatesIndex = phoneCountryCodes.findIndex(
-      ([country, code]) => country === "United States" && code === "+1",
-    );
-    return unitedStatesIndex >= 0 ? unitedStatesIndex : 0;
-  });
+  const [phoneCountryIndex, setPhoneCountryIndex] = useState(-1);
   const phoneCountryCode = phoneCountryCodes[phoneCountryIndex]?.[1] ?? "+1";
   const [phoneCountryCodeSelected, setPhoneCountryCodeSelected] = useState(false);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -150,6 +149,9 @@ export function CartContent({
             <form
               className="local-checkout-form"
               noValidate
+              onBlurCapture={reportMissingRequiredField}
+              onInputCapture={clearRequiredFieldError}
+              onChangeCapture={clearRequiredFieldError}
               onSubmit={(event) => {
                 event.preventDefault();
                 const validationError = validateRequiredFields(event.currentTarget);
@@ -178,13 +180,14 @@ export function CartContent({
                     <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
                     <select
                       autoComplete="tel-country-code"
-                      value={String(phoneCountryIndex)}
+                      value={phoneCountryIndex < 0 ? "" : String(phoneCountryIndex)}
                       onChange={(event) => {
                         setPhoneCountryIndex(Number(event.target.value));
                         setPhoneCountryCodeSelected(true);
                       }}
                       aria-label="Phone country calling code"
                     >
+                      <option value="" disabled hidden>SELECT COUNTRY</option>
                       {phoneCountryCodes.map(([country, code], index) => (
                         <option key={`${country}-${code}-${index}`} value={index}>
                           {country.toUpperCase()} ({code})

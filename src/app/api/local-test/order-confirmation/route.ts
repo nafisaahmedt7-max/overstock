@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     "ORDER ITEMS:",
     ...items.map((item) => `${item.name} · ${item.size} × ${item.quantity}`),
     `ORDER TOTAL: ${money(total)}`,
-    "SHIPPING UPDATES WILL BE SENT BY EMAIL ONCE YOUR ORDER HAS BEEN DISPATCHED.",
+    "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
     "LOCAL TEST ONLY. No payment was processed and no live order was created.",
   ].join("\n");
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin:14px 0 0;border-collapse:separate;border-spacing:0;background:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px 14px;font-size:12px;line-height:1.5;font-weight:600;">
         <span aria-hidden="true" style="display:inline-block;width:18px;height:18px;margin-right:8px;border:1px solid #777;border-radius:50%;color:#555;font-size:12px;line-height:18px;font-weight:700;vertical-align:middle;">i</span>
-        <span style="vertical-align:middle;">SHIPPING UPDATES WILL BE SENT BY EMAIL ONCE YOUR ORDER HAS BEEN DISPATCHED.</span>
+        <span style="vertical-align:middle;font-size:11px;">SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.</span>
       </td></tr>
     </table>
     <p style="margin:14px 0 0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>

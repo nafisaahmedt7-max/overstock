@@ -4238,6 +4238,14 @@ select {
   background-color: var(--paper);
 }
 .local-checkout-form input::placeholder { color: #575753; opacity: 1; }
+.required-field-error {
+  display: block;
+  color: #8f2525;
+  font: 600 0.62rem/1.45 var(--font-mono), monospace;
+}
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 .local-checkout-form select {
   appearance: none;
   border-radius: 0.5rem;

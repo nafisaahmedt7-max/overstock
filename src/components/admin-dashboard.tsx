@@ -4,7 +4,11 @@ import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { validateRequiredFields } from "@/lib/form-validation";
+import {
+  clearRequiredFieldError,
+  reportMissingRequiredField,
+  validateRequiredFields,
+} from "@/lib/form-validation";
 import { StatusConnectionGuide } from "./status-connection-guide";
 import { JOURNEY, journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
 
@@ -779,7 +783,7 @@ export function AdminDashboard({ email }: { email: string }) {
             </details>
             <section className="order-entry-panel seller-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW SELLER</p><h2>SELLER DETAILS</h2></div></header>
-              <form className="admin-form seller-entry-form" noValidate onSubmit={addSeller}>
+              <form className="admin-form seller-entry-form" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={addSeller}>
               <label><span>SELLER CODE</span><input name="code" placeholder="SEL-001" pattern="[A-Za-z0-9_-]{3,32}" required /></label>
               <label><span>SELLER NAME</span><input name="name" placeholder="VANTA" required /></label>
               <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="SELLER@EMAIL.COM" required /></label>
@@ -821,7 +825,7 @@ export function AdminDashboard({ email }: { email: string }) {
             />
             {editingSeller && (
               <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Edit seller">
-                <form className="edit-panel seller-edit-panel" noValidate onSubmit={saveSeller}>
+                <form className="edit-panel seller-edit-panel" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={saveSeller}>
                   <header>
                     <h2>EDIT SELLER</h2>
                     <button
@@ -879,7 +883,7 @@ export function AdminDashboard({ email }: { email: string }) {
             </details>
             <section className="order-entry-panel product-entry-panel">
               <header><div><p className="eyebrow">ADD A NEW PRODUCT</p><h2>PRODUCT DETAILS</h2></div></header>
-              <form className="admin-form product-form" noValidate onSubmit={addProduct}>
+              <form className="admin-form product-form" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={addProduct}>
               <label><span>SKU</span><input name="sku" placeholder="NORTH-HOOD-001" pattern="[A-Za-z0-9-]{3,24}" title="Use 3 to 24 letters, numbers, or hyphens." required /></label>
               <label><span>PRODUCT NAME</span><input name="name" placeholder="HEAVYWEIGHT HOODIE" minLength={3} maxLength={80} required /></label>
               <label><span>BRAND</span><input name="brand" placeholder="NORTH STUDIO" maxLength={40} /></label>
@@ -1000,7 +1004,7 @@ export function AdminDashboard({ email }: { email: string }) {
             />
             {editing && (
               <div className="modal-backdrop">
-                <form className="edit-panel" noValidate onSubmit={saveProduct}>
+                <form className="edit-panel" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={saveProduct}>
                   <header>
                     <h2>EDIT PRODUCT</h2>
                     <button
@@ -1181,7 +1185,7 @@ export function AdminDashboard({ email }: { email: string }) {
               <header>
                 <div><p className="eyebrow">NEW ORDER</p><h2>RECORD A CUSTOMER SALE</h2></div>
               </header>
-              <form className="order-entry-form" noValidate onSubmit={addOrder}>
+              <form className="order-entry-form" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={addOrder}>
                 <label><span>CUSTOMER NAME</span><input name="customer" placeholder="JANE SMITH" required /></label>
                 <label><span>EMAIL</span><input name="email" type="email" placeholder="CUSTOMER@EMAIL.COM" /></label>
                 <label><span>PHONE</span><input name="phone" placeholder="+1 415 555 0123" /></label>
@@ -1251,7 +1255,7 @@ export function AdminDashboard({ email }: { email: string }) {
             />
             <section className="order-entry-panel team-member-panel">
               <header><div><p className="eyebrow">TEAM SETUP</p><h2>FULFILMENT TEAM MEMBER</h2></div></header>
-              <form className="admin-form fulfilment-account-form" noValidate onSubmit={addPartner}>
+              <form className="admin-form fulfilment-account-form" noValidate onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={addPartner}>
                 <label><span>TEAM MEMBER NAME</span><input name="name" placeholder="RAHIM" required /></label>
                 <label><span>LOGIN EMAIL</span><input name="email" type="email" placeholder="TEAM@EMAIL.COM" required /></label>
                 <label><span>ADDRESS</span><input name="address" placeholder="WAREHOUSE OR WORK ADDRESS" required /></label>

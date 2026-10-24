@@ -2,7 +2,11 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { validateRequiredFields } from "@/lib/form-validation";
+import {
+  clearRequiredFieldError,
+  reportMissingRequiredField,
+  validateRequiredFields,
+} from "@/lib/form-validation";
 import { journeyLabel, JourneyStatus, OrderTimeline } from "./order-timeline";
 import { StatusConnectionGuide } from "./status-connection-guide";
 
@@ -67,7 +71,7 @@ export function FulfilmentWorkspace({ orders }: { orders: WorkOrder[] }) {
           <div className="order-receipt-body">
           <header><div><p className="eyebrow">ORDER #{order.order_number}</p><h2>{order.customer_name}</h2><small>{order.delivery_address || "ADDRESS PENDING"}</small></div></header>
           <OrderTimeline status={order.journey_status} timestamps={order.journey_timestamps} />
-          {action && <form noValidate className="order-action-form" onSubmit={e => void advance(e, order, action.status)}>
+          {action && <form noValidate className="order-action-form" onBlurCapture={reportMissingRequiredField} onInputCapture={clearRequiredFieldError} onChangeCapture={clearRequiredFieldError} onSubmit={e => void advance(e, order, action.status)}>
             {action.status === "sent_to_customer" && <><label>OUTBOUND COURIER<input name="courier" placeholder="GPO" defaultValue={order.courier || ""} required /></label><label>CUSTOMER TRACKING NUMBER<input name="tracking" inputMode="numeric" pattern="[0-9]{6,30}" title="Use 6 to 30 tracking digits only." placeholder="NUMBERS ONLY" defaultValue={order.tracking_number || ""} required /></label></>}
             <button className="fulfilment-action">{action.label}</button>
           </form>}
