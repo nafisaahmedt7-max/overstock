@@ -5038,3 +5038,45 @@ select {
 .legal-page-contact .contact-option:not(:last-child) {
   border-bottom: 0;
 }
+
+
+/* Match the order confirmation email support and shipping note spacing. */
+.checkout-thank-you-help {
+  width: min(42rem, 100%);
+  margin: 14px 0 0;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+.checkout-thank-you-help a { color: var(--ink); font-weight: 700; text-decoration: underline; }
+.checkout-thank-you-shipping {
+  width: min(42rem, 100%);
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #c8c8c4;
+  border-radius: 8px;
+  background: #e4e4e0;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+.checkout-thank-you-shipping-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #777;
+  border-radius: 50%;
+  color: #555;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
