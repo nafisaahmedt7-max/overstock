@@ -165,14 +165,14 @@ export async function POST(request: Request) {
   const safeContactHtml = [customer.email, customer.phone].filter(Boolean).map(escapeHtml).join("<br>");
   const addressText = addressLines.join("\n");
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
-  const itemRows = items.map((item) => {
+  const itemRows = items.map((item, index) => {
     const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
     const productImage = item.imageUrl
       ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" width="88" height="96" style="display:block;width:88px;height:96px;object-fit:contain;border:0;background:#f1f1ef;">`
       : `<span style="display:block;width:88px;height:96px;background:#f1f1ef;color:#777;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:96px;text-align:center;letter-spacing:.08em;">OVERSTOCK</span>`;
     return `
     <tr>
-      <td colspan="2" style="padding:0 2%;border-bottom:1px solid #c8c8c4;">
+      <td colspan="2" style="padding:0 2%;${index < items.length - 1 ? "border-bottom:1px solid #c8c8c4;" : ""}">
         <table role="presentation" width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
           <tr>
             <td width="104" valign="middle" style="width:104px;padding:14px 16px 14px 0;"><a href="${productUrl}" style="display:block;text-decoration:none;">${productImage}</a></td>
@@ -247,11 +247,11 @@ export async function POST(request: Request) {
           <tr><td colspan="2" style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER ITEMS</td></tr>
           <tr><td colspan="2" style="height:8px;font-size:8px;line-height:8px;">&nbsp;</td></tr>
           ${itemRows}
-          <tr><td colspan="2" style="padding:14px 0 0;">
+          <tr><td colspan="2" style="padding:0;">
             <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
-              <tr><td style="padding:4px 2%;color:#555;">ITEM TOTAL</td><td align="right" style="padding:4px 2%;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td style="padding:10px 2% 4px;border-top:1px solid #111;color:#555;">ITEM TOTAL</td><td align="right" style="padding:10px 2% 4px;border-top:1px solid #111;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
-              <tr><td style="padding:4px 2%;color:#555;">TAXES</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
+              <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout</td></tr>
               <tr><td colspan="2" style="height:6px;font-size:1px;line-height:6px;">&nbsp;</td></tr>
                             <tr><td colspan="2" style="padding:10px 2%;border-top:1px solid #111;border-bottom:1px solid #111;">
                 <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
