@@ -168,18 +168,18 @@ export async function POST(request: Request) {
     const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
     const productImage = item.imageUrl
       ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" width="88" height="96" style="display:block;width:88px;height:96px;object-fit:contain;border:0;background:#f1f1ef;">`
-      : `<span style="display:block;width:88px;height:96px;background:#f1f1ef;color:#777;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:96px;text-align:center;letter-spacing:.08em;">OVERSTOCK</span>`;
+      : `<span style="display:block;width:88px;height:96px;background:#f1f1ef;color:#777;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:9px;line-height:96px;text-align:center;letter-spacing:.08em;">OVERSTOCK</span>`;
     return `
     <tr>
       <td colspan="2" style="padding:0 2%;${index < items.length - 1 ? "border-bottom:1px solid #c8c8c4;" : ""}">
         <table role="presentation" width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
           <tr>
             <td width="104" valign="middle" style="width:104px;padding:14px 16px 14px 0;"><a href="${productUrl}" style="display:block;text-decoration:none;">${productImage}</a></td>
-            <td valign="middle" style="padding:14px 12px 14px 0;font-family:Arial,Helvetica,sans-serif;">
-              <a href="${productUrl}" style="color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none;text-transform:uppercase;">${escapeHtml(item.name)}</a>
+            <td valign="middle" style="padding:14px 12px 14px 0;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;">
+              <a href="${productUrl}" style="color:#111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none;text-transform:uppercase;">${escapeHtml(item.name)}</a>
               <div style="margin-top:5px;color:#555;font-size:11px;line-height:1.4;letter-spacing:.04em;">SIZE ${escapeHtml(item.size.toUpperCase())} &nbsp;·&nbsp; QTY ${item.quantity}</div>
             </td>
-            <td width="92" align="right" valign="middle" style="width:92px;padding:14px 0 14px 8px;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(item.price * item.quantity)}</td>
+            <td width="92" align="right" valign="middle" style="width:92px;padding:14px 0 14px 8px;color:#111;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(item.price * item.quantity)}</td>
           </tr>
         </table>
       </td>
@@ -225,7 +225,7 @@ export async function POST(request: Request) {
     `;
 
   const fullWidthHtml = `
-    <table class="os-receipt" role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;text-align:left;">
+    <table class="os-receipt" role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;text-align:left;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;">
       <tr><td colspan="2" height="18" style="height:18px;font-size:0;line-height:0;">&nbsp;</td></tr>
       <tr><td colspan="2" style="padding:13px 42px;border-top:1px solid #111;border-bottom:1px solid #111;background:#e4e4e0;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
@@ -236,11 +236,11 @@ export async function POST(request: Request) {
       <tr class="os-receipt-columns">
         <td width="50%" valign="top" style="width:50%;padding:14px 21px 16px 42px;border-bottom:1px solid #111;">
           <p style="margin:0 0 9px;padding-bottom:7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">DELIVERY ADDRESS</p>
-          <p style="margin:0;color:#555;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;line-height:1.5;">${safeAddressHtml}</p>
+          <p style="margin:0;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:11px;font-weight:400;line-height:1.5;">${safeAddressHtml}</p>
         </td>
         <td width="50%" valign="top" style="width:50%;padding:14px 42px 16px 21px;border-bottom:1px solid #111;border-left:1px solid #111;">
           <p style="margin:0 0 9px;padding-bottom:7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">CONTACT</p>
-          <p style="margin:0;color:#555;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;line-height:1.5;">${safeContactHtml}</p>
+          <p style="margin:0;color:#555;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:11px;font-weight:400;line-height:1.5;">${safeContactHtml}</p>
         </td>
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;">
@@ -249,7 +249,7 @@ export async function POST(request: Request) {
           <tr><td colspan="2" style="height:8px;font-size:8px;line-height:8px;">&nbsp;</td></tr>
           ${itemRows}
           <tr><td colspan="2" style="padding:0;">
-            <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
+            <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:'Geist Mono',Menlo,Monaco,Consolas,monospace;font-size:11px;line-height:1.5;">
               <tr><td style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:5px 2%;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout<br><span style="font-size:8px;font-style:italic;font-weight:700;letter-spacing:.04em;color:#666;white-space:nowrap;">(ALL AMOUNTS SHOWN IN USD)</span></td></tr>
