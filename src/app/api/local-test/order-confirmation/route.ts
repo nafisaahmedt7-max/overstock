@@ -188,7 +188,7 @@ export async function POST(request: Request) {
   }).join("");
 
   const textContent = [
-    "ORDER CONFIRMATION · LOCAL TEST",
+    "ORDER CONFIRMATION",
     `THANK YOU, ${customer.fullName.toUpperCase()}.`,
     `Hello, ${customer.fullName.split(/\s+/)[0]}. Your order confirmation is ready from OVERSTOCK.`,
     "",
@@ -210,7 +210,7 @@ export async function POST(request: Request) {
   ].join("\n");
 
   const contentHtml = `
-    <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION · LOCAL TEST</span></p>
+    <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">THANK YOU, ${uppercaseSafeName}.</h1>
     <p style="margin:0 0 18px;">Hello, ${firstName}. Your order confirmation is ready from OVERSTOCK.</p>
     <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:.12em;">ORDER DETAILS</h2>
@@ -272,7 +272,7 @@ export async function POST(request: Request) {
       fromName: "OVERSTOCK",
       toEmail: customer.email,
       toName: customer.fullName,
-      subject: `LOCAL TEST · OVERSTOCK ORDER CONFIRMATION · ${orderNumber}`,
+      subject: `OVERSTOCK ORDER CONFIRMATION · ${orderNumber}`,
       text: textContent,
       html: htmlContent,
     });
