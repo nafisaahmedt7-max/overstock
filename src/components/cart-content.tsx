@@ -173,7 +173,7 @@ export function CartContent({
                   </span>
                 </label>
                 <label>
-                  Phone number, including area code <span>(optional)</span>
+                  Phone number
                   <input
                     name="phone"
                     type="tel"

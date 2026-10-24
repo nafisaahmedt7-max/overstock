@@ -4214,6 +4214,7 @@ select {
   gap: 0.4rem;
   color: var(--ink);
   font: 600 0.65rem/1.4 var(--font-mono), monospace;
+  text-transform: uppercase;
 }
 .local-checkout-form label span { color: #666; font-weight: 400; }
 .local-checkout-form input,
@@ -4224,7 +4225,7 @@ select {
   min-height: 3.5rem;
   padding: 0.85rem 1rem;
   border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 0.5rem;
   background: #e4e4e0;
   color: var(--ink);
   font: 500 0.75rem var(--font-mono), monospace;
@@ -4264,6 +4265,7 @@ select {
   min-height: 3.5rem;
   align-items: center;
   border: 1px solid var(--line);
+  border-radius: 0.5rem;
   background: #e4e4e0;
 }
 .local-phone-code-value {
@@ -4886,11 +4888,4 @@ select {
 /* Remove dividers between the borderless contact entries. */
 .legal-page-contact .contact-option:not(:last-child) {
   border-bottom: 0;
-}
-
-@media (max-width: 380px) {
-  .local-phone-fields { grid-template-columns: minmax(0, 1fr); }
-}
-@media (max-width: 520px) {
-  .local-checkout-form-grid { grid-template-columns: minmax(0, 1fr); }
 }
