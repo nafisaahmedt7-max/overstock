@@ -4383,12 +4383,13 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 .checkout-thank-you h1 {
   font-size: clamp(3rem, 10vw, 8rem);
   letter-spacing: -0.07em;
-  margin: 1rem 0 3rem;
+  margin: 1rem 0 1rem;
   text-align: center;
 }
 .checkout-thank-you-message {
   width: 100%;
   max-width: none;
+  margin: 0 0 2.5rem;
   font: 500 0.82rem/1.5 var(--font-mono), monospace;
   text-transform: uppercase;
   letter-spacing: 0.04em;
