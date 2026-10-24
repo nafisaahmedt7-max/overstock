@@ -70,8 +70,8 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
     <main className="checkout-thank-you">
       <p className="eyebrow">OVERSTOCK / ORDER CONFIRMATION</p>
       <h1>THANK YOU.</h1>
-      <p className="checkout-thank-you-message">
-        Your order confirmation email is ready in Mailpit.
+      <p className="legal-updated checkout-thank-you-message">
+        YOUR ORDER HAS BEEN RECEIVED. A CONFIRMATION EMAIL WILL BE SENT TO THE EMAIL ADDRESS PROVIDED.
       </p>
 
       {orderNumber && (
