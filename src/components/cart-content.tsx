@@ -51,7 +51,10 @@ export function CartContent({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          items,
+          items: items.map((item) => ({
+            ...item,
+            imageUrl: item.imageUrl ?? productImages[item.slug] ?? null,
+          })),
           customer: Object.fromEntries(formData.entries()),
         }),
       });

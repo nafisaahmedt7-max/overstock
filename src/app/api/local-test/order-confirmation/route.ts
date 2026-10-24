@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { renderOverstockEmail } from "@/lib/email/overstock-layout";
 import { sendToLocalMailpit } from "@/lib/email/mailpit";
 
-type ReceiptItem = { slug: string; name: string; size: string; quantity: number; price: number };
+type ReceiptItem = { slug: string; name: string; size: string; quantity: number; price: number; imageUrl: string | null };
 type CheckoutCustomer = {
   fullName: string;
   email: string;
@@ -24,7 +24,18 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-function parseItems(value: unknown): ReceiptItem[] | null {
+function parseImageUrl(value: unknown, baseUrl: string) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const imageUrl = new URL(value.trim(), baseUrl);
+    const localHttp = imageUrl.protocol === "http:" && ["localhost", "127.0.0.1", "::1"].includes(imageUrl.hostname);
+    return imageUrl.protocol === "https:" || localHttp ? imageUrl.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseItems(value: unknown, baseUrl: string): ReceiptItem[] | null {
   if (!Array.isArray(value) || value.length < 1 || value.length > 20) return null;
   const items: ReceiptItem[] = [];
   for (const entry of value) {
@@ -38,7 +49,7 @@ function parseItems(value: unknown): ReceiptItem[] | null {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !name || name.length > 120 || !size || size.length > 32) return null;
     if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return null;
     if (!Number.isFinite(price) || price < 0 || price > 100_000) return null;
-    items.push({ slug, name, size, quantity, price });
+    items.push({ slug, name, size, quantity, price, imageUrl: parseImageUrl(item.imageUrl, baseUrl) });
   }
   return items;
 }
@@ -124,7 +135,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-  const items = parseItems(body.items);
+  const items = parseItems(body.items, url.origin);
   const missingFields = missingCustomerFields(body.customer);
   if (missingFields.length) {
     return NextResponse.json({
@@ -154,25 +165,26 @@ export async function POST(request: Request) {
   const safeContactHtml = [customer.email, customer.phone].filter(Boolean).map(escapeHtml).join("<br>");
   const addressText = addressLines.join("\n");
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
-  const itemRows = items.map((item, index) => {
+  const itemRows = items.map((item) => {
     const productUrl = escapeHtml(new URL(`/product/${encodeURIComponent(item.slug)}`, baseUrl).toString());
-    const itemNumber = index + 1;
+    const productImage = item.imageUrl
+      ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" width="88" height="96" style="display:block;width:88px;height:96px;object-fit:contain;border:0;background:#f1f1ef;">`
+      : `<span style="display:block;width:88px;height:96px;background:#f1f1ef;color:#777;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:96px;text-align:center;letter-spacing:.08em;">OVERSTOCK</span>`;
     return `
-    <tr><td colspan="2" style="padding:0;">
-      <table role="presentation" width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;">
-        <tr>
-          <td width="28" align="left" valign="middle" style="width:28px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:400;line-height:1.45;white-space:nowrap;">${itemNumber}.</td>
-          <td align="center" valign="middle">
-            <table role="presentation" width="64%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:64%;max-width:420px;border-collapse:separate;border-spacing:0;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">
-              <tr>
-                <td style="padding:9px 18px;font-size:14px;line-height:1.45;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.45;text-decoration:none;">${escapeHtml(item.name)} <span style="color:#555;font-weight:400;">· ${escapeHtml(item.size)}</span></a></td>
-                <td align="right" style="padding:9px 18px;white-space:nowrap;"><a href="${productUrl}" style="display:block;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.45;text-decoration:none;">× ${item.quantity}</a></td>
-              </tr>
-            </table>
-          </td><td width="28" style="width:28px;">&nbsp;</td>
-        </tr>
-      </table>
-    </td></tr>`;
+    <tr>
+      <td colspan="2" style="padding:0;border-bottom:1px solid #c8c8c4;">
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td width="104" valign="middle" style="width:104px;padding:14px 16px 14px 0;"><a href="${productUrl}" style="display:block;text-decoration:none;">${productImage}</a></td>
+            <td valign="middle" style="padding:14px 12px 14px 0;font-family:Arial,Helvetica,sans-serif;">
+              <a href="${productUrl}" style="color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none;text-transform:uppercase;">${escapeHtml(item.name)}</a>
+              <div style="margin-top:5px;color:#555;font-size:11px;line-height:1.4;letter-spacing:.04em;">SIZE ${escapeHtml(item.size.toUpperCase())} &nbsp;·&nbsp; QTY ${item.quantity}</div>
+            </td>
+            <td width="92" align="right" valign="middle" style="width:92px;padding:14px 0 14px 8px;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(item.price * item.quantity)}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>`;
   }).join("");
 
   const textContent = [
@@ -186,7 +198,7 @@ export async function POST(request: Request) {
     "CONTACT:",
     contactText,
     "ORDER ITEMS:",
-    ...items.map((item, index) => `${index + 1}. ${item.name} · ${item.size} × ${item.quantity}`),
+    ...items.map((item) => `${item.name} · SIZE ${item.size} · QTY ${item.quantity} · ${money(item.price * item.quantity)}`),
     `ORDER TOTAL: ${money(total)}`,
     "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
     "",
@@ -227,8 +239,9 @@ export async function POST(request: Request) {
         </td>
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;border-bottom:1px solid #111;">
-        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0 11px;">
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
           <tr><td colspan="2" style="padding:0 0 7px;border-bottom:1px solid #111;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER ITEMS</td></tr>
+          <tr><td colspan="2" style="height:8px;font-size:8px;line-height:8px;">&nbsp;</td></tr>
           ${itemRows}
         </table>
       </td></tr>
