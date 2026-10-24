@@ -252,8 +252,7 @@ export async function POST(request: Request) {
               <tr><td style="padding:10px 2% 4px;border-top:1px solid #111;color:#555;">ITEM TOTAL</td><td align="right" style="padding:10px 2% 4px;border-top:1px solid #111;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout</td></tr>
-              <tr><td colspan="2" style="height:6px;font-size:1px;line-height:6px;">&nbsp;</td></tr>
-                            <tr><td colspan="2" style="padding:10px 2%;border-top:1px solid #111;border-bottom:1px solid #111;">
+                            <tr><td colspan="2" style="padding:10px 2%;border-bottom:1px solid #111;">
                 <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
                   <tr><td style="font-size:16px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="font-size:16px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
                 </table>
