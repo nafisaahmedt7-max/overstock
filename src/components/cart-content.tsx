@@ -145,11 +145,11 @@ export function CartContent({
               <p className="local-checkout-form-title">DELIVERY AND CONTACT DETAILS</p>
               <label>
                 Full name
-                <input name="fullName" autoComplete="name" placeholder="Full name" maxLength={100} required />
+                <input name="fullName" autoComplete="name" placeholder="FULL NAME" maxLength={100} required />
               </label>
               <label>
                 Email address
-                <input name="email" type="email" autoComplete="email" placeholder="name@example.com" maxLength={254} required />
+                <input name="email" type="email" autoComplete="email" placeholder="EMAIL ADDRESS" maxLength={254} required />
               </label>
               <div className="local-phone-fields">
                 <label>
@@ -186,25 +186,25 @@ export function CartContent({
               </div>
               <label>
                 Address line 1
-                <input name="addressLine1" autoComplete="address-line1" placeholder="Street address" maxLength={120} required />
+                <input name="addressLine1" autoComplete="address-line1" placeholder="STREET ADDRESS" maxLength={120} required />
               </label>
               <label>
                 Address line 2 <span>(optional)</span>
-                <input name="addressLine2" autoComplete="address-line2" placeholder="Apartment, unit, etc." maxLength={120} />
+                <input name="addressLine2" autoComplete="address-line2" placeholder="APARTMENT, UNIT, ETC." maxLength={120} />
               </label>
               <div className="local-checkout-form-grid">
                 <label>
                   City
-                  <input name="city" autoComplete="address-level2" placeholder="City" maxLength={80} required />
+                  <input name="city" autoComplete="address-level2" placeholder="CITY" maxLength={80} required />
                 </label>
                 <label>
                   State / region
-                  <input name="region" autoComplete="address-level1" placeholder="State or region" maxLength={80} required />
+                  <input name="region" autoComplete="address-level1" placeholder="STATE OR REGION" maxLength={80} required />
                 </label>
               </div>
               <label>
                 Postal code
-                <input name="postalCode" autoComplete="postal-code" placeholder="Postal code" maxLength={24} required />
+                <input name="postalCode" autoComplete="postal-code" placeholder="POSTAL CODE" maxLength={24} required />
               </label>
               <label>
                 Country
