@@ -203,8 +203,10 @@ export async function POST(request: Request) {
     "DELIVERY: Calculated at checkout",
     "TAXES: Calculated at checkout",
     `ORDER TOTAL: ${money(total)}`,
-    "SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.",
-    "",
+    "Need help with your order? For any queries about your purchase or delivery, contact us.",
+    "SHIPPING CONFIRMATION WILL BE SENT TO YOUR EMAIL AFTER DISPATCH.",
+    "CLICK BELOW TO CONTINUE SHOPPING",
+    `CONTINUE SHOPPING: ${shopUrl}`,
   ].join("\n");
 
   const contentHtml = `
@@ -213,14 +215,15 @@ export async function POST(request: Request) {
     <p style="margin:0 0 18px;">Hello, ${firstName}. Your order confirmation is ready from OVERSTOCK.</p>
     <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:.12em;">ORDER DETAILS</h2>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
-    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin:14px 0 0;border-collapse:separate;border-spacing:0;background:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
+    <p style="margin:14px 0 0;font-size:11px;line-height:1.45;">Need help with your order? For any queries about your purchase or delivery, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700;text-decoration:underline;">contact us</a>.</p>
+    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin:12px 0 0;border-collapse:separate;border-spacing:0;background:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px 14px;font-size:12px;line-height:1.5;font-weight:600;">
         <span aria-hidden="true" style="display:inline-block;width:18px;height:18px;margin-right:8px;border:1px solid #777;border-radius:50%;color:#555;font-size:12px;line-height:18px;font-weight:700;vertical-align:middle;">i</span>
-        <span style="vertical-align:middle;font-size:11px;">SHIPPING CONFIRMATION WILL BE EMAILED AFTER DISPATCH.</span>
+        <span style="vertical-align:middle;font-size:11px;">SHIPPING CONFIRMATION WILL BE SENT TO YOUR EMAIL AFTER DISPATCH.</span>
       </td></tr>
     </table>
-    <p style="margin:14px 0 0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
-    <p style="margin:12px 0 0;font-size:11px;line-height:1.45;">Need help with your order? For any queries about your purchase or delivery, <a href="mailto:operations.overstock@gmail.com" style="color:#111;font-weight:700;text-decoration:underline;">contact us</a>.</p>
+    <p style="margin:14px 0 7px;font-size:10px;font-weight:700;letter-spacing:.1em;">CLICK BELOW TO CONTINUE SHOPPING</p>
+    <p style="margin:0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
     `;
 
   const fullWidthHtml = `
