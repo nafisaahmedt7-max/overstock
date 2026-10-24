@@ -197,7 +197,7 @@ export async function POST(request: Request) {
     addressText,
     "CONTACT:",
     contactText,
-    "ITEMS PURCHASED",
+    "ORDER SUMMARY",
     ...items.map((item) => `${item.name} · SIZE ${item.size} · QTY ${item.quantity} · ${money(item.price * item.quantity)}`),
     `ITEM TOTAL: ${money(total)}`,
     "DELIVERY: Calculated at checkout",
@@ -212,8 +212,7 @@ export async function POST(request: Request) {
   const contentHtml = `
     <p style="margin:0 0 17px;"><span style="display:inline-block;padding:7px 18px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;font-size:10px;font-weight:700;letter-spacing:.11em;">ORDER CONFIRMATION</span></p>
     <h1 style="margin:20px 0 10px;font-size:24px;line-height:1.2;">THANK YOU, ${uppercaseSafeName}.</h1>
-    <p style="margin:0 0 18px;">Hello, ${firstName}. Your order confirmation is ready from OVERSTOCK.</p>
-    <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:.12em;">ORDER DETAILS</h2>
+    <p style="margin:0 0 8px;">Hello, ${firstName}. Your order confirmation is ready from OVERSTOCK.</p>
     <!--OVERSTOCK_FULL_WIDTH_SECTION-->
     <p style="margin:14px 0 7px;font-size:10px;font-weight:700;letter-spacing:.1em;">CLICK BELOW TO CONTINUE SHOPPING</p>
     <p style="margin:0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
@@ -246,18 +245,20 @@ export async function POST(request: Request) {
       </tr>
       <tr><td colspan="2" style="padding:14px 42px 15px;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-          <tr><td colspan="2" align="center" style="padding:0 0 7px;border-bottom:1px solid #111;text-align:center;font-size:10px;font-weight:700;letter-spacing:.1em;">ITEMS PURCHASED</td></tr>
+          <tr><td colspan="2" align="center" style="padding:0 0 7px;border-bottom:1px solid #111;text-align:center;font-size:10px;font-weight:700;letter-spacing:.1em;">ORDER SUMMARY</td></tr>
           <tr><td colspan="2" style="height:8px;font-size:8px;line-height:8px;">&nbsp;</td></tr>
           ${itemRows}
           <tr><td colspan="2" style="padding:0;">
             <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
-              <tr><td style="padding:10px 2% 4px;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:10px 2% 4px;border-top:1px solid #111;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td colspan="2" style="padding:9px 2% 0;"><div style="border-top:1px solid #111;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+              <tr><td style="padding:5px 2% 4px;border-bottom:1px solid #c8c8c4;color:#555;">ITEM TOTAL</td><td align="right" style="padding:5px 2% 4px;border-bottom:1px solid #c8c8c4;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">DELIVERY</td><td align="right" style="padding:4px 2%;border-bottom:1px solid #c8c8c4;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">TAXES</td><td align="right" style="padding:4px 2% 10px;border-bottom:1px solid #111;color:#555;">Calculated at checkout<br><span style="font-size:8px;font-style:italic;font-weight:700;letter-spacing:.04em;color:#666;white-space:nowrap;">(ALL AMOUNTS SHOWN IN USD)</span></td></tr>
-                            <tr><td colspan="2" style="padding:10px 2%;border-bottom:1px solid #111;">
+                            <tr><td colspan="2" style="padding:10px 0 0;">
                 <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-                  <tr><td style="font-size:16px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="font-size:16px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
+                  <tr><td style="padding:0 2% 10px;font-size:16px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="padding:0 2% 10px;font-size:16px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
                 </table>
+                <div style="border-top:1px solid #111;font-size:0;line-height:0;">&nbsp;</div>
               </td></tr>
             </table>
           </td></tr>
