@@ -4369,23 +4369,32 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 .local-checkout-note { color: #555 !important; font-size: 0.58rem !important; }
 .local-checkout-error { color: #8e241c !important; }
 .checkout-thank-you {
-  width: min(42rem, 100%);
-  min-height: 55vh;
+  width: min(58rem, 100%);
+  min-height: 65vh;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 3rem 1rem 4rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
+  justify-content: flex-start;
+  gap: 0;
   text-align: center;
 }
 .checkout-thank-you h1 {
-  font-size: clamp(2.75rem, 9vw, 5.5rem);
-  line-height: 0.9;
+  font-size: clamp(3rem, 10vw, 8rem);
   letter-spacing: -0.07em;
+  margin: 1rem 0 3rem;
+  text-align: center;
 }
-.checkout-thank-you-message { max-width: 32rem; font-size: 1rem; line-height: 1.5; }
+.checkout-thank-you-message {
+  width: 100%;
+  max-width: none;
+  font: 500 0.67rem/1.5 var(--font-mono), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+  text-align: center;
+}
 .checkout-test-order-number {
   width: min(27rem, 100%);
   margin: 0.5rem 0 0;
@@ -4409,7 +4418,7 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 }
 .checkout-receipt {
   width: min(42rem, 100%);
-  margin-top: 0.6rem;
+  margin-top: 0;
   border: 1px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
