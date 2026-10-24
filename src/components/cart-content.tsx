@@ -23,7 +23,13 @@ export function CartContent({
   const router = useRouter();
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
-  const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
+  const [phoneCountryIndex, setPhoneCountryIndex] = useState(() => {
+    const unitedStatesIndex = phoneCountryCodes.findIndex(
+      ([country, code]) => country === "United States" && code === "+1",
+    );
+    return unitedStatesIndex >= 0 ? unitedStatesIndex : 0;
+  });
+  const phoneCountryCode = phoneCountryCodes[phoneCountryIndex]?.[1] ?? "+1";
   const [phoneCountryCodeSelected, setPhoneCountryCodeSelected] = useState(false);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const total = items.reduce(
@@ -169,18 +175,18 @@ export function CartContent({
                 <div className="local-phone-fields">
                   <span className="local-phone-code-control" data-selected={phoneCountryCodeSelected}>
                     <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode}</span>
+                    <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
                     <select
-                      name="phoneCountryCode"
                       autoComplete="tel-country-code"
-                      value={phoneCountryCode}
+                      value={String(phoneCountryIndex)}
                       onChange={(event) => {
-                        setPhoneCountryCode(event.target.value);
+                        setPhoneCountryIndex(Number(event.target.value));
                         setPhoneCountryCodeSelected(true);
                       }}
                       aria-label="Phone country calling code"
                     >
                       {phoneCountryCodes.map(([country, code], index) => (
-                        <option key={`${country}-${code}-${index}`} value={code}>
+                        <option key={`${country}-${code}-${index}`} value={index}>
                           {country.toUpperCase()} ({code})
                         </option>
                       ))}

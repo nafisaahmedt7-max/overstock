@@ -154,10 +154,14 @@ export async function POST(request: Request) {
   const addressText = addressLines.join("\n");
   const contactText = [customer.email, customer.phone].filter(Boolean).join("\n");
   const itemRows = items.map((item) => `
-    <tr>
-      <td style="padding:7px 9px;border-top:1px solid #d0d0cc;border-bottom:1px solid #d0d0cc;border-left:1px solid #d0d0cc;background:#e7e7e3;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
-      <td align="right" style="padding:7px 9px;border-top:1px solid #d0d0cc;border-right:1px solid #d0d0cc;border-bottom:1px solid #d0d0cc;background:#e7e7e3;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
-    </tr>`).join("");
+    <tr><td colspan="2" align="center" style="padding:0;">
+      <table role="presentation" width="96%" align="center" border="0" cellpadding="0" cellspacing="0" style="width:96%;border-collapse:separate;border-spacing:0;border:1px solid #d0d0cc;background:#e7e7e3;box-shadow:0 2px 5px rgba(0,0,0,.12);">
+        <tr>
+          <td style="padding:7px 9px;font-size:12px;line-height:1.45;">${escapeHtml(item.name)} <span style="color:#555;">· ${escapeHtml(item.size)}</span></td>
+          <td align="right" style="padding:7px 9px;font-size:12px;line-height:1.45;white-space:nowrap;">× ${item.quantity}</td>
+        </tr>
+      </table>
+    </td></tr>`).join("");
 
   const textContent = [
     "ORDER CONFIRMATION · LOCAL TEST",
@@ -172,7 +176,7 @@ export async function POST(request: Request) {
     "ORDER ITEMS:",
     ...items.map((item) => `${item.name} · ${item.size} × ${item.quantity}`),
     `ORDER TOTAL: ${money(total)}`,
-    "Shipping updates will be sent by email once your order has been dispatched.",
+    "SHIPPING UPDATES WILL BE SENT BY EMAIL ONCE YOUR ORDER HAS BEEN DISPATCHED.",
     "",
     "LOCAL TEST ONLY. No payment was processed and no live order was created.",
   ].join("\n");
@@ -186,7 +190,7 @@ export async function POST(request: Request) {
     <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin:14px 0 0;border-collapse:separate;border-spacing:0;background:#e4e4e0;border:1px solid #c8c8c4;border-radius:8px;">
       <tr><td align="center" style="padding:12px 14px;font-size:12px;line-height:1.5;font-weight:600;">
         <span aria-hidden="true" style="display:inline-block;width:18px;height:18px;margin-right:8px;border:1px solid #777;border-radius:50%;color:#555;font-size:12px;line-height:18px;font-weight:700;vertical-align:middle;">i</span>
-        <span style="vertical-align:middle;">Shipping updates will be sent by email once your order has been dispatched.</span>
+        <span style="vertical-align:middle;">SHIPPING UPDATES WILL BE SENT BY EMAIL ONCE YOUR ORDER HAS BEEN DISPATCHED.</span>
       </td></tr>
     </table>
     <p style="margin:14px 0 0;"><a class="os-button" href="${shopUrl}" style="display:inline-block;min-width:205px;padding:12px 22px;border:1px solid #111;border-radius:999px;background:#111;color:#f1f1ef;text-decoration:none;font-size:12px;font-weight:700;letter-spacing:.11em;">CONTINUE SHOPPING</a></p>
