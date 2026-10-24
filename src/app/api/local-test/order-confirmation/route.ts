@@ -226,7 +226,7 @@ export async function POST(request: Request) {
 
   const fullWidthHtml = `
     <table class="os-receipt" role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;text-align:left;">
-      <tr><td colspan="2" height="10" style="height:10px;font-size:0;line-height:0;">&nbsp;</td></tr>
+      <tr><td colspan="2" height="18" style="height:18px;font-size:0;line-height:0;">&nbsp;</td></tr>
       <tr><td colspan="2" style="padding:13px 42px;border-top:1px solid #111;border-bottom:1px solid #111;background:#e4e4e0;">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tr>
           <td style="font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER NUMBER</td>
