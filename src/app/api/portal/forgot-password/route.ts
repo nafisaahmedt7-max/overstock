@@ -97,7 +97,7 @@ export async function POST(request: Request) {
   const safeLink = escapeHtml(resetUrl.toString());
   const safeEmail = escapeHtml(email);
   const accountName = typeof data.user?.user_metadata?.display_name === "string"
-    ? data.user.user_metadata.display_name.trim().split(/\\s+/)[0]
+    ? data.user.user_metadata.display_name.trim().split(/\s+/)[0]
     : "";
   const safeName = escapeHtml(accountName.toUpperCase());
   const baseUrl = requestUrl.origin;
