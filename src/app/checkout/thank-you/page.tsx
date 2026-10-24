@@ -10,19 +10,19 @@ export default async function LocalCheckoutThankYouPage({
 
   return (
     <main className="checkout-thank-you">
-      <p className="eyebrow">OVERSTOCK / LOCAL CHECKOUT TEST</p>
+      <p className="eyebrow">OVERSTOCK / ORDER CONFIRMATION</p>
       <h1>THANK YOU.</h1>
       <p className="checkout-thank-you-message">
-        Your order confirmation has been sent to Mailpit for preview.
+        Your order confirmation email is ready in Mailpit.
       </p>
       {orderNumber && (
         <p className="checkout-test-order-number">
           <span>ORDER NUMBER</span>
-          <strong>{orderNumber}</strong>
+          <strong className="checkout-test-order-pill">{orderNumber}</strong>
         </p>
       )}
       <p className="checkout-test-disclaimer">
-        This local test did not process a payment or create a live order.
+        TEST CHECKOUT · NO PAYMENT WAS PROCESSED · NO LIVE ORDER WAS CREATED
       </p>
       <Link className="checkout-test-return" href="/">
         CONTINUE SHOPPING
