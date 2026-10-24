@@ -4499,7 +4499,7 @@ textarea[aria-invalid="true"] { border-color: #8f2525 !important; }
 .checkout-receipt-unavailable { margin: 0; padding: 1rem; color: #555; font: 500 0.64rem/1.5 var(--font-mono), monospace; text-align: center; }
 .checkout-test-return {
   min-width: 13rem;
-  margin-top: 1.75rem;
+  margin-top: 2.5rem;
   padding: 0.9rem 1.25rem;
   border: 1px solid var(--ink);
   border-radius: 999px;
