@@ -95,7 +95,7 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
               </div>
 
               <section className="checkout-receipt-items">
-                <h2>ITEMS PURCHASED</h2>
+                <h2>ORDER SUMMARY</h2>
                 {receipt.items.map((item, index) => (
                   <div className="checkout-receipt-item" key={`${item.name}-${item.size}-${index}`}>
                     <div className="checkout-receipt-item-image">
