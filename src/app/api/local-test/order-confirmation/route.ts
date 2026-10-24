@@ -180,7 +180,7 @@ export async function POST(request: Request) {
               <a href="${productUrl}" style="color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none;text-transform:uppercase;">${escapeHtml(item.name)}</a>
               <div style="margin-top:5px;color:#555;font-size:11px;line-height:1.4;letter-spacing:.04em;">SIZE ${escapeHtml(item.size.toUpperCase())} &nbsp;·&nbsp; QTY ${item.quantity}</div>
             </td>
-            <td width="92" align="right" valign="middle" style="width:92px;padding:14px 0 14px 8px;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(item.price * item.quantity)}</td>
+            <td width="92" align="right" valign="middle" style="width:92px;padding:14px 0 14px 8px;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(item.price * item.quantity)}</td>
           </tr>
         </table>
       </td>
@@ -248,11 +248,11 @@ export async function POST(request: Request) {
           ${itemRows}
           <tr><td colspan="2" style="padding:14px 2% 0;">
             <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
-              <tr><td style="padding:4px 0;color:#555;">ITEM TOTAL</td><td align="right" style="padding:4px 0;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
+              <tr><td style="padding:4px 0;color:#555;">ITEM TOTAL</td><td align="right" style="padding:4px 0;font-size:12px;font-weight:700;white-space:nowrap;">${money(total)}</td></tr>
               <tr><td style="padding:4px 0;color:#555;">DELIVERY</td><td align="right" style="padding:4px 0;color:#555;">Calculated at checkout</td></tr>
               <tr><td style="padding:4px 0;color:#555;">TAXES</td><td align="right" style="padding:4px 0;color:#555;">Calculated at checkout</td></tr>
-              <tr><td colspan="2" style="height:12px;padding:0 0 11px;border-bottom:2px solid #111;font-size:1px;line-height:1px;">&nbsp;</td></tr>
-              <tr><td style="padding:12px 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="padding:8px 0 0;font-size:16px;font-weight:700;letter-spacing:.01em;white-space:nowrap;"><span style="display:inline-block;padding:7px 15px;border:1px solid #111;border-radius:999px;background:#f1f1ef;color:#111;">${money(total)}</span></td></tr>
+              <tr><td colspan="2" style="height:12px;padding:0 0 11px;border-bottom:1px solid #111;font-size:1px;line-height:1px;">&nbsp;</td></tr>
+              <tr><td style="padding:12px 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;">ORDER TOTAL</td><td align="right" style="padding:12px 0 4px;font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap;">${money(total)}</td></tr>
             </table>
           </td></tr>
         </table>
