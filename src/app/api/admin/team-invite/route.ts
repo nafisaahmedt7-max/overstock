@@ -214,7 +214,7 @@ export async function POST(request: Request) {
       </td></tr>
     </table>
     <p style="margin:14px 0 0;font-size:12px;">If the button does not work, use this secure <a href="${safeUrl}" style="color:#1a73e8;text-decoration:underline;">link</a>.</p>
-    <!--OVERSTOCK_COMPACT_BOTTOM-->
+    <!--OVERSTOCK_COMPACT_BOTTOM-->`;
   const htmlContent = renderOverstockEmail(baseUrl, contentHtml, detailsHtml);
 
   if (useMailpit) {
