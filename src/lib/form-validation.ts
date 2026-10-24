@@ -6,7 +6,9 @@ function labelFor(control: RequiredControl) {
 }
 
 export function validateRequiredFields(form: HTMLFormElement) {
-  const controls = Array.from(form.querySelectorAll<RequiredControl>("input[required], select[required], textarea[required]"));
+  const controls = Array.from(
+    form.querySelectorAll<RequiredControl>("input[required], select[required], textarea[required]"),
+  ).filter((control) => !control.disabled);
   const missing: string[] = [];
   const handledGroups = new Set<string>();
 
