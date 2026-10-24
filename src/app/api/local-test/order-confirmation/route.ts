@@ -188,7 +188,7 @@ export async function POST(request: Request) {
 
   const textContent = [
     "ORDER CONFIRMATION",
-    `THANK YOU, ${customer.fullName.trim().split(/\\s+/)[0].toUpperCase()}`,
+    `THANK YOU, ${customer.fullName.trim().split(/\s+/)[0].toUpperCase()}`,
     "YOUR ORDER IS CONFIRMED AND IS BEING PREPARED FOR SHIPPING.",
     "",
     `ORDER NUMBER: ${orderNumber}`,
