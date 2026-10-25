@@ -28,7 +28,7 @@ export function CartContent({
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [phoneCountryIndex, setPhoneCountryIndex] = useState(-1);
-  const phoneCountryCode = phoneCountryCodes[phoneCountryIndex]?.[1] ?? "+1";
+  const phoneCountryCode = phoneCountryCodes[phoneCountryIndex]?.[1] ?? "";
   const [phoneCountryCodeSelected, setPhoneCountryCodeSelected] = useState(false);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const total = items.reduce(
@@ -196,7 +196,7 @@ export function CartContent({
                 <label className="local-phone-group-title" htmlFor="checkout-phone-number">Phone number</label>
                 <div className="local-phone-fields">
                   <span className="local-phone-code-control" data-selected={phoneCountryCodeSelected}>
-                    <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode}</span>
+                    <span className="local-phone-code-value" aria-hidden="true">{phoneCountryCode || "—"}</span>
                     <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
                     <select
                       autoComplete="tel-country-code"
@@ -206,8 +206,9 @@ export function CartContent({
                         setPhoneCountryCodeSelected(true);
                       }}
                       aria-label="Phone country calling code"
+                      required
                     >
-                      <option value="" disabled hidden>SELECT COUNTRY</option>
+                      <option value="" disabled hidden>SELECT CODE</option>
                       {phoneCountryCodes.map(([country, code], index) => (
                         <option key={`${country}-${code}-${index}`} value={index}>
                           {country.toUpperCase()} ({code})
