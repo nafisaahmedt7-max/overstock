@@ -65,7 +65,12 @@ export function CheckoutThankYouReceipt({ orderNumber }: { orderNumber: string |
         customer.country,
       ].filter(Boolean)
     : [];
-  const contact = customer ? [customer.email, customer.phone].filter(Boolean) : [];
+  const phone = customer?.phone?.trim();
+  const phoneCountryCode = customer?.phoneCountryCode?.trim();
+  const formattedPhone = phone
+    ? `${phoneCountryCode && !phone.startsWith(phoneCountryCode) ? `${phoneCountryCode} ` : ""}${phone}`
+    : "";
+  const contact = customer ? [customer.email, formattedPhone].filter(Boolean) : [];
 
   return (
     <main className="checkout-thank-you">
