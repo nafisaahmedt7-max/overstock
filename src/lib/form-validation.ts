@@ -9,8 +9,9 @@ function isRequiredControl(target: EventTarget): target is RequiredControl {
 }
 
 function labelFor(control: RequiredControl) {
+  const ariaLabel = control.getAttribute("aria-label")?.replace(/\s+/g, " ").trim();
   const label = control.labels?.[0]?.textContent?.replace(/\s+/g, " ").trim();
-  return label || control.name.replace(/([A-Z])/g, " $1").replaceAll("_", " ").trim() || "this field";
+  return label || ariaLabel || control.name.replace(/([A-Z])/g, " $1").replaceAll("_", " ").trim() || "this field";
 }
 
 function isMissingValue(control: RequiredControl) {
