@@ -64,7 +64,7 @@ function parseCustomer(value: unknown): CheckoutCustomer | null {
   const phoneCountryCode = readText(raw.phoneCountryCode, 5);
   const phoneNumber = readText(raw.phone, 32);
   const hasPhoneNumber = phoneNumber.length > 0;
-  if (phoneCountryCode && !/^\+[1-9]\d{0,4}$/.test(phoneCountryCode)) return null;
+  if (!/^\+[1-9]\d{0,4}$/.test(phoneCountryCode)) return null;
   if (hasPhoneNumber && !/^[+\d().\s-]+$/.test(phoneNumber)) return null;
   const customer = {
     fullName: readText(raw.fullName, 100),
@@ -93,19 +93,20 @@ function parseCustomer(value: unknown): CheckoutCustomer | null {
 
 function missingCustomerFields(value: unknown) {
   if (!value || typeof value !== "object") {
-    return ["full name", "email address", "address line 1", "city", "state / region", "postal code", "country"];
+    return ["full name", "email address", "phone country calling code", "address line 1", "city", "state / region", "postal code", "country"];
   }
   const raw = value as Record<string, unknown>;
   const required: Array<[string, number]> = [
     ["fullName", 100],
     ["email", 254],
+    ["phoneCountryCode", 5],
     ["addressLine1", 120],
     ["city", 80],
     ["region", 80],
     ["postalCode", 24],
     ["country", 80],
   ];
-  const labels = ["full name", "email address", "address line 1", "city", "state / region", "postal code", "country"];
+  const labels = ["full name", "email address", "phone country calling code", "address line 1", "city", "state / region", "postal code", "country"];
   return required.flatMap(([key, maxLength], index) =>
     readText(raw[key], maxLength) ? [] : [labels[index]],
   );
